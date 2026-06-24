@@ -1,0 +1,9 @@
+pt-BR:
+  # Sobrescreve os formatos "long" do rails-i18n por versões mais limpas.
+  # O ActiveAdmin usa o formato :long para exibir datas/horas.
+  time:
+    formats:
+      long: "%d/%m/%Y %H:%M"
+  date:
+    formats:
+      long: "%d/%m/%Y"

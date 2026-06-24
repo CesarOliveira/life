@@ -1,0 +1,39 @@
+<div class="max-w-2xl mx-auto">
+  <h1 class="text-2xl font-bold mb-2">Bem-vindo(a)!</h1>
+  <p class="text-gray-600 mb-8">Para começar, crie uma conta ou entre em uma conta existente com um código de convite.</p>
+
+  <div class="grid md:grid-cols-2 gap-6">
+    <div class="bg-white shadow rounded p-6">
+      <h2 class="text-lg font-semibold mb-4">Criar uma conta</h2>
+      <%= form_with model: @account, url: accounts_path, method: :post, class: "space-y-4" do |f| %>
+        <% if @account.errors.any? %>
+          <div class="bg-red-100 text-red-700 text-sm rounded p-2">
+            <%= @account.errors.full_messages.to_sentence %>
+          </div>
+        <% end %>
+        <div>
+          <%= f.label :name, "Nome da conta", class: "block text-sm font-medium mb-1" %>
+          <%= f.text_field :name, required: true, class: "w-full border rounded px-3 py-2 text-sm" %>
+        </div>
+        <%= f.submit "Criar conta", class: "bg-indigo-600 text-white px-4 py-2 rounded text-sm font-semibold" %>
+      <% end %>
+    </div>
+
+    <div class="bg-white shadow rounded p-6">
+      <h2 class="text-lg font-semibold mb-4">Entrar em uma conta</h2>
+      <p class="text-sm text-gray-600 mb-4">Tem um código de convite? Solicite acesso e aguarde a aprovação de um administrador da conta.</p>
+      <%= link_to "Solicitar entrada com código", new_join_request_path, class: "inline-block bg-gray-800 text-white px-4 py-2 rounded text-sm font-semibold" %>
+    </div>
+  </div>
+
+  <% if @pending.present? && @pending.any? %>
+    <div class="mt-8 bg-amber-50 border border-amber-200 rounded p-4">
+      <h3 class="font-semibold text-amber-800 mb-2">Solicitações pendentes</h3>
+      <ul class="text-sm text-amber-800 list-disc list-inside">
+        <% @pending.each do |m| %>
+          <li><%= m.account.name %> — aguardando aprovação</li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+</div>

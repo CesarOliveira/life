@@ -1,0 +1,73 @@
+<div class="max-w-3xl mx-auto">
+  <h1 class="text-2xl font-bold mb-1">Membros — <%= @account.name %></h1>
+  <p class="text-sm text-gray-500 mb-6">
+    Código de convite:
+    <span class="font-mono bg-gray-100 px-2 py-0.5 rounded"><%= @account.join_code %></span>
+    <span class="text-gray-400">— compartilhe para que outros solicitem entrada.</span>
+  </p>
+
+  <section class="mb-8">
+    <h2 class="text-lg font-semibold mb-3">Solicitações pendentes</h2>
+    <% if @pending_memberships.any? %>
+      <table class="w-full text-sm bg-white shadow rounded">
+        <tbody class="divide-y divide-gray-100">
+          <% @pending_memberships.each do |m| %>
+            <tr>
+              <td class="px-3 py-2"><%= m.user.name %> <span class="text-gray-400">(<%= m.user.email %>)</span></td>
+              <td class="px-3 py-2 text-right">
+                <div class="flex justify-end gap-2">
+                  <%= button_to "Aprovar", account_member_path(@account, m), method: :patch, params: { approve: 1 },
+                        class: "bg-green-600 text-white px-3 py-1 rounded text-xs font-semibold" %>
+                  <%= button_to "Rejeitar", account_member_path(@account, m), method: :delete,
+                        class: "bg-red-100 text-red-700 px-3 py-1 rounded text-xs font-semibold",
+                        data: { turbo_confirm: "Rejeitar esta solicitação?" } %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p class="text-sm text-gray-400">Nenhuma solicitação pendente.</p>
+    <% end %>
+  </section>
+
+  <section>
+    <h2 class="text-lg font-semibold mb-3">Membros ativos</h2>
+    <table class="w-full text-sm bg-white shadow rounded">
+      <thead class="bg-gray-100 text-xs uppercase text-gray-600">
+        <tr>
+          <th class="px-3 py-2 text-left">Usuário</th>
+          <th class="px-3 py-2 text-center">Papel</th>
+          <th class="px-3 py-2 text-right">Ações</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <% @active_memberships.each do |m| %>
+          <tr>
+            <td class="px-3 py-2"><%= m.user.name %> <span class="text-gray-400">(<%= m.user.email %>)</span></td>
+            <td class="px-3 py-2 text-center">
+              <span class="px-2 py-0.5 rounded text-xs font-semibold bg-indigo-100 text-indigo-700"><%= m.role %></span>
+            </td>
+            <td class="px-3 py-2 text-right">
+              <% unless m.owner? %>
+                <div class="flex justify-end gap-2">
+                  <% if m.role == "member" %>
+                    <%= button_to "Tornar admin", account_member_path(@account, m), method: :patch, params: { role: "admin" },
+                          class: "bg-gray-800 text-white px-3 py-1 rounded text-xs" %>
+                  <% else %>
+                    <%= button_to "Tornar membro", account_member_path(@account, m), method: :patch, params: { role: "member" },
+                          class: "bg-gray-200 text-gray-800 px-3 py-1 rounded text-xs" %>
+                  <% end %>
+                  <%= button_to "Remover", account_member_path(@account, m), method: :delete,
+                        class: "bg-red-100 text-red-700 px-3 py-1 rounded text-xs",
+                        data: { turbo_confirm: "Remover este membro?" } %>
+                </div>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </section>
+</div>

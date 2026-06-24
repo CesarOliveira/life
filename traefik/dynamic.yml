@@ -1,0 +1,33 @@
+# Configuração dinâmica do Traefik (file provider).
+#
+# Usamos o file provider em vez do docker provider de propósito: a topologia é
+# fixa (web + cable) e isso evita depender do socket do Docker / da negociação de
+# versão da API (que quebra com Docker Engine recente). O Traefik resolve os
+# nomes `web` e `cable` via DNS da rede do compose (estão na mesma rede).
+http:
+  routers:
+    # App principal (Puma) — tudo que não for /cable.
+    web:
+      rule: "Host(`app.localhost`) || Host(`localhost`)"
+      entryPoints:
+        - "web"
+      service: "web"
+
+    # WebSocket do Action Cable (Turbo Streams). A regra é mais específica
+    # (PathPrefix) e tem prioridade maior, então captura /cable antes do router web.
+    cable:
+      rule: "(Host(`app.localhost`) || Host(`localhost`)) && PathPrefix(`/cable`)"
+      entryPoints:
+        - "web"
+      service: "cable"
+      priority: 100
+
+  services:
+    web:
+      loadBalancer:
+        servers:
+          - url: "http://web:8000"
+    cable:
+      loadBalancer:
+        servers:
+          - url: "http://cable:28080"

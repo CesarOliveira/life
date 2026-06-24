@@ -1,0 +1,30 @@
+default: &default
+  adapter: "postgresql"
+  encoding: "unicode"
+  database: "<%= ENV.fetch('POSTGRES_DB') { 'life' } %>"
+  username: "<%= ENV.fetch('POSTGRES_USER') { 'life' } %>"
+  password: "<%= ENV.fetch('POSTGRES_PASSWORD') { 'password' } %>"
+  host: "<%= ENV.fetch('POSTGRES_HOST') { 'postgres' } %>"
+  port: "<%= ENV.fetch('POSTGRES_PORT') { 5432 } %>"
+  max_connections: "<%= ENV.fetch('RAILS_MAX_THREADS') { 5 } %>"
+  # Reaper roda em thread própria. Setar DB_REAPING_FREQUENCY=0 nos comandos
+  # rake de vida curta (db:migrate/db:seed) evita que a thread do reaper
+  # impeça o processo de encerrar. O puma usa o default e mantém o reaper.
+  reaping_frequency: <%= ENV.fetch('DB_REAPING_FREQUENCY', 60) %>
+
+development:
+  <<: *default
+  database: "<%= ENV.fetch('POSTGRES_DB') { 'life' } %>_development"
+
+test:
+  <<: *default
+  database: "<%= ENV.fetch('POSTGRES_DB') { 'life' } %>_test"
+
+production:
+  <<: *default
+  # Sem aspas de propósito: com DATABASE_URL ausente (ex.: dev), o ERB renderiza
+  # nil e o Rails ignora a chave `url`. Com aspas viraria "" e o Rails 8.1 aborta
+  # o boot ("Database URL cannot be empty") ao construir as configs de todos os
+  # ambientes. Em produção o DATABASE_URL está setado e a URL é usada normalmente.
+  url: <%= ENV["DATABASE_URL"] %>
+  database: "<%= ENV.fetch('POSTGRES_DB') { 'life' } %>_production"

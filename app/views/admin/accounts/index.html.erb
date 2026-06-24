@@ -1,0 +1,22 @@
+<h1 class="text-2xl font-bold mb-6">Contas</h1>
+
+<div class="bg-white rounded shadow overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50 text-gray-500 text-left">
+      <tr>
+        <th class="px-4 py-2">Conta</th>
+        <th class="px-4 py-2">Dono</th>
+        <th class="px-4 py-2">Membros</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y">
+      <% @accounts.each do |a| %>
+        <tr>
+          <td class="px-4 py-2 font-medium"><%= a.name %></td>
+          <td class="px-4 py-2"><%= a.owner&.email %></td>
+          <td class="px-4 py-2"><%= a.memberships.size %> (<%= a.memberships.select(&:active?).size %> ativos)</td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Life</title>
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
+  </head>
+  <body class="bg-gray-50 text-gray-900">
+    <% if user_signed_in? %>
+    <nav class="bg-indigo-700 text-white px-6 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-6">
+        <%= link_to "Life", authenticated_root_path, class: "font-bold text-lg" %>
+        <% if current_account %>
+          <%= link_to "Dashboard", authenticated_root_path, class: "text-sm hover:underline" %>
+        <% end %>
+      </div>
+      <div class="flex items-center gap-4">
+        <% if current_account %>
+          <details class="relative">
+            <summary class="cursor-pointer text-sm list-none select-none">
+              Conta: <span class="font-semibold"><%= current_account.name %></span> ▾
+            </summary>
+            <div class="absolute right-0 mt-2 bg-white text-gray-800 rounded shadow py-1 z-10 min-w-[220px]">
+              <% current_user.active_accounts.each do |acc| %>
+                <%= button_to acc.name, switch_account_path(acc),
+                      class: "block w-full text-left px-3 py-1 text-sm hover:bg-gray-100 #{'font-semibold bg-gray-50' if acc.id == current_account.id}" %>
+              <% end %>
+              <div class="border-t my-1"></div>
+              <% if current_user.admin_of?(current_account) %>
+                <%= link_to "Membros da conta", account_members_path(current_account), class: "block px-3 py-1 text-sm hover:bg-gray-100" %>
+              <% end %>
+              <%= link_to "Criar nova conta", new_account_path, class: "block px-3 py-1 text-sm hover:bg-gray-100" %>
+              <%= link_to "Entrar em outra conta", new_join_request_path, class: "block px-3 py-1 text-sm hover:bg-gray-100" %>
+            </div>
+          </details>
+        <% end %>
+        <% if current_user&.platform_admin? %>
+          <%= link_to "Admin", admin_root_path, class: "text-sm bg-gray-900 px-2 py-1 rounded hover:bg-black" %>
+        <% end %>
+        <% if current_user&.super_admin? %>
+          <%= link_to "Super Admin", "/super_admin", class: "text-sm bg-purple-700 px-2 py-1 rounded hover:bg-purple-800" %>
+        <% end %>
+        <%= link_to "Sair", destroy_user_session_path, data: { turbo_method: :delete }, class: "text-sm hover:underline" %>
+      </div>
+    </nav>
+    <% end %>
+    <main class="max-w-7xl mx-auto px-4 py-6">
+      <% flash.each do |type, msg| %>
+        <div class="mb-4 px-4 py-2 rounded <%= type == 'notice' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+          <%= msg %>
+        </div>
+      <% end %>
+      <%= yield %>
+    </main>
+  </body>
+</html>
