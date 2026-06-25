@@ -57,12 +57,143 @@ en:
     tagline: "Your progress, every day."
     email: "Email"
     password: "Password"
+    password_confirmation: "Confirm password"
     remember_me: "Remember me"
     sign_in: "Sign in"
     or: "or"
     sign_in_google: "Sign in with Google"
     forgot_password: "Forgot your password?"
     sign_up: "Sign up"
+    sign_up_title: "Create your account"
+    name: "Name"
+    have_account: "Already have an account?"
+    no_account: "Don't have an account?"
+    forgot_title: "Reset your password"
+    send_instructions: "Send instructions"
+    reset_title: "Set a new password"
+    new_password: "New password"
+    confirm_new_password: "Confirm new password"
+    change_password: "Change password"
+    back_to_sign_in: "Back to sign in"
+
+  onboarding:
+    welcome: "Welcome!"
+    intro: "To get started, create an account or join an existing one with an invite code."
+    create_account: "Create an account"
+    join_account: "Join an account"
+    join_intro: "Have an invite code? Request access and wait for an account admin to approve it."
+    join_cta: "Request access with a code"
+    pending_requests: "Pending requests"
+    pending_waiting: "%{account} — awaiting approval"
+    pending_title: "Awaiting approval"
+    pending_intro: "Your request was sent. An account admin needs to approve your access."
+    pending_item: "%{account} — pending"
+    create_own: "Create my own account"
+    join_other: "Join with another code"
+
+  accounts:
+    new_title: "Create new account"
+    create: "Create account"
+    cancel: "Cancel"
+
+  join_requests:
+    title: "Join an account"
+    intro: "Enter the invite code provided by an account admin."
+    code_label: "Invite code"
+    submit: "Request access"
+    back: "Back"
+
+  memberships:
+    title: "Members — %{account}"
+    code_label: "Invite code:"
+    code_share: "— share it so others can request access."
+    pending_section: "Pending requests"
+    no_pending: "No pending requests."
+    active_section: "Active members"
+    col_user: "User"
+    col_role: "Role"
+    col_actions: "Actions"
+    approve: "Approve"
+    reject: "Reject"
+    reject_confirm: "Reject this request?"
+    make_admin: "Make admin"
+    make_member: "Make member"
+    remove: "Remove"
+    remove_confirm: "Remove this member?"
+
+  admin:
+    nav:
+      title: "⚙ Admin"
+      approvals: "Approvals"
+      users: "Users"
+      accounts: "Accounts"
+      back_to_app: "← Back to app"
+      logout: "Sign out"
+    dashboard:
+      title: "Admin panel"
+      pending_approvals: "Pending approvals"
+      users: "Users"
+      accounts: "Accounts"
+      active_memberships: "Active memberships"
+      nothing_pending: "Nothing pending. ✅"
+      col_user: "User"
+      col_account: "Account"
+      col_role: "Role"
+      col_when: "When"
+      col_actions: "Actions"
+      approve: "Approve"
+      reject: "Reject"
+      reject_confirm: "Reject and remove %{email}?"
+    users:
+      title: "Users"
+      hint: "Click a role to grant or remove it."
+      col_name: "Name"
+      col_email: "Email"
+      col_login: "Login"
+      col_accounts: "Accounts"
+      col_roles: "Roles"
+      login_google: "Google"
+      login_password: "Email/password"
+    accounts:
+      title: "Accounts"
+      col_account: "Account"
+      col_owner: "Owner"
+      col_members: "Members"
+      members_count: "%{total} (%{active} active)"
+
+  flash:
+    accounts:
+      created: "Account created successfully."
+      created_pending: "Account created. Wait for an admin to approve it before you can use it."
+      switched: "Active account: %{account}."
+      unavailable: "Account unavailable."
+    join_requests:
+      invalid_code: "Invalid invite code."
+      already_member: "You're already part of %{account}."
+      already_requested: "Request already sent to %{account}."
+      sent: "Request sent to %{account}. Please wait for approval."
+    memberships:
+      approved: "%{email} approved."
+      role_updated: "Role updated."
+      nothing: "Nothing to change."
+      owner_cant_remove: "You can't remove the account owner."
+      removed: "Membership removed."
+      access_restricted: "Restricted to account admins."
+    admin_memberships:
+      approved: "%{email} approved in %{account}."
+      refused: "Request from %{email} declined."
+    admin_users:
+      cant_remove_own_admin: "You can't remove your own admin role."
+      role_granted: "Role '%{role}' granted to %{email}."
+      role_removed: "Role '%{role}' removed from %{email}."
+    admin_base:
+      access_restricted: "Restricted to platform admins."
+    super_admin:
+      access_restricted: "Restricted to super admins."
+    omniauth:
+      success: "Signed in with Google successfully."
+      failure: "Couldn't sign in with Google. Try again or use email and password."
+      cancelled: "Google sign-in cancelled or unavailable."
 
   activerecord:
     attributes:

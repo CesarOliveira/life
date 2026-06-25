@@ -12,7 +12,7 @@ module Admin
       return if current_user&.platform_admin?
 
       redirect_to authenticated_root_path,
-        alert: "Acesso restrito ao administrador da plataforma."
+        alert: t("flash.admin_base.access_restricted")
     end
   end
 end

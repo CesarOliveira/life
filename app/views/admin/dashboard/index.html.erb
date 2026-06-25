@@ -1,55 +1,55 @@
-<h1 class="text-2xl font-bold mb-6">Painel administrativo</h1>
+<h1 class="mb-6 text-2xl font-bold text-slate-900"><%= t("admin.dashboard.title") %></h1>
 
-<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-  <div class="bg-white rounded shadow p-4">
+<div class="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+  <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
     <div class="text-3xl font-bold text-amber-600"><%= @pending_memberships.size %></div>
-    <div class="text-sm text-gray-500">Aprovações pendentes</div>
+    <div class="text-sm text-slate-500"><%= t("admin.dashboard.pending_approvals") %></div>
   </div>
-  <div class="bg-white rounded shadow p-4">
-    <div class="text-3xl font-bold"><%= @users_count %></div>
-    <div class="text-sm text-gray-500">Usuários</div>
+  <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div class="text-3xl font-bold text-slate-900"><%= @users_count %></div>
+    <div class="text-sm text-slate-500"><%= t("admin.dashboard.users") %></div>
   </div>
-  <div class="bg-white rounded shadow p-4">
-    <div class="text-3xl font-bold"><%= @accounts_count %></div>
-    <div class="text-sm text-gray-500">Contas</div>
+  <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div class="text-3xl font-bold text-slate-900"><%= @accounts_count %></div>
+    <div class="text-sm text-slate-500"><%= t("admin.dashboard.accounts") %></div>
   </div>
-  <div class="bg-white rounded shadow p-4">
-    <div class="text-3xl font-bold text-green-600"><%= @active_count %></div>
-    <div class="text-sm text-gray-500">Vínculos ativos</div>
+  <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div class="text-3xl font-bold text-emerald-600"><%= @active_count %></div>
+    <div class="text-sm text-slate-500"><%= t("admin.dashboard.active_memberships") %></div>
   </div>
 </div>
 
-<h2 class="text-lg font-semibold mb-3">Aprovações pendentes</h2>
+<h2 class="mb-3 text-lg font-semibold text-slate-900"><%= t("admin.dashboard.pending_approvals") %></h2>
 <% if @pending_memberships.empty? %>
-  <p class="text-gray-500">Nada pendente. ✅</p>
+  <p class="text-slate-500"><%= t("admin.dashboard.nothing_pending") %></p>
 <% else %>
-  <div class="bg-white rounded shadow overflow-hidden">
+  <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
     <table class="w-full text-sm">
-      <thead class="bg-gray-50 text-gray-500 text-left">
+      <thead class="bg-slate-50 text-left text-slate-500">
         <tr>
-          <th class="px-4 py-2">Usuário</th>
-          <th class="px-4 py-2">Conta</th>
-          <th class="px-4 py-2">Papel</th>
-          <th class="px-4 py-2">Quando</th>
-          <th class="px-4 py-2 text-right">Ações</th>
+          <th class="px-4 py-2"><%= t("admin.dashboard.col_user") %></th>
+          <th class="px-4 py-2"><%= t("admin.dashboard.col_account") %></th>
+          <th class="px-4 py-2"><%= t("admin.dashboard.col_role") %></th>
+          <th class="px-4 py-2"><%= t("admin.dashboard.col_when") %></th>
+          <th class="px-4 py-2 text-right"><%= t("admin.dashboard.col_actions") %></th>
         </tr>
       </thead>
-      <tbody class="divide-y">
+      <tbody class="divide-y divide-slate-100">
         <% @pending_memberships.each do |m| %>
           <tr>
             <td class="px-4 py-2">
-              <div class="font-medium"><%= m.user.name %></div>
-              <div class="text-gray-500"><%= m.user.email %></div>
+              <div class="font-medium text-slate-900"><%= m.user.name %></div>
+              <div class="text-slate-500"><%= m.user.email %></div>
             </td>
             <td class="px-4 py-2"><%= m.account.name %></td>
             <td class="px-4 py-2"><%= m.role %></td>
-            <td class="px-4 py-2 text-gray-500"><%= m.created_at.strftime("%d/%m/%Y %H:%M") %></td>
-            <td class="px-4 py-2 text-right space-x-2 whitespace-nowrap">
-              <%= button_to "Aprovar", admin_membership_path(m), method: :patch,
-                    class: "bg-green-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-green-700 cursor-pointer" %>
-              <%= button_to "Recusar", admin_membership_path(m), method: :delete,
-                    form: { data: { turbo_confirm: "Recusar e remover #{m.user.email}?" } },
-                    class: "bg-red-100 text-red-700 px-3 py-1 rounded text-xs font-semibold hover:bg-red-200 cursor-pointer" %>
+            <td class="px-4 py-2 text-slate-500"><%= l(m.created_at, format: :long) %></td>
+            <td class="space-x-2 whitespace-nowrap px-4 py-2 text-right">
+              <%= button_to t("admin.dashboard.approve"), admin_membership_path(m), method: :patch,
+                    class: "rounded bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-700" %>
+              <%= button_to t("admin.dashboard.reject"), admin_membership_path(m), method: :delete,
+                    form: { data: { turbo_confirm: t("admin.dashboard.reject_confirm", email: m.user.email) } },
+                    class: "rounded bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700 hover:bg-rose-200" %>
             </td>
           </tr>
         <% end %>

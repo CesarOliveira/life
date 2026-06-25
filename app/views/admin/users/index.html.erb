@@ -1,27 +1,26 @@
-<h1 class="text-2xl font-bold mb-6">Usuários</h1>
+<h1 class="mb-6 text-2xl font-bold text-slate-900"><%= t("admin.users.title") %></h1>
+<p class="mb-4 text-sm text-slate-500"><%= t("admin.users.hint") %></p>
 
-<p class="text-sm text-gray-500 mb-4">Clique numa role para conceder ou remover.</p>
-
-<div class="bg-white rounded shadow overflow-hidden">
+<div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
   <table class="w-full text-sm">
-    <thead class="bg-gray-50 text-gray-500 text-left">
+    <thead class="bg-slate-50 text-left text-slate-500">
       <tr>
-        <th class="px-4 py-2">Nome</th>
-        <th class="px-4 py-2">E-mail</th>
-        <th class="px-4 py-2">Login</th>
-        <th class="px-4 py-2">Contas</th>
-        <th class="px-4 py-2">Roles</th>
+        <th class="px-4 py-2"><%= t("admin.users.col_name") %></th>
+        <th class="px-4 py-2"><%= t("admin.users.col_email") %></th>
+        <th class="px-4 py-2"><%= t("admin.users.col_login") %></th>
+        <th class="px-4 py-2"><%= t("admin.users.col_accounts") %></th>
+        <th class="px-4 py-2"><%= t("admin.users.col_roles") %></th>
       </tr>
     </thead>
-    <tbody class="divide-y">
+    <tbody class="divide-y divide-slate-100">
       <% @users.each do |u| %>
         <tr>
-          <td class="px-4 py-2 font-medium"><%= u.name %></td>
+          <td class="px-4 py-2 font-medium text-slate-900"><%= u.name %></td>
           <td class="px-4 py-2"><%= u.email %></td>
-          <td class="px-4 py-2"><%= u.provider == "google_oauth2" ? "Google" : "E-mail/senha" %></td>
-          <td class="px-4 py-2 space-x-1">
+          <td class="px-4 py-2"><%= u.provider == "google_oauth2" ? t("admin.users.login_google") : t("admin.users.login_password") %></td>
+          <td class="space-x-1 px-4 py-2">
             <% u.memberships.each do |m| %>
-              <span class="inline-block px-2 py-0.5 rounded text-xs <%= m.active? ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700' %>">
+              <span class="inline-block rounded px-2 py-0.5 text-xs <%= m.active? ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700" %>">
                 <%= m.account.name %>: <%= m.status %>
               </span>
             <% end %>
@@ -31,7 +30,7 @@
               <% Role::KNOWN.each do |role| %>
                 <% has = u.role?(role) %>
                 <%= button_to admin_user_path(u, role: role, grant: has ? "0" : "1"), method: :patch,
-                      class: "px-2 py-0.5 rounded text-xs font-medium cursor-pointer #{has ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}" do %>
+                      class: "rounded px-2 py-0.5 text-xs font-medium #{has ? "bg-emerald-600 text-white hover:bg-emerald-700" : "bg-slate-100 text-slate-500 hover:bg-slate-200"}" do %>
                   <%= has ? "✓ #{role}" : role %>
                 <% end %>
               <% end %>

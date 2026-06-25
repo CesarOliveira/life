@@ -1,20 +1,20 @@
-<h1 class="text-2xl font-bold mb-6">Contas</h1>
+<h1 class="mb-6 text-2xl font-bold text-slate-900"><%= t("admin.accounts.title") %></h1>
 
-<div class="bg-white rounded shadow overflow-hidden">
+<div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
   <table class="w-full text-sm">
-    <thead class="bg-gray-50 text-gray-500 text-left">
+    <thead class="bg-slate-50 text-left text-slate-500">
       <tr>
-        <th class="px-4 py-2">Conta</th>
-        <th class="px-4 py-2">Dono</th>
-        <th class="px-4 py-2">Membros</th>
+        <th class="px-4 py-2"><%= t("admin.accounts.col_account") %></th>
+        <th class="px-4 py-2"><%= t("admin.accounts.col_owner") %></th>
+        <th class="px-4 py-2"><%= t("admin.accounts.col_members") %></th>
       </tr>
     </thead>
-    <tbody class="divide-y">
+    <tbody class="divide-y divide-slate-100">
       <% @accounts.each do |a| %>
         <tr>
-          <td class="px-4 py-2 font-medium"><%= a.name %></td>
+          <td class="px-4 py-2 font-medium text-slate-900"><%= a.name %></td>
           <td class="px-4 py-2"><%= a.owner&.email %></td>
-          <td class="px-4 py-2"><%= a.memberships.size %> (<%= a.memberships.select(&:active?).size %> ativos)</td>
+          <td class="px-4 py-2"><%= t("admin.accounts.members_count", total: a.memberships.size, active: a.memberships.select(&:active?).size) %></td>
         </tr>
       <% end %>
     </tbody>

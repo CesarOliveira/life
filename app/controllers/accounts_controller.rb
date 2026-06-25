@@ -18,10 +18,9 @@ class AccountsController < ApplicationController
 
       if status == "active"
         session[:account_id] = @account.id
-        redirect_to authenticated_root_path, notice: "Conta criada com sucesso."
+        redirect_to authenticated_root_path, notice: t("flash.accounts.created")
       else
-        redirect_to pending_approval_path,
-          notice: "Conta criada. Aguarde a aprovação do administrador para começar a usar."
+        redirect_to pending_approval_path, notice: t("flash.accounts.created_pending")
       end
     else
       render :new, status: :unprocessable_entity
@@ -33,9 +32,9 @@ class AccountsController < ApplicationController
     account = current_user.active_accounts.find_by(id: params[:id])
     if account
       session[:account_id] = account.id
-      redirect_to authenticated_root_path, notice: "Conta ativa: #{account.name}."
+      redirect_to authenticated_root_path, notice: t("flash.accounts.switched", account: account.name)
     else
-      redirect_to authenticated_root_path, alert: "Conta indisponível."
+      redirect_to authenticated_root_path, alert: t("flash.accounts.unavailable")
     end
   end
 

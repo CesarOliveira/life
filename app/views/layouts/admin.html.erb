@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="<%= I18n.locale %>">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -9,22 +9,30 @@
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
   </head>
-  <body class="bg-gray-100 text-gray-900">
-    <nav class="bg-gray-900 text-white px-6 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-6">
-        <%= link_to "⚙ Admin", admin_root_path, class: "font-bold text-lg" %>
-        <%= link_to "Aprovações", admin_root_path, class: "text-sm hover:underline" %>
-        <%= link_to "Usuários", admin_users_path, class: "text-sm hover:underline" %>
-        <%= link_to "Contas", admin_accounts_path, class: "text-sm hover:underline" %>
-      </div>
-      <div class="flex items-center gap-4">
-        <%= link_to "← Voltar ao app", authenticated_root_path, class: "text-sm hover:underline" %>
-        <%= link_to "Sair", destroy_user_session_path, data: { turbo_method: :delete }, class: "text-sm hover:underline" %>
+  <body class="min-h-screen bg-slate-100 text-slate-800 antialiased">
+    <nav class="bg-slate-900 px-6 py-3 text-white">
+      <div class="mx-auto flex max-w-7xl items-center justify-between gap-2">
+        <div class="flex items-center gap-5">
+          <%= link_to t("admin.nav.title"), admin_root_path, class: "text-lg font-bold" %>
+          <%= link_to t("admin.nav.approvals"), admin_root_path, class: "text-sm hover:underline" %>
+          <%= link_to t("admin.nav.users"), admin_users_path, class: "text-sm hover:underline" %>
+          <%= link_to t("admin.nav.accounts"), admin_accounts_path, class: "text-sm hover:underline" %>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="flex items-center overflow-hidden rounded-lg border border-slate-700 text-xs">
+            <% I18n.available_locales.each do |loc| %>
+              <%= link_to locale_label(loc), locale_switch_path(loc),
+                    class: "px-2 py-1 #{I18n.locale == loc ? "bg-slate-700 font-semibold" : "text-slate-300 hover:bg-slate-800"}" %>
+            <% end %>
+          </div>
+          <%= link_to t("admin.nav.back_to_app"), authenticated_root_path, class: "text-sm hover:underline" %>
+          <%= link_to t("admin.nav.logout"), destroy_user_session_path, data: { turbo_method: :delete }, class: "text-sm hover:underline" %>
+        </div>
       </div>
     </nav>
-    <main class="max-w-7xl mx-auto px-4 py-6">
+    <main class="mx-auto max-w-7xl px-4 py-6">
       <% flash.each do |type, msg| %>
-        <div class="mb-4 px-4 py-2 rounded <%= type == 'notice' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+        <div class="mb-4 rounded-xl border px-4 py-3 text-sm <%= type.to_s == "notice" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-rose-200 bg-rose-50 text-rose-800" %>">
           <%= msg %>
         </div>
       <% end %>

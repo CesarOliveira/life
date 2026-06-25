@@ -6,6 +6,6 @@ module SuperAdminAuthentication
     authenticate_user!
     return if current_user&.super_admin?
 
-    redirect_to main_app.authenticated_root_path, alert: "Acesso restrito ao super admin."
+    redirect_to main_app.authenticated_root_path, alert: I18n.t("flash.super_admin.access_restricted")
   end
 end

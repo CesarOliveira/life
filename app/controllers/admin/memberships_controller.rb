@@ -7,14 +7,14 @@ module Admin
       membership = Membership.find(params[:id])
       membership.update!(status: "active")
       redirect_to admin_root_path,
-        notice: "#{membership.user.email} aprovado em #{membership.account.name}."
+        notice: t("flash.admin_memberships.approved", email: membership.user.email, account: membership.account.name)
     end
 
     def destroy
       membership = Membership.find(params[:id])
       email = membership.user.email
       membership.destroy
-      redirect_to admin_root_path, notice: "Solicitação de #{email} recusada."
+      redirect_to admin_root_path, notice: t("flash.admin_memberships.refused", email: email)
     end
   end
 end

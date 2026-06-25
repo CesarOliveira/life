@@ -57,12 +57,143 @@ pt-BR:
     tagline: "Seu progresso, todo dia."
     email: "E-mail"
     password: "Senha"
+    password_confirmation: "Confirmar senha"
     remember_me: "Lembrar-me"
     sign_in: "Entrar"
     or: "ou"
     sign_in_google: "Entrar com o Google"
     forgot_password: "Esqueci minha senha"
     sign_up: "Criar conta"
+    sign_up_title: "Criar sua conta"
+    name: "Nome"
+    have_account: "Já tem conta?"
+    no_account: "Não tem conta?"
+    forgot_title: "Recuperar senha"
+    send_instructions: "Enviar instruções"
+    reset_title: "Definir nova senha"
+    new_password: "Nova senha"
+    confirm_new_password: "Confirmar nova senha"
+    change_password: "Alterar senha"
+    back_to_sign_in: "Voltar ao login"
+
+  onboarding:
+    welcome: "Bem-vindo(a)!"
+    intro: "Para começar, crie uma conta ou entre em uma conta existente com um código de convite."
+    create_account: "Criar uma conta"
+    join_account: "Entrar em uma conta"
+    join_intro: "Tem um código de convite? Solicite acesso e aguarde a aprovação de um administrador da conta."
+    join_cta: "Solicitar entrada com código"
+    pending_requests: "Solicitações pendentes"
+    pending_waiting: "%{account} — aguardando aprovação"
+    pending_title: "Aguardando aprovação"
+    pending_intro: "Sua solicitação foi enviada. Um administrador da conta precisa aprovar seu acesso."
+    pending_item: "%{account} — pendente"
+    create_own: "Criar minha própria conta"
+    join_other: "Entrar com outro código"
+
+  accounts:
+    new_title: "Criar nova conta"
+    create: "Criar conta"
+    cancel: "Cancelar"
+
+  join_requests:
+    title: "Entrar em uma conta"
+    intro: "Informe o código de convite fornecido por um administrador da conta."
+    code_label: "Código de convite"
+    submit: "Solicitar entrada"
+    back: "Voltar"
+
+  memberships:
+    title: "Membros — %{account}"
+    code_label: "Código de convite:"
+    code_share: "— compartilhe para que outros solicitem entrada."
+    pending_section: "Solicitações pendentes"
+    no_pending: "Nenhuma solicitação pendente."
+    active_section: "Membros ativos"
+    col_user: "Usuário"
+    col_role: "Papel"
+    col_actions: "Ações"
+    approve: "Aprovar"
+    reject: "Rejeitar"
+    reject_confirm: "Rejeitar esta solicitação?"
+    make_admin: "Tornar admin"
+    make_member: "Tornar membro"
+    remove: "Remover"
+    remove_confirm: "Remover este membro?"
+
+  admin:
+    nav:
+      title: "⚙ Admin"
+      approvals: "Aprovações"
+      users: "Usuários"
+      accounts: "Contas"
+      back_to_app: "← Voltar ao app"
+      logout: "Sair"
+    dashboard:
+      title: "Painel administrativo"
+      pending_approvals: "Aprovações pendentes"
+      users: "Usuários"
+      accounts: "Contas"
+      active_memberships: "Vínculos ativos"
+      nothing_pending: "Nada pendente. ✅"
+      col_user: "Usuário"
+      col_account: "Conta"
+      col_role: "Papel"
+      col_when: "Quando"
+      col_actions: "Ações"
+      approve: "Aprovar"
+      reject: "Recusar"
+      reject_confirm: "Recusar e remover %{email}?"
+    users:
+      title: "Usuários"
+      hint: "Clique numa role para conceder ou remover."
+      col_name: "Nome"
+      col_email: "E-mail"
+      col_login: "Login"
+      col_accounts: "Contas"
+      col_roles: "Roles"
+      login_google: "Google"
+      login_password: "E-mail/senha"
+    accounts:
+      title: "Contas"
+      col_account: "Conta"
+      col_owner: "Dono"
+      col_members: "Membros"
+      members_count: "%{total} (%{active} ativos)"
+
+  flash:
+    accounts:
+      created: "Conta criada com sucesso."
+      created_pending: "Conta criada. Aguarde a aprovação do administrador para começar a usar."
+      switched: "Conta ativa: %{account}."
+      unavailable: "Conta indisponível."
+    join_requests:
+      invalid_code: "Código de convite inválido."
+      already_member: "Você já participa de %{account}."
+      already_requested: "Solicitação já enviada para %{account}."
+      sent: "Solicitação enviada para %{account}. Aguarde aprovação."
+    memberships:
+      approved: "%{email} aprovado."
+      role_updated: "Papel atualizado."
+      nothing: "Nada a alterar."
+      owner_cant_remove: "Não é possível remover o dono da conta."
+      removed: "Vínculo removido."
+      access_restricted: "Acesso restrito aos administradores da conta."
+    admin_memberships:
+      approved: "%{email} aprovado em %{account}."
+      refused: "Solicitação de %{email} recusada."
+    admin_users:
+      cant_remove_own_admin: "Você não pode remover sua própria role de admin."
+      role_granted: "Role '%{role}' concedida a %{email}."
+      role_removed: "Role '%{role}' removida de %{email}."
+    admin_base:
+      access_restricted: "Acesso restrito ao administrador da plataforma."
+    super_admin:
+      access_restricted: "Acesso restrito ao super admin."
+    omniauth:
+      success: "Login com o Google realizado com sucesso."
+      failure: "Não foi possível entrar com o Google. Tente novamente ou use e-mail e senha."
+      cancelled: "Login com o Google cancelado ou indisponível."
 
   activerecord:
     attributes:
