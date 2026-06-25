@@ -1,0 +1,45 @@
+<%= form_with model: @habit, class: "bg-white shadow rounded p-6 space-y-4 max-w-lg" do |f| %>
+  <% if @habit.errors.any? %>
+    <div class="bg-red-100 text-red-700 text-sm rounded p-2">
+      <%= @habit.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :name, "Nome", class: "block text-sm font-medium mb-1" %>
+    <%= f.text_field :name, required: true, class: "w-full border rounded px-3 py-2 text-sm" %>
+  </div>
+
+  <div>
+    <%= f.label :description, "Descrição (opcional)", class: "block text-sm font-medium mb-1" %>
+    <%= f.text_area :description, rows: 2, class: "w-full border rounded px-3 py-2 text-sm" %>
+  </div>
+
+  <div>
+    <span class="block text-sm font-medium mb-1">Dias da semana</span>
+    <%= hidden_field_tag "habit[weekdays][]", "" %>
+    <div class="flex flex-wrap gap-2">
+      <% Habit::WEEKDAYS.each do |d| %>
+        <label class="inline-flex items-center gap-1 text-sm border rounded px-2 py-1 cursor-pointer">
+          <%= check_box_tag "habit[weekdays][]", d, Array(@habit.weekdays).include?(d) %>
+          <%= Habit::WEEKDAY_NAMES[d] %>
+        </label>
+      <% end %>
+    </div>
+    <p class="text-xs text-gray-500 mt-1">Marque todos para um hábito diário.</p>
+  </div>
+
+  <div>
+    <%= f.label :color, "Cor", class: "block text-sm font-medium mb-1" %>
+    <%= f.color_field :color, class: "h-9 w-16 border rounded" %>
+  </div>
+
+  <label class="inline-flex items-center gap-2 text-sm">
+    <%= f.check_box :active %> Ativo
+  </label>
+
+  <div class="flex items-center gap-3 pt-2">
+    <%= f.submit submit_label, class: "bg-indigo-600 text-white px-4 py-2 rounded text-sm font-semibold hover:bg-indigo-700" %>
+    <%= link_to "Cancelar", habits_path, class: "text-sm text-gray-500 hover:underline" %>
+  </div>
+<% end %>

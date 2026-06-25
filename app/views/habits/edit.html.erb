@@ -1,0 +1,8 @@
+<h1 class="text-2xl font-bold mb-6">Editar hábito</h1>
+<%= render "form", submit_label: "Salvar alterações" %>
+
+<div class="max-w-lg mt-4">
+  <%= button_to "Remover hábito", habit_path(@habit), method: :delete,
+        class: "text-red-600 text-sm hover:underline",
+        form: { data: { turbo_confirm: "Remover este hábito e todo o histórico de marcações?" } } %>
+</div>

@@ -4,7 +4,6 @@
 #
 #  id                   :bigint           not null, primary key
 #  join_code            :string
-#  monthly_yield_target :decimal(6, 2)
 #  name                 :string           not null
 #  created_at           :datetime         not null
 #  updated_at           :datetime         not null
@@ -23,7 +22,6 @@ FactoryBot.define do
   factory :account do
     sequence(:name) { |n| "Conta #{n}" }
     association :owner, factory: :user
-    monthly_yield_target { 3.0 }
     # join_code é gerado por callback (before_create)
   end
 end

@@ -1,0 +1,85 @@
+<div class="max-w-4xl">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold">Hábitos</h1>
+      <p class="text-gray-500 text-sm"><%= @today.strftime("%d/%m/%Y") %></p>
+    </div>
+    <%= link_to "+ Novo hábito", new_habit_path,
+          class: "bg-indigo-600 text-white px-4 py-2 rounded text-sm font-semibold hover:bg-indigo-700" %>
+  </div>
+
+  <% if @habits.empty? %>
+    <div class="bg-white rounded-lg shadow p-8 text-center">
+      <p class="text-gray-600 mb-4">Você ainda não tem hábitos. Bora começar?</p>
+      <%= link_to "Criar meu primeiro hábito", new_habit_path,
+            class: "inline-block bg-indigo-600 text-white px-4 py-2 rounded text-sm font-semibold hover:bg-indigo-700" %>
+    </div>
+  <% else %>
+    <% today_habits = @habits.select { |h| @stats[h].scheduled_today? } %>
+    <% done_today = today_habits.count { |h| @stats[h].done_today? } %>
+
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold">Hoje</h2>
+        <span class="text-sm text-gray-500"><%= done_today %> / <%= today_habits.size %> concluídos</span>
+      </div>
+
+      <% if today_habits.empty? %>
+        <p class="text-sm text-gray-500">Nenhum hábito agendado para hoje.</p>
+      <% else %>
+        <ul class="divide-y divide-gray-100">
+          <% today_habits.each do |h| %>
+            <% done = @stats[h].done_today? %>
+            <li class="flex items-center gap-3 py-2">
+              <%= button_to toggle_habit_path(h), params: { date: @today.iso8601 },
+                    class: "w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0 #{done ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 text-transparent hover:border-indigo-400'}",
+                    aria: { label: "Marcar #{h.name}" } do %>
+                <span class="text-xs leading-none">✓</span>
+              <% end %>
+              <span class="w-3 h-3 rounded-full inline-block shrink-0" style="background-color: <%= h.color %>"></span>
+              <span class="<%= 'line-through text-gray-400' if done %>"><%= h.name %></span>
+              <span class="ml-auto text-xs text-gray-500 shrink-0">🔥 <%= @stats[h].current_streak %></span>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+    </div>
+
+    <div class="space-y-3">
+      <% @habits.each do |h| %>
+        <% s = @stats[h] %>
+        <div class="bg-white rounded-lg shadow p-4">
+          <div class="flex items-center gap-3">
+            <span class="w-3 h-3 rounded-full inline-block shrink-0" style="background-color: <%= h.color %>"></span>
+            <div class="min-w-0">
+              <p class="font-semibold truncate"><%= h.name %></p>
+              <p class="text-xs text-gray-500">
+                <%= h.daily? ? "Todos os dias" : Array(h.weekdays).sort.map { |d| Habit::WEEKDAY_NAMES[d] }.join(", ") %>
+              </p>
+            </div>
+            <div class="ml-auto flex items-center gap-4 text-sm shrink-0">
+              <span title="Sequência atual">🔥 <span class="font-semibold"><%= s.current_streak %></span></span>
+              <span title="Adesão nos últimos 30 dias"><span class="font-semibold"><%= s.adherence %></span>%</span>
+              <%= link_to "Editar", edit_habit_path(h), class: "text-indigo-600 hover:underline text-xs" %>
+            </div>
+          </div>
+
+          <div class="flex gap-1 mt-3">
+            <% s.last_days(7).each do |day| %>
+              <% if day[:scheduled] %>
+                <%= button_to toggle_habit_path(h), params: { date: day[:date].iso8601 },
+                      class: "w-8 h-8 rounded flex items-center justify-center text-[11px] #{day[:done] ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}",
+                      title: day[:date].strftime('%d/%m') do %>
+                  <%= day[:date].day %>
+                <% end %>
+              <% else %>
+                <span class="w-8 h-8 rounded flex items-center justify-center text-[11px] text-gray-300 bg-gray-50"
+                      title="<%= day[:date].strftime('%d/%m') %> (não agendado)">–</span>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

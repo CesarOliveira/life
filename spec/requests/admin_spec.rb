@@ -57,12 +57,10 @@ RSpec.describe "Admin panel", type: :request do
       expect(admin.reload.role?(:admin)).to be true
     end
 
-    it "renders the CRUD index pages (trades, positions, assets)" do
-      get admin_trades_path
+    it "renders the admin index pages (accounts, users)" do
+      get admin_accounts_path
       expect(response).to have_http_status(:ok)
-      get admin_positions_path
-      expect(response).to have_http_status(:ok)
-      get admin_assets_path
+      get admin_users_path
       expect(response).to have_http_status(:ok)
     end
   end

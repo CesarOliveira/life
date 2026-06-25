@@ -24,6 +24,10 @@ Rails.application.routes.draw do
   end
   resources :join_requests, only: [:new, :create]
 
+  # Domínio de tracking
+  resources :habits
+  post "habits/:id/toggle", to: "habit_checks#toggle", as: :toggle_habit
+
   namespace :admin do
     root to: "dashboard#index"
     resources :memberships, only: [:update, :destroy]

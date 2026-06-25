@@ -5,13 +5,25 @@
   </p>
 
   <div class="bg-white rounded-lg shadow p-6">
-    <h2 class="text-lg font-semibold mb-2">Life</h2>
-    <p class="text-gray-600 text-sm">
-      Esqueleto multi-tenant: autenticação (e-mail/senha + Google), roles
-      (<code>admin</code> / <code>super_admin</code>), painel
-      <%= link_to "/admin", admin_root_path, class: "text-indigo-600 hover:underline" %>
-      e <%= link_to "/super_admin", "/super_admin", class: "text-indigo-600 hover:underline" %>
-      (ActiveAdmin). Substitua esta tela e adicione o domínio do seu projeto.
-    </p>
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-lg font-semibold">Hábitos de hoje</h2>
+      <%= link_to "Ver todos", habits_path, class: "text-indigo-600 hover:underline text-sm" %>
+    </div>
+
+    <% if @today_habits.empty? %>
+      <p class="text-gray-600 text-sm">
+        Nenhum hábito agendado para hoje.
+        <%= link_to "Criar um hábito", new_habit_path, class: "text-indigo-600 hover:underline" %>.
+      </p>
+    <% else %>
+      <p class="text-3xl font-bold">
+        <%= @today_done %><span class="text-gray-400 text-xl">/<%= @today_habits.size %></span>
+      </p>
+      <p class="text-sm text-gray-500">hábitos concluídos hoje</p>
+      <div class="w-full bg-gray-100 rounded-full h-2 mt-3">
+        <div class="bg-green-500 h-2 rounded-full"
+             style="width: <%= (@today_done * 100 / @today_habits.size) %>%"></div>
+      </div>
+    <% end %>
   </div>
 </div>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2024_01_01_000005) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_25_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -22,6 +22,29 @@ ActiveRecord::Schema[8.1].define(version: 2024_01_01_000005) do
     t.datetime "updated_at", null: false
     t.index ["join_code"], name: "index_accounts_on_join_code", unique: true
     t.index ["owner_id"], name: "index_accounts_on_owner_id"
+  end
+
+  create_table "habit_checks", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.date "date", null: false
+    t.bigint "habit_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["habit_id", "date"], name: "index_habit_checks_on_habit_id_and_date", unique: true
+    t.index ["habit_id"], name: "index_habit_checks_on_habit_id"
+  end
+
+  create_table "habits", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.boolean "active", default: true, null: false
+    t.string "color", default: "#6366f1", null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.string "name", null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.integer "weekdays", default: [0, 1, 2, 3, 4, 5, 6], null: false, array: true
+    t.index ["account_id", "active"], name: "index_habits_on_account_id_and_active"
+    t.index ["account_id"], name: "index_habits_on_account_id"
   end
 
   create_table "memberships", force: :cascade do |t|
@@ -69,6 +92,8 @@ ActiveRecord::Schema[8.1].define(version: 2024_01_01_000005) do
   end
 
   add_foreign_key "accounts", "users", column: "owner_id"
+  add_foreign_key "habit_checks", "habits"
+  add_foreign_key "habits", "accounts"
   add_foreign_key "memberships", "accounts"
   add_foreign_key "memberships", "users"
 end
