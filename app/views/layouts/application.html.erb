@@ -22,7 +22,7 @@
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
   </head>
-  <body class="min-h-screen bg-slate-50 text-slate-800 antialiased">
+  <body data-controller="pwa-install" class="min-h-screen bg-slate-50 text-slate-800 antialiased">
     <% if user_signed_in? %>
       <nav class="sticky top-0 z-20 border-b border-slate-200 bg-white/80 backdrop-blur">
         <div class="mx-auto flex h-14 max-w-5xl items-center justify-between gap-2 px-4">
@@ -56,10 +56,16 @@
                   <% end %>
                   <div class="my-1 border-t border-slate-100"></div>
                   <% if current_user.admin_of?(current_account) %>
+                    <%= link_to t("nav.account_settings"), edit_account_path(current_account), class: "block px-3 py-1.5 text-sm hover:bg-slate-50" %>
                     <%= link_to t("nav.account_members"), account_members_path(current_account), class: "block px-3 py-1.5 text-sm hover:bg-slate-50" %>
                   <% end %>
                   <%= link_to t("nav.create_account"), new_account_path, class: "block px-3 py-1.5 text-sm hover:bg-slate-50" %>
                   <%= link_to t("nav.join_account"), new_join_request_path, class: "block px-3 py-1.5 text-sm hover:bg-slate-50" %>
+                  <div class="my-1 border-t border-slate-100"></div>
+                  <button type="button" data-pwa-install-target="menuItem" data-action="pwa-install#promptInstall"
+                          class="block w-full px-3 py-1.5 text-left text-sm hover:bg-slate-50">
+                    <%= t("pwa.menu_item") %>
+                  </button>
                 </div>
               </details>
             <% end %>

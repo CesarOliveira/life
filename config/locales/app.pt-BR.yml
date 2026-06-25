@@ -6,6 +6,7 @@ pt-BR:
     super_admin: "Super Admin"
     logout: "Sair"
     account_members: "Membros da conta"
+    account_settings: "Configurações da conta"
     create_account: "Criar nova conta"
     join_account: "Entrar em outra conta"
 
@@ -92,6 +93,7 @@ pt-BR:
     hint_ios: 'Toque em Compartilhar e depois em "Adicionar à Tela de Início".'
     install: "Instalar"
     dismiss: "Dispensar"
+    menu_item: "Instalar app"
 
   onboarding:
     welcome: "Bem-vindo(a)!"
@@ -112,6 +114,10 @@ pt-BR:
     new_title: "Criar nova conta"
     create: "Criar conta"
     cancel: "Cancelar"
+    settings_title: "Configurações da conta"
+    save: "Salvar"
+    join_code: "Código de convite"
+    join_code_hint: "Compartilhe para outras pessoas solicitarem entrada."
 
   join_requests:
     title: "Entrar em uma conta"
@@ -184,6 +190,8 @@ pt-BR:
       created_pending: "Conta criada. Aguarde a aprovação do administrador para começar a usar."
       switched: "Conta ativa: %{account}."
       unavailable: "Conta indisponível."
+      updated: "Conta atualizada."
+      not_admin: "Apenas administradores da conta podem editá-la."
     join_requests:
       invalid_code: "Código de convite inválido."
       already_member: "Você já participa de %{account}."

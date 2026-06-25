@@ -1,9 +1,22 @@
 class AccountsController < ApplicationController
   # Criar conta / trocar de conta não exigem uma conta ativa prévia.
   skip_before_action :require_account, only: [:new, :create]
+  before_action :set_admin_account, only: [:edit, :update]
 
   def new
     @account = Account.new
+  end
+
+  # Configurações da conta (renomear). Só admin da conta.
+  def edit
+  end
+
+  def update
+    if @account.update(account_params)
+      redirect_to edit_account_path(@account), notice: t("flash.accounts.updated")
+    else
+      render :edit, status: :unprocessable_entity
+    end
   end
 
   def create
@@ -39,6 +52,14 @@ class AccountsController < ApplicationController
   end
 
   private
+
+  # Carrega a conta entre as do usuário e exige que ele seja admin dela.
+  def set_admin_account
+    @account = current_user.accounts.find(params[:id])
+    return if current_user.admin_of?(@account)
+
+    redirect_to authenticated_root_path, alert: t("flash.accounts.not_admin")
+  end
 
   def account_params
     params.require(:account).permit(:name)

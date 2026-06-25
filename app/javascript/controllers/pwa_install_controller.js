@@ -1,34 +1,49 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Banner para facilitar a instalação como PWA.
-// - Android/Chrome: captura o evento `beforeinstallprompt` e mostra um botão
-//   "Instalar" que dispara o prompt nativo.
-// - iOS Safari: não há prompt nativo, então mostra a instrução
-//   "Compartilhar → Adicionar à Tela de Início".
-// - Esconde-se se já estiver instalado (standalone) ou se foi dispensado.
+// Facilita instalar como PWA. Mostra um banner e também responde ao item
+// "Instalar app" do menu da conta (ação promptInstall).
+// - Android/Chrome: usa o evento `beforeinstallprompt` (prompt nativo).
+// - iOS Safari: sem prompt nativo, mostra a instrução "Compartilhar →
+//   Adicionar à Tela de Início".
+// - Esconde-se se já instalado (standalone) ou dispensado (localStorage).
 export default class extends Controller {
-  static targets = ["banner", "hint", "installButton"]
+  static targets = ["banner", "hint", "installButton", "menuItem"]
 
   connect() {
     this.deferredPrompt = null
-    if (this.isStandalone() || this.dismissed()) return
 
     this.onBeforeInstall = (event) => {
       event.preventDefault()
       this.deferredPrompt = event
-      this.installButtonTarget.classList.remove("hidden")
-      this.show()
+      if (this.hasInstallButtonTarget) this.installButtonTarget.classList.remove("hidden")
+      if (!this.isStandalone() && !this.dismissed()) this.show()
     }
     window.addEventListener("beforeinstallprompt", this.onBeforeInstall)
 
-    if (this.isIosSafari()) {
-      this.hintTarget.textContent = this.hintTarget.dataset.iosText
+    if (this.isStandalone()) {
+      if (this.hasMenuItemTarget) this.menuItemTarget.classList.add("hidden")
+      return
+    }
+
+    if (this.isIosSafari() && !this.dismissed()) {
+      this.useIosHint()
       this.show()
     }
   }
 
   disconnect() {
     window.removeEventListener("beforeinstallprompt", this.onBeforeInstall)
+  }
+
+  // Acionado pelo item "Instalar app" do menu.
+  promptInstall() {
+    this.undismiss()
+    if (this.deferredPrompt) {
+      this.install()
+    } else {
+      if (this.isIosSafari()) this.useIosHint()
+      this.show()
+    }
   }
 
   async install() {
@@ -43,17 +58,29 @@ export default class extends Controller {
     try {
       localStorage.setItem("pwa-install-dismissed", "1")
     } catch (_) {
-      // localStorage indisponível (modo privado antigo) — apenas esconde.
+      // localStorage indisponível — apenas esconde.
     }
     this.hide()
   }
 
+  undismiss() {
+    try {
+      localStorage.removeItem("pwa-install-dismissed")
+    } catch (_) {
+      // ignore
+    }
+  }
+
+  useIosHint() {
+    if (this.hasHintTarget) this.hintTarget.textContent = this.hintTarget.dataset.iosText
+  }
+
   show() {
-    this.bannerTarget.classList.remove("hidden")
+    if (this.hasBannerTarget) this.bannerTarget.classList.remove("hidden")
   }
 
   hide() {
-    this.bannerTarget.classList.add("hidden")
+    if (this.hasBannerTarget) this.bannerTarget.classList.add("hidden")
   }
 
   dismissed() {

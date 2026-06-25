@@ -6,6 +6,7 @@ en:
     super_admin: "Super Admin"
     logout: "Sign out"
     account_members: "Account members"
+    account_settings: "Account settings"
     create_account: "Create new account"
     join_account: "Join another account"
 
@@ -92,6 +93,7 @@ en:
     hint_ios: 'Tap Share, then "Add to Home Screen".'
     install: "Install"
     dismiss: "Dismiss"
+    menu_item: "Install app"
 
   onboarding:
     welcome: "Welcome!"
@@ -112,6 +114,10 @@ en:
     new_title: "Create new account"
     create: "Create account"
     cancel: "Cancel"
+    settings_title: "Account settings"
+    save: "Save"
+    join_code: "Invite code"
+    join_code_hint: "Share it so others can request access."
 
   join_requests:
     title: "Join an account"
@@ -184,6 +190,8 @@ en:
       created_pending: "Account created. Wait for an admin to approve it before you can use it."
       switched: "Active account: %{account}."
       unavailable: "Account unavailable."
+      updated: "Account updated."
+      not_admin: "Only account admins can edit it."
     join_requests:
       invalid_code: "Invalid invite code."
       already_member: "You're already part of %{account}."

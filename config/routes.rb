@@ -16,7 +16,7 @@ Rails.application.routes.draw do
   # Multi-tenant: onboarding, contas e vínculos (memberships).
   get "/onboarding", to: "onboarding#show", as: :onboarding
   get "/pending", to: "onboarding#pending", as: :pending_approval
-  resources :accounts, only: [:new, :create] do
+  resources :accounts, only: [:new, :create, :edit, :update] do
     member do
       post :switch
     end
