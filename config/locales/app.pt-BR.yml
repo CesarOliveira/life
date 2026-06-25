@@ -75,6 +75,16 @@ pt-BR:
     confirm_new_password: "Confirmar nova senha"
     change_password: "Alterar senha"
     back_to_sign_in: "Voltar ao login"
+    password_min: "Senha (mín. 6 caracteres)"
+    current_password: "Senha atual"
+    current_password_hint: "deixe em branco para manter"
+    need_current_password: "precisamos da sua senha atual para confirmar as alterações"
+    update: "Atualizar"
+    edit_title: "Editar conta"
+    cancel_account: "Cancelar minha conta"
+    cancel_account_confirm: "Tem certeza?"
+    unhappy: "Insatisfeito?"
+    back: "Voltar"
 
   onboarding:
     welcome: "Bem-vindo(a)!"

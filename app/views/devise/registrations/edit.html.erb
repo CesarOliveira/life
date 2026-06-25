@@ -1,0 +1,48 @@
+<div class="mx-auto max-w-lg">
+  <h1 class="mb-6 text-2xl font-bold text-slate-900"><%= t("auth.edit_title") %></h1>
+
+  <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
+    <div class="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <% if resource.errors.any? %>
+        <div class="rounded-lg border border-rose-200 bg-rose-50 p-3">
+          <% resource.errors.full_messages.each do |msg| %>
+            <p class="text-sm text-rose-700"><%= msg %></p>
+          <% end %>
+        </div>
+      <% end %>
+
+      <div>
+        <%= f.label :name, t("auth.name"), class: "mb-1 block text-sm font-medium text-slate-700" %>
+        <%= f.text_field :name, autocomplete: "name", class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+      </div>
+      <div>
+        <%= f.label :email, t("auth.email"), class: "mb-1 block text-sm font-medium text-slate-700" %>
+        <%= f.email_field :email, autocomplete: "email", class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+      </div>
+      <div>
+        <%= f.label :password, class: "mb-1 block text-sm font-medium text-slate-700" do %>
+          <%= t("auth.password") %>
+          <span class="font-normal text-slate-400">(<%= t("auth.current_password_hint") %>)</span>
+        <% end %>
+        <%= f.password_field :password, autocomplete: "new-password", class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+      </div>
+      <div>
+        <%= f.label :password_confirmation, t("auth.password_confirmation"), class: "mb-1 block text-sm font-medium text-slate-700" %>
+        <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+      </div>
+      <div>
+        <%= f.label :current_password, t("auth.current_password"), class: "mb-1 block text-sm font-medium text-slate-700" %>
+        <%= f.password_field :current_password, autocomplete: "current-password", class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+        <p class="mt-1 text-xs text-slate-500"><%= t("auth.need_current_password") %></p>
+      </div>
+      <%= f.submit t("auth.update"), class: "rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700" %>
+    </div>
+  <% end %>
+
+  <div class="mt-6 flex items-center justify-between">
+    <%= button_to t("auth.cancel_account"), registration_path(resource_name), method: :delete,
+          class: "text-sm text-rose-600 hover:underline",
+          form: { data: { turbo_confirm: t("auth.cancel_account_confirm") } } %>
+    <%= link_to t("auth.back"), authenticated_root_path, class: "text-sm text-slate-500 hover:underline" %>
+  </div>
+</div>

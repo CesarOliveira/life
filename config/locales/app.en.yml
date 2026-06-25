@@ -75,6 +75,16 @@ en:
     confirm_new_password: "Confirm new password"
     change_password: "Change password"
     back_to_sign_in: "Back to sign in"
+    password_min: "Password (min. 6 characters)"
+    current_password: "Current password"
+    current_password_hint: "leave blank to keep it"
+    need_current_password: "we need your current password to confirm changes"
+    update: "Update"
+    edit_title: "Edit account"
+    cancel_account: "Cancel my account"
+    cancel_account_confirm: "Are you sure?"
+    unhappy: "Unhappy?"
+    back: "Back"
 
   onboarding:
     welcome: "Welcome!"

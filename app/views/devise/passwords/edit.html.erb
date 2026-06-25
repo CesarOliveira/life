@@ -1,0 +1,34 @@
+<div class="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+  <div class="w-full max-w-md">
+    <div class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+      <h1 class="mb-6 text-center text-xl font-bold text-slate-900"><%= t("auth.reset_title") %></h1>
+
+      <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :put }) do |f| %>
+        <%= f.hidden_field :reset_password_token %>
+        <% if resource.errors.any? %>
+          <div class="mb-4 rounded-lg border border-rose-200 bg-rose-50 p-3">
+            <% resource.errors.full_messages.each do |msg| %>
+              <p class="text-sm text-rose-700"><%= msg %></p>
+            <% end %>
+          </div>
+        <% end %>
+
+        <div class="space-y-4">
+          <div>
+            <%= f.label :password, t("auth.new_password"), class: "mb-1 block text-sm font-medium text-slate-700" %>
+            <%= f.password_field :password, autofocus: true, autocomplete: "new-password", class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+          </div>
+          <div>
+            <%= f.label :password_confirmation, t("auth.confirm_new_password"), class: "mb-1 block text-sm font-medium text-slate-700" %>
+            <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+          </div>
+          <%= f.submit t("auth.change_password"), class: "w-full cursor-pointer rounded-lg bg-emerald-600 py-2 font-semibold text-white hover:bg-emerald-700" %>
+        </div>
+      <% end %>
+
+      <div class="mt-4 text-center">
+        <%= link_to t("auth.back_to_sign_in"), new_session_path(resource_name), class: "text-sm text-emerald-600 hover:underline" %>
+      </div>
+    </div>
+  </div>
+</div>
