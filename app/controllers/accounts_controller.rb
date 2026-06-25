@@ -1,6 +1,7 @@
 class AccountsController < ApplicationController
   # Criar conta / trocar de conta não exigem uma conta ativa prévia.
   skip_before_action :require_account, only: [:new, :create]
+  skip_before_action :ensure_personal_account
   before_action :set_admin_account, only: [:edit, :update]
 
   def new
@@ -62,6 +63,6 @@ class AccountsController < ApplicationController
   end
 
   def account_params
-    params.require(:account).permit(:name)
+    params.require(:account).permit(:name, :height_cm)
   end
 end

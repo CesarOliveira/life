@@ -10,12 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_25_000003) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_25_000004) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
   create_table "accounts", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.integer "height_cm"
     t.string "join_code"
     t.string "name", null: false
     t.bigint "owner_id"
@@ -91,9 +92,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_25_000003) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  create_table "weight_entries", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.datetime "created_at", null: false
+    t.date "date", null: false
+    t.datetime "updated_at", null: false
+    t.decimal "weight_kg", precision: 5, scale: 2, null: false
+    t.index ["account_id", "date"], name: "index_weight_entries_on_account_id_and_date", unique: true
+    t.index ["account_id"], name: "index_weight_entries_on_account_id"
+  end
+
   add_foreign_key "accounts", "users", column: "owner_id"
   add_foreign_key "habit_checks", "habits"
   add_foreign_key "habits", "accounts"
   add_foreign_key "memberships", "accounts"
   add_foreign_key "memberships", "users"
+  add_foreign_key "weight_entries", "accounts"
 end

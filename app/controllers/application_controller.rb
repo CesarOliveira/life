@@ -2,6 +2,7 @@ class ApplicationController < ActionController::Base
   around_action :switch_locale
   before_action :authenticate_user!
   before_action :configure_permitted_parameters, if: :devise_controller?
+  before_action :ensure_personal_account, if: :user_signed_in?, unless: :devise_controller?
   before_action :require_account, unless: :devise_controller?
 
   include Pagy::Backend
@@ -46,6 +47,16 @@ class ApplicationController < ActionController::Base
   def current_membership
     return @current_membership if defined?(@current_membership)
     @current_membership = current_user&.membership_for(current_account)
+  end
+
+  # Modelo single-user: cada usuário tem 1 conta pessoal, criada sob demanda no
+  # 1º acesso autenticado. Assim ninguém passa por onboarding/aprovação.
+  def ensure_personal_account
+    return if current_user.accounts.exists?
+
+    account = current_user.owned_accounts.create!(name: current_user.name.presence || "Pessoal")
+    current_user.memberships.create!(account: account, role: "owner", status: "active")
+    session[:account_id] = account.id
   end
 
   # Usuário autenticado precisa de uma conta ativa para usar o app.

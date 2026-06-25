@@ -1,6 +1,7 @@
 class JoinRequestsController < ApplicationController
   # Solicitar entrada não exige conta ativa prévia.
   skip_before_action :require_account
+  skip_before_action :ensure_personal_account
 
   def new
   end

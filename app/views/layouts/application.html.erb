@@ -34,6 +34,7 @@
             <% if current_account %>
               <%= nav_link t("nav.dashboard"), authenticated_root_path %>
               <%= nav_link t("nav.habits"), habits_path %>
+              <%= nav_link t("nav.weight"), weights_path %>
             <% end %>
           </div>
           <div class="flex items-center gap-2">
@@ -50,18 +51,7 @@
                   <span class="text-slate-400">▾</span>
                 </summary>
                 <div class="absolute right-0 z-10 mt-2 min-w-[220px] rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
-                  <% current_user.active_accounts.each do |acc| %>
-                    <%= button_to acc.name, switch_account_path(acc),
-                          class: "block w-full px-3 py-1.5 text-left text-sm hover:bg-slate-50 #{"font-semibold text-emerald-700" if acc.id == current_account.id}" %>
-                  <% end %>
-                  <div class="my-1 border-t border-slate-100"></div>
-                  <% if current_user.admin_of?(current_account) %>
-                    <%= link_to t("nav.account_settings"), edit_account_path(current_account), class: "block px-3 py-1.5 text-sm hover:bg-slate-50" %>
-                    <%= link_to t("nav.account_members"), account_members_path(current_account), class: "block px-3 py-1.5 text-sm hover:bg-slate-50" %>
-                  <% end %>
-                  <%= link_to t("nav.create_account"), new_account_path, class: "block px-3 py-1.5 text-sm hover:bg-slate-50" %>
-                  <%= link_to t("nav.join_account"), new_join_request_path, class: "block px-3 py-1.5 text-sm hover:bg-slate-50" %>
-                  <div class="my-1 border-t border-slate-100"></div>
+                  <%= link_to t("nav.account_settings"), edit_account_path(current_account), class: "block px-3 py-1.5 text-sm hover:bg-slate-50" %>
                   <button type="button" data-pwa-install-target="menuItem" data-action="pwa-install#promptInstall"
                           class="block w-full px-3 py-1.5 text-left text-sm hover:bg-slate-50">
                     <%= t("pwa.menu_item") %>

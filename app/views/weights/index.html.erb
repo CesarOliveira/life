@@ -1,0 +1,79 @@
+<% bmi_colors = {
+     underweight: "bg-amber-100 text-amber-700",
+     normal: "bg-emerald-100 text-emerald-700",
+     overweight: "bg-orange-100 text-orange-700",
+     obese: "bg-rose-100 text-rose-700"
+   } %>
+
+<div class="space-y-6">
+  <h1 class="text-2xl font-bold text-slate-900"><%= t("weights.title") %></h1>
+
+  <div class="grid gap-4 sm:grid-cols-3">
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:col-span-2">
+      <h2 class="mb-3 font-semibold text-slate-900"><%= t("weights.add") %></h2>
+      <%= form_with model: @entry, url: weights_path, method: :post, class: "flex flex-wrap items-end gap-3" do |f| %>
+        <% if @entry.errors.any? %>
+          <div class="w-full rounded-lg border border-rose-200 bg-rose-50 p-2 text-sm text-rose-700">
+            <%= @entry.errors.full_messages.to_sentence %>
+          </div>
+        <% end %>
+        <div>
+          <%= f.label :date, WeightEntry.human_attribute_name(:date), class: "mb-1 block text-xs font-medium text-slate-600" %>
+          <%= f.date_field :date, class: "rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+        </div>
+        <div>
+          <%= f.label :weight_kg, WeightEntry.human_attribute_name(:weight_kg), class: "mb-1 block text-xs font-medium text-slate-600" %>
+          <%= f.number_field :weight_kg, step: 0.1, min: 0, required: true, class: "w-28 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+        </div>
+        <%= f.submit t("weights.add"), class: "rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700" %>
+      <% end %>
+    </div>
+
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <% if @latest %>
+        <p class="text-xs font-medium uppercase tracking-wide text-slate-400"><%= t("weights.current") %></p>
+        <p class="mt-1 text-2xl font-bold text-slate-900"><%= @latest.weight_kg %> <span class="text-base font-medium text-slate-400">kg</span></p>
+        <% if @latest.bmi %>
+          <div class="mt-2 flex flex-wrap items-center gap-2">
+            <span class="text-sm text-slate-500"><%= t("weights.bmi") %> <span class="font-semibold text-slate-900"><%= @latest.bmi %></span></span>
+            <span class="rounded-full px-2 py-0.5 text-xs font-semibold <%= bmi_colors[@latest.bmi_category] %>"><%= t("weights.categories.#{@latest.bmi_category}") %></span>
+          </div>
+        <% else %>
+          <p class="mt-2 text-xs text-slate-500">
+            <%= t("weights.no_height") %>
+            <%= link_to t("weights.set_height"), edit_account_path(current_account), class: "font-medium text-emerald-600 hover:underline" %>
+          </p>
+        <% end %>
+      <% else %>
+        <p class="text-sm text-slate-500"><%= t("weights.empty") %></p>
+      <% end %>
+    </div>
+  </div>
+
+  <% if @chart.any? %>
+    <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 class="mb-3 font-semibold text-slate-900"><%= t("weights.evolution") %></h2>
+      <%= render "chart", chart: @chart %>
+    </section>
+  <% end %>
+
+  <% if @entries.any? %>
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <h2 class="px-5 pt-5 font-semibold text-slate-900"><%= t("weights.history") %></h2>
+      <ul class="mt-2 divide-y divide-slate-100">
+        <% @entries.each do |e| %>
+          <li class="flex items-center gap-3 px-5 py-2.5 text-sm">
+            <span class="w-32 shrink-0 text-slate-500"><%= l(e.date, format: :long) %></span>
+            <span class="font-semibold text-slate-900"><%= e.weight_kg %> kg</span>
+            <% if e.bmi %>
+              <span class="rounded-full px-2 py-0.5 text-xs font-medium <%= bmi_colors[e.bmi_category] %>"><%= t("weights.bmi") %> <%= e.bmi %></span>
+            <% end %>
+            <%= button_to t("memberships.remove"), weight_path(e), method: :delete,
+                  class: "ml-auto shrink-0 text-xs text-rose-600 hover:underline",
+                  form: { data: { turbo_confirm: t("weights.remove_confirm") } } %>
+          </li>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
+</div>

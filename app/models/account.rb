@@ -23,6 +23,7 @@ class Account < ApplicationRecord
   has_many :memberships, dependent: :destroy
   has_many :users, through: :memberships
   has_many :habits, dependent: :destroy
+  has_many :weight_entries, dependent: :destroy
 
   validates :name, presence: true
   validates :join_code, uniqueness: true, allow_nil: true

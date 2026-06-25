@@ -14,9 +14,9 @@
     </div>
 
     <div>
-      <span class="mb-1 block text-sm font-medium text-slate-700"><%= t("accounts.join_code") %></span>
-      <div class="rounded-lg bg-slate-100 px-3 py-2 font-mono text-sm text-slate-600"><%= @account.join_code %></div>
-      <p class="mt-1 text-xs text-slate-500"><%= t("accounts.join_code_hint") %></p>
+      <%= f.label :height_cm, Account.human_attribute_name(:height_cm), class: "mb-1 block text-sm font-medium text-slate-700" %>
+      <%= f.number_field :height_cm, min: 0, max: 300, class: "w-32 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+      <p class="mt-1 text-xs text-slate-500"><%= t("weights.no_height") %></p>
     </div>
 
     <div class="flex items-center gap-3 pt-2">
@@ -24,8 +24,4 @@
       <%= link_to t("accounts.cancel"), authenticated_root_path, class: "text-sm text-slate-500 hover:underline" %>
     </div>
   <% end %>
-
-  <div class="mt-4">
-    <%= link_to t("nav.account_members"), account_members_path(@account), class: "text-sm font-medium text-emerald-600 hover:text-emerald-700" %>
-  </div>
 </div>

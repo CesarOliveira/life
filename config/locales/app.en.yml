@@ -2,6 +2,7 @@ en:
   nav:
     dashboard: "Dashboard"
     habits: "Habits"
+    weight: "Weight"
     admin: "Admin"
     super_admin: "Super Admin"
     logout: "Sign out"
@@ -53,6 +54,23 @@ en:
       created: "Habit created."
       updated: "Habit updated."
       removed: "Habit deleted."
+
+  weights:
+    title: "Weight"
+    add: "Log weight"
+    current: "Current weight"
+    bmi: "BMI"
+    evolution: "Weight evolution"
+    history: "History"
+    empty: "No weight entries yet. Add the first one!"
+    no_height: "Set your height in account settings to compute BMI."
+    set_height: "Set height"
+    remove_confirm: "Remove this entry?"
+    categories:
+      underweight: "Underweight"
+      normal: "Normal weight"
+      overweight: "Overweight"
+      obese: "Obese"
 
   auth:
     tagline: "Your progress, every day."
@@ -219,6 +237,9 @@ en:
       success: "Signed in with Google successfully."
       failure: "Couldn't sign in with Google. Try again or use email and password."
       cancelled: "Google sign-in cancelled or unavailable."
+    weights:
+      saved: "Weight logged."
+      removed: "Entry removed."
 
   activerecord:
     attributes:
@@ -230,3 +251,7 @@ en:
         weekdays: "Weekdays"
       account:
         name: "Account name"
+        height_cm: "Height (cm)"
+      weight_entry:
+        date: "Date"
+        weight_kg: "Weight (kg)"

@@ -27,6 +27,7 @@ Rails.application.routes.draw do
   # Domínio de tracking
   resources :habits
   post "habits/:id/toggle", to: "habit_checks#toggle", as: :toggle_habit
+  resources :weights, only: [:index, :create, :destroy]
 
   namespace :admin do
     root to: "dashboard#index"

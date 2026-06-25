@@ -2,6 +2,7 @@ pt-BR:
   nav:
     dashboard: "Dashboard"
     habits: "Hábitos"
+    weight: "Peso"
     admin: "Admin"
     super_admin: "Super Admin"
     logout: "Sair"
@@ -53,6 +54,23 @@ pt-BR:
       created: "Hábito criado."
       updated: "Hábito atualizado."
       removed: "Hábito removido."
+
+  weights:
+    title: "Peso"
+    add: "Registrar peso"
+    current: "Peso atual"
+    bmi: "IMC"
+    evolution: "Evolução do peso"
+    history: "Histórico"
+    empty: "Nenhum registro de peso ainda. Adicione o primeiro!"
+    no_height: "Defina sua altura nas configurações da conta para calcular o IMC."
+    set_height: "Definir altura"
+    remove_confirm: "Remover este registro?"
+    categories:
+      underweight: "Abaixo do peso"
+      normal: "Peso normal"
+      overweight: "Sobrepeso"
+      obese: "Obesidade"
 
   auth:
     tagline: "Seu progresso, todo dia."
@@ -219,6 +237,9 @@ pt-BR:
       success: "Login com o Google realizado com sucesso."
       failure: "Não foi possível entrar com o Google. Tente novamente ou use e-mail e senha."
       cancelled: "Login com o Google cancelado ou indisponível."
+    weights:
+      saved: "Peso registrado."
+      removed: "Registro removido."
 
   activerecord:
     attributes:
@@ -230,3 +251,7 @@ pt-BR:
         weekdays: "Dias da semana"
       account:
         name: "Nome da conta"
+        height_cm: "Altura (cm)"
+      weight_entry:
+        date: "Data"
+        weight_kg: "Peso (kg)"
