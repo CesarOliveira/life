@@ -2,9 +2,9 @@ import { Controller } from "@hotwired/stimulus"
 
 // Facilita instalar como PWA. Mostra um banner e também responde ao item
 // "Instalar app" do menu da conta (ação promptInstall).
-// - Android/Chrome: usa o evento `beforeinstallprompt` (prompt nativo).
-// - iOS Safari: sem prompt nativo, mostra a instrução "Compartilhar →
-//   Adicionar à Tela de Início".
+// - Android/Chrome/desktop: usa o evento `beforeinstallprompt` (prompt nativo).
+// - iOS (qualquer navegador — todos usam WebKit): não há prompt nativo, então
+//   mostra a instrução "Compartilhar → Adicionar à Tela de Início".
 // - Esconde-se se já instalado (standalone) ou dispensado (localStorage).
 export default class extends Controller {
   static targets = ["banner", "hint", "installButton", "menuItem"]
@@ -25,7 +25,8 @@ export default class extends Controller {
       return
     }
 
-    if (this.isIosSafari() && !this.dismissed()) {
+    // iOS não dispara beforeinstallprompt em nenhum navegador → instrução manual.
+    if (this.isIos() && !this.dismissed()) {
       this.useIosHint()
       this.show()
     }
@@ -41,7 +42,7 @@ export default class extends Controller {
     if (this.deferredPrompt) {
       this.install()
     } else {
-      if (this.isIosSafari()) this.useIosHint()
+      if (this.isIos()) this.useIosHint()
       this.show()
     }
   }
@@ -98,13 +99,12 @@ export default class extends Controller {
     )
   }
 
-  isIosSafari() {
+  // iPhone/iPad em qualquer navegador (todos rodam WebKit no iOS).
+  isIos() {
     const ua = window.navigator.userAgent
-    const ios =
+    return (
       /iPad|iPhone|iPod/.test(ua) ||
       (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
-    const webkit = /WebKit/.test(ua)
-    const otherBrowser = /CriOS|FxiOS|EdgiOS|OPiOS/.test(ua)
-    return ios && webkit && !otherBrowser
+    )
   }
 }
