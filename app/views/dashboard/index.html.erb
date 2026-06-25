@@ -1,29 +1,60 @@
-<div class="max-w-3xl">
-  <h1 class="text-2xl font-bold mb-2">Bem-vindo, <%= current_user.name %> 👋</h1>
-  <p class="text-gray-600 mb-6">
-    Conta ativa: <span class="font-semibold"><%= current_account&.name %></span>
-  </p>
+<div class="space-y-6">
+  <header>
+    <h1 class="text-2xl font-bold text-slate-900">Olá, <%= current_user.name.split.first %> 👋</h1>
+    <p class="text-sm text-slate-500"><%= @today.strftime("%d/%m/%Y") %></p>
+  </header>
 
-  <div class="bg-white rounded-lg shadow p-6">
-    <div class="flex items-center justify-between mb-3">
-      <h2 class="text-lg font-semibold">Hábitos de hoje</h2>
-      <%= link_to "Ver todos", habits_path, class: "text-indigo-600 hover:underline text-sm" %>
+  <div class="grid grid-cols-3 gap-3 sm:gap-4">
+    <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Hoje</p>
+      <p class="mt-1 text-2xl font-bold text-slate-900">
+        <%= @today_done %><span class="text-base font-medium text-slate-400">/<%= @today_habits.size %></span>
+      </p>
+    </div>
+    <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Sequência</p>
+      <p class="mt-1 text-2xl font-bold text-slate-900">🔥 <%= @best_streak %></p>
+    </div>
+    <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Conclusões</p>
+      <p class="mt-1 text-2xl font-bold text-slate-900"><%= @graph.total %></p>
+    </div>
+  </div>
+
+  <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div class="mb-3 flex items-center justify-between">
+      <h2 class="font-semibold text-slate-900">Atividade</h2>
+      <span class="text-xs text-slate-400">últimas 53 semanas</span>
+    </div>
+    <%= render "shared/contributions", graph: @graph %>
+  </section>
+
+  <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div class="mb-3 flex items-center justify-between">
+      <h2 class="font-semibold text-slate-900">Hábitos de hoje</h2>
+      <%= link_to "Ver todos →", habits_path, class: "text-sm font-medium text-emerald-600 hover:text-emerald-700" %>
     </div>
 
     <% if @today_habits.empty? %>
-      <p class="text-gray-600 text-sm">
+      <p class="text-sm text-slate-500">
         Nenhum hábito agendado para hoje.
-        <%= link_to "Criar um hábito", new_habit_path, class: "text-indigo-600 hover:underline" %>.
+        <%= link_to "Criar um hábito", new_habit_path, class: "font-medium text-emerald-600 hover:text-emerald-700" %>.
       </p>
     <% else %>
-      <p class="text-3xl font-bold">
-        <%= @today_done %><span class="text-gray-400 text-xl">/<%= @today_habits.size %></span>
-      </p>
-      <p class="text-sm text-gray-500">hábitos concluídos hoje</p>
-      <div class="w-full bg-gray-100 rounded-full h-2 mt-3">
-        <div class="bg-green-500 h-2 rounded-full"
-             style="width: <%= (@today_done * 100 / @today_habits.size) %>%"></div>
-      </div>
+      <ul class="divide-y divide-slate-100">
+        <% @today_habits.each do |h| %>
+          <% done = @stats[h].done_today? %>
+          <li class="flex items-center gap-3 py-2.5">
+            <%= button_to toggle_habit_path(h), params: { date: @today.iso8601 },
+                  class: "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 transition #{done ? "border-emerald-500 bg-emerald-500 text-white" : "border-slate-300 text-transparent hover:border-emerald-400"}" do %>
+              <span class="text-xs leading-none">✓</span>
+            <% end %>
+            <span class="h-3 w-3 shrink-0 rounded-full" style="background-color: <%= h.color %>"></span>
+            <span class="text-sm <%= "text-slate-400 line-through" if done %>"><%= h.name %></span>
+            <span class="ml-auto shrink-0 text-xs text-slate-400">🔥 <%= @stats[h].current_streak %></span>
+          </li>
+        <% end %>
+      </ul>
     <% end %>
-  </div>
+  </section>
 </div>
