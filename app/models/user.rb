@@ -28,11 +28,6 @@ class User < ApplicationRecord
   validates :name, presence: true
   validates :email, presence: true, uniqueness: { case_sensitive: false }
 
-  # Bootstrap: quem se cadastra com e-mail em PLATFORM_ADMIN_EMAILS já nasce
-  # admin + super_admin (vale para e-mail/senha e Google). after_create_commit
-  # evita insert duplicado na HABTM (associação re-salva dentro da transação).
-  after_create_commit :grant_platform_admin_roles
-
   # Roles da plataforma (muitas por usuário, via Role + join). Substituem o antigo
   # PLATFORM_ADMIN_EMAILS — a ENV agora só faz bootstrap na migration de dados.
   def role?(name)
@@ -110,17 +105,10 @@ class User < ApplicationRecord
     m.present? && m.active? && m.admin?
   end
 
-  # E-mails que recebem bootstrap de admin (ENV PLATFORM_ADMIN_EMAILS).
+  # E-mails de bootstrap de admin (ENV PLATFORM_ADMIN_EMAILS). Usado SÓ pela
+  # migration de bootstrap (concessão one-time no deploy) — não há concessão
+  # automática em runtime no cadastro de novos usuários.
   def self.platform_admin_emails
     ENV.fetch("PLATFORM_ADMIN_EMAILS", "").split(",").map { |e| e.strip.downcase }.reject(&:blank?)
-  end
-
-  private
-
-  def grant_platform_admin_roles
-    return unless self.class.platform_admin_emails.include?(email.to_s.downcase)
-
-    add_role(Role::ADMIN)
-    add_role(Role::SUPER_ADMIN)
   end
 end

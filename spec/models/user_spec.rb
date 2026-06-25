@@ -78,19 +78,4 @@ RSpec.describe User, type: :model do
       expect(user.super_admin?).to be true
     end
   end
-
-  describe "bootstrap de roles (PLATFORM_ADMIN_EMAILS)" do
-    before { allow(User).to receive(:platform_admin_emails).and_return(["boss@life.test"]) }
-
-    it "concede admin + super_admin ao cadastrar com e-mail listado" do
-      user = create(:user, email: "boss@life.test")
-      expect(user.platform_admin?).to be true
-      expect(user.super_admin?).to be true
-    end
-
-    it "não concede para e-mail fora da lista" do
-      user = create(:user, email: "rando@life.test")
-      expect(user.platform_admin?).to be false
-    end
-  end
 end
