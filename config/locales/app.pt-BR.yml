@@ -3,6 +3,7 @@ pt-BR:
     dashboard: "Dashboard"
     habits: "Hábitos"
     weight: "Peso"
+    screen_time: "Tempo de tela"
     admin: "Admin"
     super_admin: "Super Admin"
     logout: "Sair"
@@ -71,6 +72,21 @@ pt-BR:
       normal: "Peso normal"
       overweight: "Sobrepeso"
       obese: "Obesidade"
+
+  screen_time:
+    title: "Tempo de tela"
+    today: "Hoje"
+    this_week: "Últimos 7 dias"
+    by_app: "Por app · últimos 7 dias"
+    empty: "Ainda não chegaram dados — configure o envio do Mac abaixo."
+    setup_title: "Conectar (via Mac)"
+    setup_intro: "O iPhone sincroniza o Tempo de Uso com o Mac (Ajustes → Tempo de Uso → Compartilhar Entre Dispositivos). Um script no Mac lê esses dados e envia pra cá automaticamente."
+    token_label: "Seu token pessoal"
+    endpoint_label: "Endpoint (POST)"
+    regenerate: "Gerar novo token"
+    regenerate_confirm: "Gerar um novo token invalida o atual. Continuar?"
+    guide: "Guia + script: pasta tools/mac_screentime no repositório."
+    keep_secret: "Trate o token como senha — quem tiver ele pode enviar dados pra sua conta."
 
   auth:
     tagline: "Seu progresso, todo dia."
@@ -240,6 +256,8 @@ pt-BR:
     weights:
       saved: "Peso registrado."
       removed: "Registro removido."
+    screen_time:
+      token_regenerated: "Token regenerado."
 
   activerecord:
     attributes:

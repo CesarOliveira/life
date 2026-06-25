@@ -16,4 +16,12 @@ module ApplicationHelper
   def locale_label(locale)
     locale.to_s.split("-").first.upcase
   end
+
+  # Duração legível a partir de segundos: "2h 7m", "43m", "0m".
+  def humanize_duration(seconds)
+    seconds = seconds.to_i
+    hours = seconds / 3600
+    minutes = (seconds % 3600) / 60
+    hours.positive? ? "#{hours}h #{minutes}m" : "#{minutes}m"
+  end
 end

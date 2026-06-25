@@ -3,6 +3,7 @@ en:
     dashboard: "Dashboard"
     habits: "Habits"
     weight: "Weight"
+    screen_time: "Screen time"
     admin: "Admin"
     super_admin: "Super Admin"
     logout: "Sign out"
@@ -71,6 +72,21 @@ en:
       normal: "Normal weight"
       overweight: "Overweight"
       obese: "Obese"
+
+  screen_time:
+    title: "Screen time"
+    today: "Today"
+    this_week: "Last 7 days"
+    by_app: "By app · last 7 days"
+    empty: "No data yet — set up the Mac sync below."
+    setup_title: "Connect (via Mac)"
+    setup_intro: "Your iPhone syncs Screen Time to the Mac (Settings → Screen Time → Share Across Devices). A script on the Mac reads it and sends it here automatically."
+    token_label: "Your personal token"
+    endpoint_label: "Endpoint (POST)"
+    regenerate: "Generate new token"
+    regenerate_confirm: "Generating a new token invalidates the current one. Continue?"
+    guide: "Guide + script: tools/mac_screentime folder in the repo."
+    keep_secret: "Treat the token like a password — anyone with it can post data to your account."
 
   auth:
     tagline: "Your progress, every day."
@@ -240,6 +256,8 @@ en:
     weights:
       saved: "Weight logged."
       removed: "Entry removed."
+    screen_time:
+      token_regenerated: "Token regenerated."
 
   activerecord:
     attributes:

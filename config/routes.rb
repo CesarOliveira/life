@@ -28,6 +28,13 @@ Rails.application.routes.draw do
   resources :habits
   post "habits/:id/toggle", to: "habit_checks#toggle", as: :toggle_habit
   resources :weights, only: [:index, :create, :destroy]
+  get "screen-time", to: "screen_time#index", as: :screen_time
+  post "screen-time/token", to: "screen_time#regenerate", as: :regenerate_screen_time_token
+
+  # API de ingestão (token pessoal) — ex.: script do Mac enviando uso por app.
+  namespace :api do
+    post "usage", to: "usage#create"
+  end
 
   namespace :admin do
     root to: "dashboard#index"

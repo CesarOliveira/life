@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.life.screentime</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/python3</string>
+    <string>/Users/SEU_USUARIO/life-screentime/screentime_sync.py</string>
+  </array>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>LIFE_ENDPOINT</key>
+    <string>https://life.cesaroliveira.online/api/usage</string>
+    <key>LIFE_TOKEN</key>
+    <string>COLE_SEU_TOKEN_AQUI</string>
+    <key>DEVICE</key>
+    <string>iphone</string>
+    <key>DEVICE_FILTER</key>
+    <string>remote</string>
+    <key>DAYS</key>
+    <string>3</string>
+  </dict>
+
+  <!-- Roda a cada 6 horas e ao carregar -->
+  <key>StartInterval</key>
+  <integer>21600</integer>
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>StandardOutPath</key>
+  <string>/tmp/life-screentime.log</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/life-screentime.err</string>
+</dict>
+</plist>
