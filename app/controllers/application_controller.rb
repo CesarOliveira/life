@@ -1,4 +1,5 @@
 class ApplicationController < ActionController::Base
+  around_action :switch_locale
   before_action :authenticate_user!
   before_action :configure_permitted_parameters, if: :devise_controller?
   before_action :require_account, unless: :devise_controller?
@@ -8,6 +9,15 @@ class ApplicationController < ActionController::Base
   helper_method :current_account, :current_membership
 
   protected
+
+  # Define o idioma a partir de ?locale=, persistindo na sessão. Default: pt-BR.
+  def switch_locale(&action)
+    available = I18n.available_locales.map(&:to_s)
+    requested = params[:locale].to_s
+    session[:locale] = requested if available.include?(requested)
+    locale = available.include?(session[:locale].to_s) ? session[:locale] : I18n.default_locale
+    I18n.with_locale(locale, &action)
+  end
 
   def current_user_or_nil
     current_user

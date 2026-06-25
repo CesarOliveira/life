@@ -1,8 +1,8 @@
-<h1 class="text-2xl font-bold mb-6">Editar hábito</h1>
-<%= render "form", submit_label: "Salvar alterações" %>
+<h1 class="mb-6 text-2xl font-bold text-slate-900"><%= t("habits.edit_title") %></h1>
+<%= render "form", submit_label: t("habits.update_submit") %>
 
-<div class="max-w-lg mt-4">
-  <%= button_to "Remover hábito", habit_path(@habit), method: :delete,
-        class: "text-red-600 text-sm hover:underline",
-        form: { data: { turbo_confirm: "Remover este hábito e todo o histórico de marcações?" } } %>
+<div class="mt-4 max-w-lg">
+  <%= button_to t("habits.remove"), habit_path(@habit), method: :delete,
+        class: "text-sm text-rose-600 hover:underline",
+        form: { data: { turbo_confirm: t("habits.remove_confirm") } } %>
 </div>

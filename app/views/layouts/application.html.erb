@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="<%= I18n.locale %>">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -19,11 +19,17 @@
               <span>Life</span>
             <% end %>
             <% if current_account %>
-              <%= nav_link "Dashboard", authenticated_root_path %>
-              <%= nav_link "Hábitos", habits_path %>
+              <%= nav_link t("nav.dashboard"), authenticated_root_path %>
+              <%= nav_link t("nav.habits"), habits_path %>
             <% end %>
           </div>
           <div class="flex items-center gap-2">
+            <div class="flex items-center overflow-hidden rounded-lg border border-slate-200 text-xs">
+              <% I18n.available_locales.each do |loc| %>
+                <%= link_to locale_label(loc), locale_switch_path(loc),
+                      class: "px-2 py-1 #{I18n.locale == loc ? "bg-emerald-50 font-semibold text-emerald-700" : "text-slate-500 hover:bg-slate-50"}" %>
+              <% end %>
+            </div>
             <% if current_account %>
               <details class="relative">
                 <summary class="flex cursor-pointer list-none select-none items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">
@@ -33,24 +39,24 @@
                 <div class="absolute right-0 z-10 mt-2 min-w-[220px] rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
                   <% current_user.active_accounts.each do |acc| %>
                     <%= button_to acc.name, switch_account_path(acc),
-                          class: "block w-full px-3 py-1.5 text-left text-sm hover:bg-slate-50 #{'font-semibold text-emerald-700' if acc.id == current_account.id}" %>
+                          class: "block w-full px-3 py-1.5 text-left text-sm hover:bg-slate-50 #{"font-semibold text-emerald-700" if acc.id == current_account.id}" %>
                   <% end %>
                   <div class="my-1 border-t border-slate-100"></div>
                   <% if current_user.admin_of?(current_account) %>
-                    <%= link_to "Membros da conta", account_members_path(current_account), class: "block px-3 py-1.5 text-sm hover:bg-slate-50" %>
+                    <%= link_to t("nav.account_members"), account_members_path(current_account), class: "block px-3 py-1.5 text-sm hover:bg-slate-50" %>
                   <% end %>
-                  <%= link_to "Criar nova conta", new_account_path, class: "block px-3 py-1.5 text-sm hover:bg-slate-50" %>
-                  <%= link_to "Entrar em outra conta", new_join_request_path, class: "block px-3 py-1.5 text-sm hover:bg-slate-50" %>
+                  <%= link_to t("nav.create_account"), new_account_path, class: "block px-3 py-1.5 text-sm hover:bg-slate-50" %>
+                  <%= link_to t("nav.join_account"), new_join_request_path, class: "block px-3 py-1.5 text-sm hover:bg-slate-50" %>
                 </div>
               </details>
             <% end %>
             <% if current_user&.platform_admin? %>
-              <%= link_to "Admin", admin_root_path, class: "hidden rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-900 sm:inline" %>
+              <%= link_to t("nav.admin"), admin_root_path, class: "hidden rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-900 sm:inline" %>
             <% end %>
             <% if current_user&.super_admin? %>
-              <%= link_to "Super Admin", "/super_admin", class: "hidden rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-900 sm:inline" %>
+              <%= link_to t("nav.super_admin"), "/super_admin", class: "hidden rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-900 sm:inline" %>
             <% end %>
-            <%= link_to "Sair", destroy_user_session_path, data: { turbo_method: :delete }, class: "rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-900" %>
+            <%= link_to t("nav.logout"), destroy_user_session_path, data: { turbo_method: :delete }, class: "rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-900" %>
           </div>
         </div>
       </nav>

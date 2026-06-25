@@ -1,7 +1,6 @@
 # Monta o grid estilo "contribuições do GitHub": uma célula por dia, colorida
 # pela quantidade de hábitos concluídos naquele dia (no escopo da conta).
 class ContributionGraph
-  MONTHS = %w[jan fev mar abr mai jun jul ago set out nov dez].freeze
   # Classes Tailwind por nível de intensidade (0 = vazio ... 4 = máximo).
   CELL_CLASSES = %w[bg-slate-100 bg-emerald-200 bg-emerald-400 bg-emerald-600 bg-emerald-800].freeze
 
@@ -37,7 +36,7 @@ class ContributionGraph
     @weeks.times do |w|
       m = (@start + (w * 7)).month
       if segs.empty? || segs.last[:month] != m
-        segs << { month: m, label: MONTHS[m - 1], weeks: 1 }
+        segs << { month: m, label: I18n.t("date.abbr_month_names")[m].to_s.capitalize, weeks: 1 }
       else
         segs.last[:weeks] += 1
       end

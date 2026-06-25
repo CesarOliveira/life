@@ -14,6 +14,7 @@ module Life
     config.time_zone = "America/Sao_Paulo"
     config.i18n.default_locale = :"pt-BR"
     config.i18n.available_locales = [:"pt-BR", :en]
+    config.i18n.fallbacks = true
 
     config.cache_store = :redis_cache_store, {
       url: ENV.fetch("REDIS_URL") { "redis://redis:6379/1" },

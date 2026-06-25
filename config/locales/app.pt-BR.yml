@@ -1,0 +1,76 @@
+pt-BR:
+  nav:
+    dashboard: "Dashboard"
+    habits: "Hábitos"
+    admin: "Admin"
+    super_admin: "Super Admin"
+    logout: "Sair"
+    account_members: "Membros da conta"
+    create_account: "Criar nova conta"
+    join_account: "Entrar em outra conta"
+
+  contributions:
+    title: "Atividade"
+    last_weeks: "últimas %{count} semanas"
+    less: "Menos"
+    more: "Mais"
+    cell: "%{date} — %{count} hábito(s) concluído(s)"
+
+  dashboard:
+    greeting: "Olá, %{name} 👋"
+    today: "Hoje"
+    streak: "Sequência"
+    completions: "Conclusões"
+    habits_today: "Hábitos de hoje"
+    see_all: "Ver todos →"
+    none_today: "Nenhum hábito agendado para hoje."
+    create_a_habit: "Criar um hábito"
+
+  habits:
+    title: "Hábitos"
+    new: "+ Novo hábito"
+    empty: "Você ainda não tem hábitos. Bora começar?"
+    create_first: "Criar meu primeiro hábito"
+    today: "Hoje"
+    none_today: "Nenhum hábito agendado para hoje."
+    completed: "%{done} / %{total} concluídos"
+    everyday: "Todos os dias"
+    streak_tooltip: "Sequência atual"
+    adherence_tooltip: "Adesão nos últimos 30 dias"
+    not_scheduled: "%{date} (não agendado)"
+    edit: "Editar"
+    new_title: "Novo hábito"
+    edit_title: "Editar hábito"
+    create_submit: "Criar hábito"
+    update_submit: "Salvar alterações"
+    remove: "Remover hábito"
+    remove_confirm: "Remover este hábito e todo o histórico de marcações?"
+    weekdays_hint: "Marque todos para um hábito diário."
+    optional: "opcional"
+    cancel: "Cancelar"
+    flash:
+      created: "Hábito criado."
+      updated: "Hábito atualizado."
+      removed: "Hábito removido."
+
+  auth:
+    tagline: "Seu progresso, todo dia."
+    email: "E-mail"
+    password: "Senha"
+    remember_me: "Lembrar-me"
+    sign_in: "Entrar"
+    or: "ou"
+    sign_in_google: "Entrar com o Google"
+    forgot_password: "Esqueci minha senha"
+    sign_up: "Criar conta"
+
+  activerecord:
+    attributes:
+      habit:
+        name: "Nome"
+        description: "Descrição"
+        color: "Cor"
+        active: "Ativo"
+        weekdays: "Dias da semana"
+      account:
+        name: "Nome da conta"

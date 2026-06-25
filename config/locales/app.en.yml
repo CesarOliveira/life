@@ -1,0 +1,76 @@
+en:
+  nav:
+    dashboard: "Dashboard"
+    habits: "Habits"
+    admin: "Admin"
+    super_admin: "Super Admin"
+    logout: "Sign out"
+    account_members: "Account members"
+    create_account: "Create new account"
+    join_account: "Join another account"
+
+  contributions:
+    title: "Activity"
+    last_weeks: "last %{count} weeks"
+    less: "Less"
+    more: "More"
+    cell: "%{date} — %{count} habit(s) completed"
+
+  dashboard:
+    greeting: "Hi, %{name} 👋"
+    today: "Today"
+    streak: "Streak"
+    completions: "Completions"
+    habits_today: "Today's habits"
+    see_all: "See all →"
+    none_today: "No habits scheduled for today."
+    create_a_habit: "Create a habit"
+
+  habits:
+    title: "Habits"
+    new: "+ New habit"
+    empty: "You don't have any habits yet. Let's start?"
+    create_first: "Create my first habit"
+    today: "Today"
+    none_today: "No habits scheduled for today."
+    completed: "%{done} / %{total} done"
+    everyday: "Every day"
+    streak_tooltip: "Current streak"
+    adherence_tooltip: "Adherence over the last 30 days"
+    not_scheduled: "%{date} (not scheduled)"
+    edit: "Edit"
+    new_title: "New habit"
+    edit_title: "Edit habit"
+    create_submit: "Create habit"
+    update_submit: "Save changes"
+    remove: "Delete habit"
+    remove_confirm: "Delete this habit and all its check history?"
+    weekdays_hint: "Select all for a daily habit."
+    optional: "optional"
+    cancel: "Cancel"
+    flash:
+      created: "Habit created."
+      updated: "Habit updated."
+      removed: "Habit deleted."
+
+  auth:
+    tagline: "Your progress, every day."
+    email: "Email"
+    password: "Password"
+    remember_me: "Remember me"
+    sign_in: "Sign in"
+    or: "or"
+    sign_in_google: "Sign in with Google"
+    forgot_password: "Forgot your password?"
+    sign_up: "Sign up"
+
+  activerecord:
+    attributes:
+      habit:
+        name: "Name"
+        description: "Description"
+        color: "Color"
+        active: "Active"
+        weekdays: "Weekdays"
+      account:
+        name: "Account name"

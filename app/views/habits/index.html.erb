@@ -1,17 +1,17 @@
 <div class="space-y-6">
   <div class="flex items-center justify-between">
     <div>
-      <h1 class="text-2xl font-bold text-slate-900">Hábitos</h1>
-      <p class="text-sm text-slate-500"><%= @today.strftime("%d/%m/%Y") %></p>
+      <h1 class="text-2xl font-bold text-slate-900"><%= t("habits.title") %></h1>
+      <p class="text-sm text-slate-500"><%= l(@today, format: :long) %></p>
     </div>
-    <%= link_to "+ Novo hábito", new_habit_path,
+    <%= link_to t("habits.new"), new_habit_path,
           class: "rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700" %>
   </div>
 
   <% if @habits.empty? %>
     <div class="rounded-2xl border border-slate-200 bg-white p-10 text-center shadow-sm">
-      <p class="mb-4 text-slate-500">Você ainda não tem hábitos. Bora começar?</p>
-      <%= link_to "Criar meu primeiro hábito", new_habit_path,
+      <p class="mb-4 text-slate-500"><%= t("habits.empty") %></p>
+      <%= link_to t("habits.create_first"), new_habit_path,
             class: "inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700" %>
     </div>
   <% else %>
@@ -20,12 +20,12 @@
 
     <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <div class="mb-4 flex items-center justify-between">
-        <h2 class="font-semibold text-slate-900">Hoje</h2>
-        <span class="text-sm text-slate-400"><%= done_today %> / <%= today_habits.size %> concluídos</span>
+        <h2 class="font-semibold text-slate-900"><%= t("habits.today") %></h2>
+        <span class="text-sm text-slate-400"><%= t("habits.completed", done: done_today, total: today_habits.size) %></span>
       </div>
 
       <% if today_habits.empty? %>
-        <p class="text-sm text-slate-500">Nenhum hábito agendado para hoje.</p>
+        <p class="text-sm text-slate-500"><%= t("habits.none_today") %></p>
       <% else %>
         <ul class="divide-y divide-slate-100">
           <% today_habits.each do |h| %>
@@ -33,7 +33,7 @@
             <li class="flex items-center gap-3 py-2.5">
               <%= button_to toggle_habit_path(h), params: { date: @today.iso8601 },
                     class: "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 transition #{done ? "border-emerald-500 bg-emerald-500 text-white" : "border-slate-300 text-transparent hover:border-emerald-400"}",
-                    aria: { label: "Marcar #{h.name}" } do %>
+                    aria: { label: h.name } do %>
                 <span class="text-xs leading-none">✓</span>
               <% end %>
               <span class="h-3 w-3 shrink-0 rounded-full" style="background-color: <%= h.color %>"></span>
@@ -54,13 +54,13 @@
             <div class="min-w-0">
               <p class="truncate font-semibold text-slate-900"><%= h.name %></p>
               <p class="text-xs text-slate-500">
-                <%= h.daily? ? "Todos os dias" : Array(h.weekdays).sort.map { |d| Habit::WEEKDAY_NAMES[d] }.join(", ") %>
+                <%= h.daily? ? t("habits.everyday") : Array(h.weekdays).sort.map { |d| t("date.abbr_day_names")[d].capitalize }.join(", ") %>
               </p>
             </div>
             <div class="ml-auto flex shrink-0 items-center gap-4 text-sm">
-              <span title="Sequência atual">🔥 <span class="font-semibold text-slate-900"><%= s.current_streak %></span></span>
-              <span title="Adesão nos últimos 30 dias"><span class="font-semibold text-slate-900"><%= s.adherence %></span><span class="text-slate-400">%</span></span>
-              <%= link_to "Editar", edit_habit_path(h), class: "text-xs font-medium text-emerald-600 hover:text-emerald-700" %>
+              <span title="<%= t("habits.streak_tooltip") %>">🔥 <span class="font-semibold text-slate-900"><%= s.current_streak %></span></span>
+              <span title="<%= t("habits.adherence_tooltip") %>"><span class="font-semibold text-slate-900"><%= s.adherence %></span><span class="text-slate-400">%</span></span>
+              <%= link_to t("habits.edit"), edit_habit_path(h), class: "text-xs font-medium text-emerald-600 hover:text-emerald-700" %>
             </div>
           </div>
 
@@ -69,12 +69,12 @@
               <% if day[:scheduled] %>
                 <%= button_to toggle_habit_path(h), params: { date: day[:date].iso8601 },
                       class: "flex h-8 w-8 items-center justify-center rounded text-[11px] #{day[:done] ? "bg-emerald-500 text-white" : "bg-slate-100 text-slate-400 hover:bg-slate-200"}",
-                      title: day[:date].strftime("%d/%m") do %>
+                      title: l(day[:date], format: :long) do %>
                   <%= day[:date].day %>
                 <% end %>
               <% else %>
                 <span class="flex h-8 w-8 items-center justify-center rounded bg-slate-50 text-[11px] text-slate-300"
-                      title="<%= day[:date].strftime("%d/%m") %> (não agendado)">–</span>
+                      title="<%= t("habits.not_scheduled", date: l(day[:date], format: :long)) %>">–</span>
               <% end %>
             <% end %>
           </div>
