@@ -86,6 +86,13 @@ pt-BR:
     unhappy: "Insatisfeito?"
     back: "Voltar"
 
+  pwa:
+    title: "Instalar o Life"
+    hint_android: "Adicione à tela de início para acesso rápido."
+    hint_ios: 'Toque em Compartilhar e depois em "Adicionar à Tela de Início".'
+    install: "Instalar"
+    dismiss: "Dispensar"
+
   onboarding:
     welcome: "Bem-vindo(a)!"
     intro: "Para começar, crie uma conta ou entre em uma conta existente com um código de convite."

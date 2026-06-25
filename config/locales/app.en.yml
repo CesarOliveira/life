@@ -86,6 +86,13 @@ en:
     unhappy: "Unhappy?"
     back: "Back"
 
+  pwa:
+    title: "Install Life"
+    hint_android: "Add it to your home screen for quick access."
+    hint_ios: 'Tap Share, then "Add to Home Screen".'
+    install: "Install"
+    dismiss: "Dismiss"
+
   onboarding:
     welcome: "Welcome!"
     intro: "To get started, create an account or join an existing one with an invite code."

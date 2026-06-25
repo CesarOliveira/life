@@ -3,3 +3,6 @@
 // ./bin/rails generate stimulus controllerName
 
 import { application } from "./application"
+
+import PwaInstallController from "./pwa_install_controller"
+application.register("pwa-install", PwaInstallController)
