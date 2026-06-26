@@ -74,7 +74,17 @@ def query_usage(days, device_filter):
     # lidar com locks nem deixar um dump legível do banco (dado sensível) por aí.
     with tempfile.TemporaryDirectory() as tmpdir:
         dbcopy = os.path.join(tmpdir, "k.db")
-        shutil.copy2(KNOWLEDGE_DB, dbcopy)
+        try:
+            shutil.copy2(KNOWLEDGE_DB, dbcopy)
+        except PermissionError as exc:
+            raise SystemExit(
+                "Sem permissão para ler o knowledgeC.db (proteção TCC do macOS).\n"
+                "Dê FULL DISK ACCESS ao seu terminal:\n"
+                "  Ajustes do Sistema > Privacidade e Segurança > Acesso Total ao Disco\n"
+                "  -> ligue para o app de terminal que você usa (Terminal/iTerm/Ghostty/\n"
+                "     VS Code/Warp...), depois FECHE (Cmd+Q) e reabra o terminal.\n"
+                f"Detalhe: {exc}"
+            ) from exc
         os.chmod(dbcopy, 0o600)
         for ext in ("-wal", "-shm"):
             try:

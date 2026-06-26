@@ -43,6 +43,21 @@ para o Mac via iCloud; um script no Mac lê esse dado e faz `POST` na API.
    launchctl unload ~/Library/LaunchAgents/com.life.screentime.plist
    ```
 
+## Troubleshooting
+- **`PermissionError: Operation not permitted` no knowledgeC.db** → falta Full Disk
+  Access. Ligue para o **app de terminal que você usa** (Terminal/iTerm/VS Code/
+  Warp/Ghostty…) em Ajustes do Sistema → Privacidade e Segurança → **Acesso Total
+  ao Disco**, e **feche (Cmd+Q) e reabra o terminal** (a permissão só vale para
+  processos novos).
+- **Rodou mas "Sem eventos de uso no período"** → ou o sync do iPhone ainda não
+  populou o Mac (espere), ou o filtro. Faça um teste de sanidade com o uso do
+  PRÓPRIO Mac (não depende de sync):
+  ```bash
+  DEVICE_FILTER=local LIFE_TOKEN="seu_token" python3 .../screentime_sync.py
+  ```
+  Se aparecerem apps do Mac, a leitura funciona — aí é só ligar "Compartilhar
+  Entre Dispositivos" no iPhone e esperar o iCloud sincronizar para usar `remote`.
+
 ## Config (variáveis de ambiente)
 | Var | Default | O que é |
 |---|---|---|
