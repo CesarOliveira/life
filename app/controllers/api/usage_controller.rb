@@ -3,10 +3,11 @@ module Api
   # Fonte principal: Atalho do iPhone com a ação "Get App & Website Activity"
   # (iOS/macOS 26) → POST aqui. Corpo JSON:
   #   { "device": "iphone", "date": "2026-06-24",
-  #     "apps": [ { "name": "Instagram", "minutes": 127 } ] }
+  #     "apps": [ { "name": "Instagram", "duration": "2h 36min" } ] }
   # Cada app aceita `bundle_id` E/OU `name` (se faltar bundle_id, usa o name como
-  # chave — o Atalho só tem o nome do app), e `seconds` OU `minutes` (a Duration
-  # do Atalho sai mais fácil em minutos). Upsert atômico (idempotente) por
+  # chave — o Atalho só tem o nome do app), e o tempo como `seconds`, `minutes` OU
+  # `duration` (texto que a ação "Obter Atividade em Apps e Sites" devolve, ex.:
+  # "2h 36min", "22min"). Upsert atômico (idempotente) por
   # (account, device, date, bundle_id): reenviar o dia sobrescreve em vez de
   # duplicar. O tempo é um snapshot do dia.
   class UsageController < BaseController
@@ -59,13 +60,15 @@ module Api
       }
     end
 
-    # Aceita `seconds` ou `minutes` (a Duration do Atalho costuma sair em minutos).
+    # Aceita `seconds`, `minutes` ou `duration` (texto da ação do iPhone).
     def extract_seconds(entry)
       raw =
         if present_number?(entry["seconds"])
           entry["seconds"].to_f
         elsif present_number?(entry["minutes"])
           entry["minutes"].to_f * 60
+        elsif entry["duration"].to_s.strip.present?
+          parse_duration_text(entry["duration"])
         else
           0
         end
@@ -74,6 +77,20 @@ module Api
 
     def present_number?(value)
       !value.nil? && value.to_s.strip.present?
+    end
+
+    # "2h 36min" -> 9360. Tolerante a espaços/locale: h/hora, min/m, s/seg.
+    def parse_duration_text(text)
+      str = text.to_s.downcase
+      hours = number_before(str, /h/)
+      minutes = number_before(str, /m(?:in)?/)
+      seconds = number_before(str, /s/)
+      hours * 3600 + minutes * 60 + seconds
+    end
+
+    def number_before(str, unit)
+      match = str[/(\d+(?:[.,]\d+)?)\s*#{unit.source}/, 1]
+      match ? match.tr(",", ".").to_f : 0
     end
 
     def parsed_body
