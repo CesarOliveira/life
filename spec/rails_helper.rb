@@ -1,5 +1,7 @@
 require "spec_helper"
-ENV["RAILS_ENV"] ||= "test"
+# Força o ambiente de teste: o container de dev seta RAILS_ENV=development, e com
+# `||=` os specs rodariam no banco de dev e sem o group :test (ex.: shoulda).
+ENV["RAILS_ENV"] = "test"
 require_relative "../config/environment"
 abort("RAILS_ENV is production") if Rails.env.production?
 require "rspec/rails"

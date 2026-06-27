@@ -1,10 +1,14 @@
 module Api
-  # POST /api/usage — ingestão de tempo de uso por app (ex.: do script do Mac).
-  # Corpo JSON:
+  # POST /api/usage — ingestão de tempo de uso por app.
+  # Fonte principal: Atalho do iPhone com a ação "Get App & Website Activity"
+  # (iOS/macOS 26) → POST aqui. Corpo JSON:
   #   { "device": "iphone", "date": "2026-06-24",
-  #     "apps": [ { "bundle_id": "com.burbn.instagram", "name": "Instagram", "seconds": 7620 } ] }
-  # Upsert atômico (idempotente) por (account, device, date, bundle_id): reenviar
-  # o dia sobrescreve em vez de duplicar. `seconds` é um snapshot do dia.
+  #     "apps": [ { "name": "Instagram", "minutes": 127 } ] }
+  # Cada app aceita `bundle_id` E/OU `name` (se faltar bundle_id, usa o name como
+  # chave — o Atalho só tem o nome do app), e `seconds` OU `minutes` (a Duration
+  # do Atalho sai mais fácil em minutos). Upsert atômico (idempotente) por
+  # (account, device, date, bundle_id): reenviar o dia sobrescreve em vez de
+  # duplicar. O tempo é um snapshot do dia.
   class UsageController < BaseController
     MAX_ENTRIES = 1000
     MAX_SECONDS = 7 * 24 * 60 * 60 # sanidade: ~1 semana por linha
@@ -39,7 +43,9 @@ module Api
     def build_row(entry, device, default_date)
       return nil unless entry.is_a?(Hash)
 
-      bundle = entry["bundle_id"].to_s.strip.first(200)
+      name = entry["name"].to_s.strip.first(120).presence
+      # O Atalho do iPhone só expõe o NOME do app — sem bundle_id, usa o nome como chave.
+      bundle = entry["bundle_id"].to_s.strip.first(200).presence || name
       date = parse_date(entry["date"] || default_date)
       return nil if bundle.blank? || date.nil? || !date_in_window?(date)
 
@@ -48,9 +54,26 @@ module Api
         device: device,
         date: date,
         bundle_id: bundle,
-        name: entry["name"].to_s.strip.first(120).presence,
-        seconds: entry["seconds"].to_i.clamp(0, MAX_SECONDS)
+        name: name,
+        seconds: extract_seconds(entry)
       }
+    end
+
+    # Aceita `seconds` ou `minutes` (a Duration do Atalho costuma sair em minutos).
+    def extract_seconds(entry)
+      raw =
+        if present_number?(entry["seconds"])
+          entry["seconds"].to_f
+        elsif present_number?(entry["minutes"])
+          entry["minutes"].to_f * 60
+        else
+          0
+        end
+      raw.round.clamp(0, MAX_SECONDS)
+    end
+
+    def present_number?(value)
+      !value.nil? && value.to_s.strip.present?
     end
 
     def parsed_body

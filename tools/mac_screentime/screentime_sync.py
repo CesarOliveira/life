@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
-"""Lê o tempo de uso POR APP do banco knowledgeC do macOS (que recebe os dados
-do iPhone via Ajustes > Tempo de Uso > "Compartilhar Entre Dispositivos") e
-envia para o endpoint do Life.
+"""Lê o tempo de uso POR APP do banco knowledgeC do macOS e envia para o Life.
+
+ATENÇÃO: no macOS 26 o knowledgeC só contém o uso do PRÓPRIO MAC — o Tempo de Uso
+do iPhone NÃO é mais legível aqui (virou E2E no CloudKit). Para o iPhone, use a
+ação de Atalhos "Get App & Website Activity" (iOS/macOS 26) -> POST /api/usage.
+Este script serve só para registrar o uso do Mac (use DEVICE_FILTER=local e, p.ex.,
+DEVICE=mac).
 
 Config por variáveis de ambiente:
   LIFE_ENDPOINT  ex.: https://life.cesaroliveira.online/api/usage
   LIFE_TOKEN     token pessoal (página "Tempo de tela" do app) — OBRIGATÓRIO
-  DEVICE         rótulo enviado (default "iphone")
-  DEVICE_FILTER  "remote" = só eventos sincronizados de outro device (~iPhone) [default]
-                 "local"  = só o próprio Mac
+  DEVICE         rótulo enviado (default "mac")
+  DEVICE_FILTER  "local"  = só o próprio Mac [default]
+                 "remote" = só eventos sincronizados de outro device (vazio no macOS 26)
                  "all"    = tudo
   DAYS           quantos dias para trás reenviar (default 3)
 
@@ -151,8 +155,8 @@ def main():
     token = env("LIFE_TOKEN")
     if not token:
         raise SystemExit("Defina LIFE_TOKEN (token da página 'Tempo de tela').")
-    device = env("DEVICE", "iphone")
-    device_filter = env("DEVICE_FILTER", "remote")
+    device = env("DEVICE", "mac")
+    device_filter = env("DEVICE_FILTER", "local")
     days = int(env("DAYS", "3"))
 
     agg = aggregate(query_usage(days, device_filter))

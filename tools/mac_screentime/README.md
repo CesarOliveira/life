@@ -1,13 +1,16 @@
-# Sync de Tempo de Uso por app (iPhone → Mac → Life)
+# Sync de Tempo de Uso por app — uso do PRÓPRIO Mac (opcional)
 
-Coleta o **tempo de uso por app** do iPhone e envia para o app Life
-(`life.cesaroliveira.online`). Funciona porque o iPhone sincroniza o Tempo de Uso
-para o Mac via iCloud; um script no Mac lê esse dado e faz `POST` na API.
+Coleta o **tempo de uso por app do próprio Mac** (via `knowledgeC.db`) e envia
+para o app Life (`life.cesaroliveira.online`).
 
-> **Por que precisa do Mac?** A Apple não deixa nenhum app no iPhone exportar o
-> tempo **por app** para um servidor. O único caminho suportado é o iPhone
-> sincronizar para o Mac e o Mac ler o banco local. (Total diário dá pra mandar
-> direto do iPhone via Atalhos, mas não a quebra por app.)
+> ⚠️ **Para o iPhone, use o Atalho — não este script.** No macOS 26 o Tempo de
+> Uso sincronizado do iPhone **não** fica legível no Mac (vira E2E no CloudKit;
+> o `knowledgeC.db` do Mac só tem o uso local dele). A rota oficial para o iPhone
+> é a ação de Atalhos **"Get App & Website Activity"** (iOS/macOS 26), que devolve
+> a lista por app e faz `POST` direto em `/api/usage`. Veja a página
+> **"Tempo de tela"** do app. Este script aqui serve **apenas** se você também
+> quiser registrar o uso do **Mac** (rode com `DEVICE_FILTER=local` e um `DEVICE`
+> próprio, ex.: `DEVICE=mac`).
 
 ## 1. No iPhone
 - **Ajustes → Tempo de Uso → Compartilhar Entre Dispositivos = ON.**

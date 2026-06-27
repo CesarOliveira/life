@@ -37,6 +37,34 @@ RSpec.describe "API::Usage", type: :request do
     expect(ig.date).to eq(Date.current)
   end
 
+  it "falls back to the app name as bundle_id when bundle_id is absent (iPhone Shortcut)" do
+    post "/api/usage", params: body(apps: [{ name: "Instagram", minutes: 127 }]), headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(JSON.parse(response.body)["upserted"]).to eq(1)
+
+    row = account.app_usages.find_by(bundle_id: "Instagram")
+    expect(row).to be_present
+    expect(row.name).to eq("Instagram")
+    expect(row.seconds).to eq(127 * 60)
+  end
+
+  it "accepts minutes (fractional) as an alternative to seconds" do
+    post "/api/usage", params: body(apps: [{ bundle_id: "com.x", minutes: 1.5 }]), headers: headers
+    expect(account.app_usages.find_by(bundle_id: "com.x").seconds).to eq(90)
+  end
+
+  it "prefers seconds over minutes when both are sent" do
+    post "/api/usage", params: body(apps: [{ bundle_id: "com.x", seconds: 42, minutes: 999 }]), headers: headers
+    expect(account.app_usages.find_by(bundle_id: "com.x").seconds).to eq(42)
+  end
+
+  it "skips an entry with neither bundle_id nor name" do
+    post "/api/usage", params: body(apps: [{ minutes: 10 }, { name: "Ok", minutes: 5 }]), headers: headers
+    json = JSON.parse(response.body)
+    expect(json["upserted"]).to eq(1)
+    expect(json["skipped"]).to eq(1)
+  end
+
   it "upserts the same (device,date,bundle) instead of duplicating" do
     post "/api/usage", params: body(apps: [{ bundle_id: "com.x", seconds: 100 }]), headers: headers
     expect {
