@@ -1,0 +1,15 @@
+<%# locals: chart (MetricChart), unit (String) %>
+<% pts = chart.points %>
+<svg viewBox="0 0 <%= chart.w %> <%= chart.h %>" class="h-40 w-full" preserveAspectRatio="none" role="img">
+  <% if pts.size > 1 %>
+    <polyline points="<%= chart.polyline %>" fill="none" stroke="#10b981" stroke-width="2"
+              stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke" />
+  <% end %>
+  <% pts.each do |p| %>
+    <circle cx="<%= p.x %>" cy="<%= p.y %>" r="3.5" fill="#10b981">
+      <title><%= l(p.date, format: :long) %> — <%= number_with_delimiter(p.value) %> <%= unit %></title>
+    </circle>
+  <% end %>
+  <text x="<%= chart.pad %>" y="16" font-size="11" fill="#94a3b8"><%= number_with_delimiter(chart.max) %></text>
+  <text x="<%= chart.pad %>" y="<%= chart.h - 8 %>" font-size="11" fill="#94a3b8"><%= number_with_delimiter(chart.min) %></text>
+</svg>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_29_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_29_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -63,6 +63,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_29_000001) do
     t.integer "weekly_target"
     t.index ["account_id", "active"], name: "index_habits_on_account_id_and_active"
     t.index ["account_id"], name: "index_habits_on_account_id"
+  end
+
+  create_table "measurements", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.string "category", default: "health", null: false
+    t.datetime "created_at", null: false
+    t.string "key", null: false
+    t.date "measured_on", null: false
+    t.decimal "ref_high", precision: 12, scale: 3
+    t.decimal "ref_low", precision: 12, scale: 3
+    t.string "source", default: "manual", null: false
+    t.string "unit"
+    t.datetime "updated_at", null: false
+    t.decimal "value", precision: 12, scale: 3, null: false
+    t.index ["account_id", "category"], name: "index_measurements_on_account_id_and_category"
+    t.index ["account_id", "key", "measured_on"], name: "idx_measurements_unique", unique: true
+    t.index ["account_id"], name: "index_measurements_on_account_id"
   end
 
   create_table "memberships", force: :cascade do |t|
@@ -123,6 +140,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_29_000001) do
   add_foreign_key "app_usages", "accounts"
   add_foreign_key "habit_checks", "habits"
   add_foreign_key "habits", "accounts"
+  add_foreign_key "measurements", "accounts"
   add_foreign_key "memberships", "accounts"
   add_foreign_key "memberships", "users"
   add_foreign_key "weight_entries", "accounts"

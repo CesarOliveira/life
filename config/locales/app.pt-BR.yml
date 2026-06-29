@@ -4,6 +4,7 @@ pt-BR:
     activity: "Atividade"
     habits: "Hábitos"
     weight: "Peso"
+    health: "Saúde"
     screen_time: "Tempo de tela"
     admin: "Admin"
     super_admin: "Super Admin"
@@ -90,6 +91,37 @@ pt-BR:
       created: "Hábito criado."
       updated: "Hábito atualizado."
       removed: "Hábito removido."
+
+  measurements:
+    title: "Saúde"
+    tabs:
+      health: "Sinais"
+      exam: "Exames"
+    add: "Adicionar"
+    metric: "Métrica"
+    value: "Valor"
+    date: "Data"
+    ref_low: "Ref. mín"
+    ref_high: "Ref. máx"
+    reference: "Referência: %{low}–%{high} %{unit}"
+    history: "Histórico"
+    empty: "Sem dados ainda. Adicione manualmente ou envie pela API (sono/passos)."
+    out_of_range: "Fora da faixa"
+    in_range: "Normal"
+    remove_confirm: "Remover esta medição?"
+    pdf_hint: "Em breve: importar PDF de exame com extração automática."
+    keys:
+      sleep_minutes: "Sono (min)"
+      steps: "Passos"
+      resting_hr: "FC de repouso"
+      active_energy: "Energia ativa"
+      glucose: "Glicemia"
+      cholesterol_total: "Colesterol total"
+      hdl: "HDL"
+      ldl: "LDL"
+      triglycerides: "Triglicérides"
+      tsh: "TSH"
+      vitamin_d: "Vitamina D"
 
   weights:
     title: "Peso"
@@ -293,6 +325,9 @@ pt-BR:
     weights:
       saved: "Peso registrado."
       removed: "Registro removido."
+    measurements:
+      saved: "Medição registrada."
+      removed: "Medição removida."
     screen_time:
       token_regenerated: "Token regenerado."
 
@@ -312,3 +347,9 @@ pt-BR:
       weight_entry:
         date: "Data"
         weight_kg: "Peso (kg)"
+      measurement:
+        key: "Métrica"
+        value: "Valor"
+        measured_on: "Data"
+        ref_low: "Ref. mín"
+        ref_high: "Ref. máx"

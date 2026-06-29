@@ -4,6 +4,7 @@ module Api
   class BaseController < ActionController::API
     MAX_BODY_BYTES = 2_000_000
     RATE_LIMIT = 120 # requisições por minuto por IP
+    DATE_WINDOW_PAST = 90 # dias aceitos no passado na ingestão
 
     before_action :reject_large_body
     before_action :throttle!
@@ -38,5 +39,39 @@ module Api
     end
 
     attr_reader :current_account
+
+    # --- Helpers de ingestão (compartilhados pelas rotas de API) ---
+
+    def parsed_body
+      JSON.parse(request.raw_post)
+    rescue JSON::ParserError
+      {}
+    end
+
+    # Data padrão do lote: `date` explícito tem prioridade; senão resolve
+    # `period` ("today"/"yesterday"/"hoje"/"ontem") no fuso do app.
+    def default_date_from(data)
+      return data["date"] if data["date"].to_s.strip.present?
+
+      case data["period"].to_s.strip.downcase
+      when "yesterday", "ontem" then (Date.current - 1).iso8601
+      when "today", "hoje" then Date.current.iso8601
+      end
+    end
+
+    def parse_date(raw)
+      Date.iso8601(raw.to_s)
+    rescue ArgumentError, TypeError
+      nil
+    end
+
+    def date_in_window?(date)
+      today = Date.current
+      date >= (today - DATE_WINDOW_PAST) && date <= (today + 1)
+    end
+
+    def render_error(code, **extra)
+      render json: { error: code, **extra }, status: :unprocessable_entity
+    end
   end
 end

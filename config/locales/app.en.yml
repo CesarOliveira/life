@@ -4,6 +4,7 @@ en:
     activity: "Activity"
     habits: "Habits"
     weight: "Weight"
+    health: "Health"
     screen_time: "Screen time"
     admin: "Admin"
     super_admin: "Super Admin"
@@ -90,6 +91,37 @@ en:
       created: "Habit created."
       updated: "Habit updated."
       removed: "Habit deleted."
+
+  measurements:
+    title: "Health"
+    tabs:
+      health: "Signals"
+      exam: "Lab tests"
+    add: "Add"
+    metric: "Metric"
+    value: "Value"
+    date: "Date"
+    ref_low: "Ref. low"
+    ref_high: "Ref. high"
+    reference: "Reference: %{low}–%{high} %{unit}"
+    history: "History"
+    empty: "No data yet. Add it manually or send it via the API (sleep/steps)."
+    out_of_range: "Out of range"
+    in_range: "Normal"
+    remove_confirm: "Remove this measurement?"
+    pdf_hint: "Coming soon: import a lab PDF with automatic extraction."
+    keys:
+      sleep_minutes: "Sleep (min)"
+      steps: "Steps"
+      resting_hr: "Resting HR"
+      active_energy: "Active energy"
+      glucose: "Glucose"
+      cholesterol_total: "Total cholesterol"
+      hdl: "HDL"
+      ldl: "LDL"
+      triglycerides: "Triglycerides"
+      tsh: "TSH"
+      vitamin_d: "Vitamin D"
 
   weights:
     title: "Weight"
@@ -293,6 +325,9 @@ en:
     weights:
       saved: "Weight logged."
       removed: "Entry removed."
+    measurements:
+      saved: "Measurement logged."
+      removed: "Measurement removed."
     screen_time:
       token_regenerated: "Token regenerated."
 
@@ -312,3 +347,9 @@ en:
       weight_entry:
         date: "Date"
         weight_kg: "Weight (kg)"
+      measurement:
+        key: "Metric"
+        value: "Value"
+        measured_on: "Date"
+        ref_low: "Ref. low"
+        ref_high: "Ref. high"
