@@ -109,7 +109,22 @@ pt-BR:
     out_of_range: "Fora da faixa"
     in_range: "Normal"
     remove_confirm: "Remover esta medição?"
-    pdf_hint: "Em breve: importar PDF de exame com extração automática."
+    pdf:
+      title: "Importar exame (PDF)"
+      intro: "Envie o PDF do laudo; os valores são extraídos automaticamente por IA. Revise depois."
+      submit: "Importar PDF"
+      processing: "Extraindo…"
+      imported:
+        one: "1 valor importado. Revise abaixo."
+        other: "%{count} valores importados. Revise abaixo."
+      errors:
+        not_configured: "Importação por IA indisponível (configure ANTHROPIC_API_KEY no ambiente)."
+        no_file: "Selecione um arquivo PDF."
+        empty: "Arquivo vazio."
+        too_large: "Arquivo muito grande (máx. 15 MB)."
+        timeout: "A extração demorou demais. Tente novamente."
+        no_results: "Nenhum resultado numérico encontrado no PDF."
+        extraction_failed: "Não foi possível extrair os dados do PDF."
     keys:
       sleep_minutes: "Sono (min)"
       steps: "Passos"

@@ -109,7 +109,22 @@ en:
     out_of_range: "Out of range"
     in_range: "Normal"
     remove_confirm: "Remove this measurement?"
-    pdf_hint: "Coming soon: import a lab PDF with automatic extraction."
+    pdf:
+      title: "Import lab test (PDF)"
+      intro: "Upload the report PDF; values are extracted automatically by AI. Review afterwards."
+      submit: "Import PDF"
+      processing: "Extracting…"
+      imported:
+        one: "1 value imported. Review below."
+        other: "%{count} values imported. Review below."
+      errors:
+        not_configured: "AI import unavailable (set ANTHROPIC_API_KEY in the environment)."
+        no_file: "Select a PDF file."
+        empty: "Empty file."
+        too_large: "File too large (max 15 MB)."
+        timeout: "Extraction took too long. Try again."
+        no_results: "No numeric results found in the PDF."
+        extraction_failed: "Couldn't extract data from the PDF."
     keys:
       sleep_minutes: "Sleep (min)"
       steps: "Steps"

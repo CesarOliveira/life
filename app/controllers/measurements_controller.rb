@@ -8,6 +8,24 @@ class MeasurementsController < ApplicationController
     @measurement = current_account.measurements.new(measured_on: Date.current, category: @category)
     @groups = build_groups(@category)
     @catalog_keys = Measurement.catalog_keys(@category)
+    @pdf_import = ExamPdfExtractor.configured?
+  end
+
+  # Importa um PDF de exame: extrai os resultados (IA) e cria as medições.
+  def import
+    return redirect_with_pdf_alert("not_configured") unless ExamPdfExtractor.configured?
+
+    file = params[:file]
+    return redirect_with_pdf_alert("no_file") unless file.respond_to?(:read)
+
+    result = ExamPdfExtractor.new(file.read, today: Date.current).call
+    return redirect_with_pdf_alert(result.error) unless result.ok?
+
+    rows = result.rows.map { |row| row.merge(account_id: current_account.id) }
+    rows = rows.reverse.uniq { |row| [row[:key], row[:measured_on]] }.reverse
+    Measurement.upsert_all(rows, unique_by: :idx_measurements_unique, record_timestamps: true) if rows.any?
+
+    redirect_to measurements_path(category: "exam"), notice: t("measurements.pdf.imported", count: rows.size)
   end
 
   def create
@@ -63,6 +81,12 @@ class MeasurementsController < ApplicationController
 
     measurement.ref_low = meta[:ref_low] if measurement.ref_low.blank? && meta[:ref_low]
     measurement.ref_high = meta[:ref_high] if measurement.ref_high.blank? && meta[:ref_high]
+  end
+
+  def redirect_with_pdf_alert(error)
+    key = "measurements.pdf.errors.#{error}"
+    message = I18n.exists?(key) ? t(key) : t("measurements.pdf.errors.extraction_failed")
+    redirect_to measurements_path(category: "exam"), alert: message
   end
 
   def set_measurement

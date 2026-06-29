@@ -29,7 +29,9 @@ Rails.application.routes.draw do
   resources :habits
   post "habits/:id/toggle", to: "habit_checks#toggle", as: :toggle_habit
   resources :weights, only: [:index, :create, :destroy]
-  resources :measurements, only: [:index, :create, :destroy]
+  resources :measurements, only: [:index, :create, :destroy] do
+    post :import, on: :collection
+  end
   get "screen-time", to: "screen_time#index", as: :screen_time
   post "screen-time/token", to: "screen_time#regenerate", as: :regenerate_screen_time_token
 

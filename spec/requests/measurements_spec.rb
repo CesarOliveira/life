@@ -46,6 +46,29 @@ RSpec.describe "Measurements", type: :request do
     end
   end
 
+  describe "POST /measurements/import" do
+    let(:rows) do
+      [{ key: "glucose", value: 92.0, unit: "mg/dL", measured_on: Date.current, category: "exam", ref_low: 70, ref_high: 99, source: "pdf" }]
+    end
+    let(:upload) { Rack::Test::UploadedFile.new(StringIO.new("%PDF-1.4 fake"), "application/pdf", original_filename: "exam.pdf") }
+
+    it "creates measurements from the extracted rows" do
+      allow(ExamPdfExtractor).to receive(:configured?).and_return(true)
+      allow(ExamPdfExtractor).to receive(:new).and_return(instance_double(ExamPdfExtractor, call: ExamPdfExtractor::Result.new(rows: rows, measured_on: Date.current)))
+
+      expect { post import_measurements_path, params: { file: upload } }.to change(account.measurements, :count).by(1)
+      expect(response).to redirect_to(measurements_path(category: "exam"))
+      expect(account.measurements.find_by(key: "glucose").source).to eq("pdf")
+    end
+
+    it "alerts and imports nothing when extraction is not configured" do
+      allow(ExamPdfExtractor).to receive(:configured?).and_return(false)
+      post import_measurements_path, params: { file: upload }
+      expect(response).to redirect_to(measurements_path(category: "exam"))
+      expect(account.measurements.count).to eq(0)
+    end
+  end
+
   describe "DELETE /measurements/:id" do
     it "removes the measurement" do
       m = create(:measurement, account: account)
