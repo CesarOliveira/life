@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_25_000005) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_29_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -55,10 +55,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_25_000005) do
     t.string "color", default: "#6366f1", null: false
     t.datetime "created_at", null: false
     t.text "description"
+    t.string "frequency", default: "weekly_days", null: false
     t.string "name", null: false
     t.integer "position", default: 0, null: false
     t.datetime "updated_at", null: false
     t.integer "weekdays", default: [0, 1, 2, 3, 4, 5, 6], null: false, array: true
+    t.integer "weekly_target"
     t.index ["account_id", "active"], name: "index_habits_on_account_id_and_active"
     t.index ["account_id"], name: "index_habits_on_account_id"
   end

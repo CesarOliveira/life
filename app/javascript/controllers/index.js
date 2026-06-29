@@ -6,3 +6,6 @@ import { application } from "./application"
 
 import PwaInstallController from "./pwa_install_controller"
 application.register("pwa-install", PwaInstallController)
+
+import HabitFormController from "./habit_form_controller"
+application.register("habit-form", HabitFormController)

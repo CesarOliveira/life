@@ -1,4 +1,5 @@
-<%= form_with model: @habit, class: "max-w-lg space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" do |f| %>
+<%= form_with model: @habit, data: { controller: "habit-form" },
+      class: "max-w-lg space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" do |f| %>
   <% if @habit.errors.any? %>
     <div class="rounded-lg border border-rose-200 bg-rose-50 p-2 text-sm text-rose-700">
       <%= @habit.errors.full_messages.to_sentence %>
@@ -21,6 +22,15 @@
   </div>
 
   <div>
+    <%= f.label :frequency, t("habits.frequency"), class: "mb-1 block text-sm font-medium text-slate-700" %>
+    <%= f.select :frequency,
+          options_for_select(Habit::FREQUENCIES.map { |freq| [t("habits.frequencies.#{freq}"), freq] }, @habit.frequency),
+          {},
+          data: { habit_form_target: "frequency", action: "change->habit-form#toggle" },
+          class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+  </div>
+
+  <div data-habit-form-target="weeklyDays">
     <span class="mb-1 block text-sm font-medium text-slate-700"><%= Habit.human_attribute_name(:weekdays) %></span>
     <%= hidden_field_tag "habit[weekdays][]", "" %>
     <div class="flex flex-wrap gap-2">
@@ -32,6 +42,13 @@
       <% end %>
     </div>
     <p class="mt-1 text-xs text-slate-500"><%= t("habits.weekdays_hint") %></p>
+  </div>
+
+  <div data-habit-form-target="weeklyCount" class="hidden">
+    <%= f.label :weekly_target, t("habits.weekly_target"), class: "mb-1 block text-sm font-medium text-slate-700" %>
+    <%= f.number_field :weekly_target, min: 1, max: 7, value: @habit.weekly_target || 3,
+          class: "w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+    <p class="mt-1 text-xs text-slate-500"><%= t("habits.weekly_target_hint") %></p>
   </div>
 
   <div>

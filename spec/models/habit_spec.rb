@@ -16,6 +16,39 @@ RSpec.describe Habit, type: :model do
     expect(build(:habit, weekdays: [9])).not_to be_valid
   end
 
+  describe "frequency" do
+    it "rejects an unknown frequency" do
+      expect(build(:habit, frequency: "monthly")).not_to be_valid
+    end
+
+    it "requires a weekly_target for weekly_count" do
+      expect(build(:habit, :weekly_count, weekly_target: nil)).not_to be_valid
+      expect(build(:habit, :weekly_count, weekly_target: 0)).not_to be_valid
+      expect(build(:habit, :weekly_count, weekly_target: 8)).not_to be_valid
+      expect(build(:habit, :weekly_count, weekly_target: 3)).to be_valid
+    end
+
+    it "does not require weekdays for weekly_count" do
+      expect(build(:habit, :weekly_count, weekdays: [])).to be_valid
+    end
+
+    it "is scheduled on any day when weekly_count" do
+      habit = build(:habit, :weekly_count)
+      expect(habit.scheduled_on?(Date.new(2026, 6, 22))).to be(true)
+      expect(habit.scheduled_on?(Date.new(2026, 6, 23))).to be(true)
+    end
+  end
+
+  describe "#effective_weekly_target" do
+    it "is the weekly_target for weekly_count" do
+      expect(build(:habit, :weekly_count, weekly_target: 4).effective_weekly_target).to eq(4)
+    end
+
+    it "is the number of scheduled weekdays for weekly_days" do
+      expect(build(:habit, weekdays: [1, 3, 5]).effective_weekly_target).to eq(3)
+    end
+  end
+
   describe "#daily?" do
     it "is true when every weekday is set" do
       expect(build(:habit, weekdays: (0..6).to_a)).to be_daily

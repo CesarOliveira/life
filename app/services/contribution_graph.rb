@@ -10,8 +10,9 @@ class ContributionGraph
   # por compatibilidade, today:/weeks: (janela rolante terminando em `today`, usada
   # no dashboard). Dias futuros (> today) e fora do intervalo [from, to] vêm como
   # nil (célula vazia), igual ao GitHub.
-  def initialize(account, from: nil, to: nil, today: Date.current, weeks: 53)
+  def initialize(account, from: nil, to: nil, today: Date.current, weeks: 53, habit: nil)
     @account = account
+    @habit = habit
     @today = today
     @to = to || today
     @from = from || (week_start(@to) - (weeks - 1) * 7)
@@ -66,11 +67,9 @@ class ContributionGraph
   end
 
   def load_counts
-    HabitCheck.joins(:habit)
-              .where(habits: { account_id: @account.id })
-              .where(date: @from..@visible_to)
-              .group(:date)
-              .count
+    scope = HabitCheck.joins(:habit).where(habits: { account_id: @account.id })
+    scope = scope.where(habit_id: @habit.id) if @habit
+    scope.where(date: @from..@visible_to).group(:date).count
   end
 
   def level_for(count)

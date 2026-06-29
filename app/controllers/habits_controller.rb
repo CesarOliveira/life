@@ -1,10 +1,18 @@
 class HabitsController < ApplicationController
-  before_action :set_habit, only: %i[edit update destroy]
+  before_action :set_habit, only: %i[show edit update destroy]
 
   def index
     @today = Date.current
     @habits = current_account.habits.active.ordered.includes(:habit_checks).to_a
     @stats = @habits.to_h { |h| [h, HabitStats.new(h, today: @today)] }
+  end
+
+  # Página do hábito: força, sequência e timeline (feito/perdido por dia).
+  def show
+    @today = Date.current
+    @stats = HabitStats.new(@habit, today: @today)
+    @timeline = @stats.timeline(28)
+    @graph = ContributionGraph.new(current_account, habit: @habit, from: @today << 3, to: @today, today: @today)
   end
 
   def new
@@ -44,9 +52,17 @@ class HabitsController < ApplicationController
 
   def habit_params
     permitted = params.require(:habit)
-                      .permit(:name, :description, :color, :active, :position, weekdays: [])
-    if permitted.key?(:weekdays)
-      permitted[:weekdays] = Array(permitted[:weekdays]).reject(&:blank?).map(&:to_i).uniq.sort
+                      .permit(:name, :description, :color, :active, :position,
+                              :frequency, :weekly_target, weekdays: [])
+    permitted[:frequency] = "weekly_days" unless Habit::FREQUENCIES.include?(permitted[:frequency])
+
+    if permitted[:frequency] == "weekly_count"
+      permitted.delete(:weekdays) # dias da semana não se aplicam a Nx/semana
+    else
+      permitted[:weekly_target] = nil
+      if permitted.key?(:weekdays)
+        permitted[:weekdays] = Array(permitted[:weekdays]).reject(&:blank?).map(&:to_i).uniq.sort
+      end
     end
     permitted
   end

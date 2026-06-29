@@ -40,6 +40,32 @@ RSpec.describe "Habits", type: :request do
     end
   end
 
+  describe "GET /habits/:id" do
+    it "renders the habit page with its timeline" do
+      habit = create(:habit, account: account, name: "Meditar")
+      create(:habit_check, habit: habit, date: Date.current)
+      get habit_path(habit)
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("Meditar")
+    end
+
+    it "does not expose another account's habit" do
+      other = create(:habit, name: "Hábito alheio")
+      get habit_path(other)
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+
+  describe "POST /habits with weekly_count" do
+    it "creates a times-per-week habit" do
+      post habits_path, params: { habit: { name: "Academia", color: "#00ff00", frequency: "weekly_count", weekly_target: "3" } }
+      expect(response).to redirect_to(habits_path)
+      habit = account.habits.last
+      expect(habit.frequency).to eq("weekly_count")
+      expect(habit.weekly_target).to eq(3)
+    end
+  end
+
   describe "POST /habits/:id/toggle" do
     let(:habit) { create(:habit, account: account) }
 
