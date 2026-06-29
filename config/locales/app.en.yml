@@ -1,6 +1,7 @@
 en:
   nav:
     dashboard: "Dashboard"
+    activity: "Activity"
     habits: "Habits"
     weight: "Weight"
     screen_time: "Screen time"
@@ -18,6 +19,14 @@ en:
     less: "Less"
     more: "More"
     cell: "%{date} — %{count} habit(s) completed"
+
+  activity:
+    title: "Activity"
+    summary: "%{count} contributions %{period}"
+    period_months: "in the last %{count} months"
+    period_year: "in %{year}"
+    months: "%{count} months"
+    by_year: "By year"
 
   dashboard:
     greeting: "Hi, %{name} 👋"
@@ -150,6 +159,8 @@ en:
     cancel: "Cancel"
     settings_title: "Account settings"
     save: "Save"
+    language: "Language"
+    language_hint: "Choose the interface language."
     join_code: "Invite code"
     join_code_hint: "Share it so others can request access."
 

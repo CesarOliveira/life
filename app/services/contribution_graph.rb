@@ -6,23 +6,30 @@ class ContributionGraph
 
   Cell = Struct.new(:date, :count, :level, keyword_init: true)
 
-  def initialize(account, today: Date.current, weeks: 53)
+  # Aceita um intervalo explícito (from:/to:) — usado pela página de Atividade — ou,
+  # por compatibilidade, today:/weeks: (janela rolante terminando em `today`, usada
+  # no dashboard). Dias futuros (> today) e fora do intervalo [from, to] vêm como
+  # nil (célula vazia), igual ao GitHub.
+  def initialize(account, from: nil, to: nil, today: Date.current, weeks: 53)
     @account = account
     @today = today
-    @weeks = weeks
-    @start = week_start(today) - (weeks - 1) * 7
+    @to = to || today
+    @from = from || (week_start(@to) - (weeks - 1) * 7)
+    @visible_to = [@to, @today].min
+    @start = week_start(@from)
+    @weeks = ((@to - @start).to_i / 7) + 1
     @counts = load_counts
     @max = @counts.values.max || 0
   end
 
   # Colunas (semanas) da mais antiga (esq.) à atual (dir.). Cada coluna tem 7
-  # células (domingo..sábado); datas futuras vêm como nil.
+  # células (domingo..sábado); datas fora do intervalo ou futuras vêm como nil.
   def columns
     (0...@weeks).map do |w|
       col_start = @start + (w * 7)
       (0..6).map do |d|
         date = col_start + d
-        next nil if date > @today
+        next nil if date < @from || date > @visible_to
 
         count = @counts[date] || 0
         Cell.new(date: date, count: count, level: level_for(count))
@@ -61,7 +68,7 @@ class ContributionGraph
   def load_counts
     HabitCheck.joins(:habit)
               .where(habits: { account_id: @account.id })
-              .where(date: @start..@today)
+              .where(date: @from..@visible_to)
               .group(:date)
               .count
   end

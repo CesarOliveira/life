@@ -1,0 +1,42 @@
+# Roadmap — Atividade, Hábitos, Metas e Saúde
+
+Plano da evolução do tracking pessoal do Life. Desenhado em 2026-06-29.
+
+## Conceitos centrais (3 coisas distintas)
+
+| Conceito | O que é | Vira contribuição no heatmap? |
+|---|---|---|
+| **Hábito** (manual ou automático) | recorrência (diário / dias da semana / Nx por semana) | ✅ cada dia feito = 1 `HabitCheck` |
+| **Meta** (alvo) | aspiração pontual: "chegar a 80kg" | ❌ barra de progresso (não recorrente) |
+| **Medição** (saúde/exames) | sinal bruto: sono, passos, glicemia, colesterol… | ❌ por si só; pode alimentar hábito-automático |
+
+**Decisão sobre "metas são hábitos?":** depende do tipo.
+- **Meta de limiar diário** ("tela ≤ 3h", "sono ≥ 7h") = **hábito automático** (regra avalia a métrica do dia e cria/remove o `HabitCheck`; sem toque manual).
+- **Meta de alvo** ("80kg") = **entidade `Goal` separada** (progresso início→atual→alvo lendo o histórico de peso).
+
+## Substrato técnico
+Tudo que é recorrente desagua em **`HabitCheck`** (já existe; índice único `[habit_id, date]`), que o heatmap (`ContributionGraph`), o streak e a aderência (`HabitStats`) já consomem. **Não** criar tabela `contributions` nova.
+
+## Modelo de dados planejado
+- `habit_checks` *(existe)* — substrato de contribuição.
+- `habits` *(existe)* — +`frequency` (dias-da-semana / diário / Nx-semana), +`weekly_target`, +`auto`, +regra inline (`metric_key`, `comparator` lte/gte, `threshold_value`).
+- `measurements` *(nova, genérica)* — `account_id, key, value, unit, measured_on, ref_low?, ref_high?, source`; único `[account, key, measured_on]`. Cobre sono, passos **e exames** (glicemia, colesterol, com faixa de referência).
+- `goals` *(nova)* — `account_id, name, metric_key, start_value, target_value, deadline?, achieved_on?`.
+- `app_usages` *(existe)* — tela continua aqui; hábito "tela<3h" lê a soma do dia.
+- `weight_entries` *(existe)* — a meta 80kg lê daqui.
+
+## Fases
+
+- [x] **Fase 1 — Página de Atividade** (`/activity`): heatmap com filtros 3/6/12 meses (padrão 3) + select por ano. `ContributionGraph` generalizado p/ `from:/to:`. Dias sem atividade em cinza (sem vermelho); futuros vazios. *(Concluída 2026-06-29.)*
+- [ ] **Fase 2 — Cadência semanal + força do hábito**: `habits.frequency` + `weekly_target` ("Academia 3x/sem"); `HabitStats` com aderência/streak semanal; classificação **Forte ≥80% / Médio 50–79% / Fraco <50%** (janela 28d) + badge; timeline por hábito (feito/perdido por dia).
+- [ ] **Fase 3 — Saúde + Exames**: tabela `measurements` + `POST /api/metrics` (reusa token/fuso do screen time) para sono/passos. **Exames** (glicemia, colesterol…) com faixa de referência, via **(a) entrada manual** ou **(b) import de PDF do exame com extração automática dos dados** (visão/LLM, como o fluxo do screen time). Tela de listagem + tendência.
+- [ ] **Fase 4 — Hábitos automáticos de limiar**: `habits.auto` + colunas de regra; `HabitRuleEvaluator` disparado na ingestão (tela via `AppUsage`, sono/passos via `measurements`). "tela<3h" e "sono≥7h" entram no heatmap/streak sem mexer no `ContributionGraph`. Bloquear toggle manual em hábitos `auto`.
+- [ ] **Fase 5 — Metas de alvo (`Goal`)**: entidade + cartão de progresso (ex.: 80kg sobre `weight_entries`), deadline opcional, `achieved_on`.
+- [ ] **Fase 6 — Análise cruzada**: correlação sono/passos × aderência de hábitos, usando `(account, date)` como chave comum (ex.: sono ruim × queda de aderência).
+
+## Decisões tomadas
+- Dia perdido no grid geral = **cinza** (ausente), nada de vermelho. O "perdido" explícito fica só no timeline por hábito.
+- `weekly_count`: cada check = 1 contribuição (sem cap no heatmap); o cap fica só na métrica de força.
+- Hábito-auto sem dado do dia = **"sem dados"** (não pune o streak); reavalia quando o dado atrasado chega na janela.
+- Tela: derivar total diário de `AppUsage` (não duplicar em `measurements`).
+- Idioma da interface: movido do cabeçalho para **Configurações da conta**.

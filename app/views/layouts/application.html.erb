@@ -33,18 +33,13 @@
             <% end %>
             <% if current_account %>
               <%= nav_link t("nav.dashboard"), authenticated_root_path %>
+              <%= nav_link t("nav.activity"), activity_path %>
               <%= nav_link t("nav.habits"), habits_path %>
               <%= nav_link t("nav.weight"), weights_path %>
               <%= nav_link t("nav.screen_time"), screen_time_path %>
             <% end %>
           </div>
           <div class="flex items-center gap-2">
-            <div class="flex items-center overflow-hidden rounded-lg border border-slate-200 text-xs">
-              <% I18n.available_locales.each do |loc| %>
-                <%= link_to locale_label(loc), locale_switch_path(loc),
-                      class: "px-2 py-1 #{I18n.locale == loc ? "bg-emerald-50 font-semibold text-emerald-700" : "text-slate-500 hover:bg-slate-50"}" %>
-              <% end %>
-            </div>
             <% if current_account %>
               <details class="relative">
                 <summary class="flex cursor-pointer list-none select-none items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">

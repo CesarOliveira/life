@@ -25,6 +25,7 @@ Rails.application.routes.draw do
   resources :join_requests, only: [:new, :create]
 
   # Domínio de tracking
+  get "/activity", to: "activity#index", as: :activity
   resources :habits
   post "habits/:id/toggle", to: "habit_checks#toggle", as: :toggle_habit
   resources :weights, only: [:index, :create, :destroy]

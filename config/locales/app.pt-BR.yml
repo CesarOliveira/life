@@ -1,6 +1,7 @@
 pt-BR:
   nav:
     dashboard: "Dashboard"
+    activity: "Atividade"
     habits: "Hábitos"
     weight: "Peso"
     screen_time: "Tempo de tela"
@@ -18,6 +19,14 @@ pt-BR:
     less: "Menos"
     more: "Mais"
     cell: "%{date} — %{count} hábito(s) concluído(s)"
+
+  activity:
+    title: "Atividade"
+    summary: "%{count} contribuições %{period}"
+    period_months: "nos últimos %{count} meses"
+    period_year: "em %{year}"
+    months: "%{count} meses"
+    by_year: "Por ano"
 
   dashboard:
     greeting: "Olá, %{name} 👋"
@@ -150,6 +159,8 @@ pt-BR:
     cancel: "Cancelar"
     settings_title: "Configurações da conta"
     save: "Salvar"
+    language: "Idioma"
+    language_hint: "Escolha o idioma da interface."
     join_code: "Código de convite"
     join_code_hint: "Compartilhe para outras pessoas solicitarem entrada."
 
