@@ -21,34 +21,71 @@
           class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
   </div>
 
-  <div>
-    <%= f.label :frequency, t("habits.frequency"), class: "mb-1 block text-sm font-medium text-slate-700" %>
-    <%= f.select :frequency,
-          options_for_select(Habit::FREQUENCIES.map { |freq| [t("habits.frequencies.#{freq}"), freq] }, @habit.frequency),
-          {},
-          data: { habit_form_target: "frequency", action: "change->habit-form#toggle" },
-          class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
-  </div>
+  <%# Hábito automático (derivado de uma métrica) %>
+  <label class="flex items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm">
+    <%= f.check_box :auto, data: { habit_form_target: "auto", action: "change->habit-form#toggleAuto" }, class: "mt-0.5 accent-emerald-600" %>
+    <span>
+      <span class="font-medium text-slate-700"><%= t("habits.auto") %></span>
+      <span class="block text-xs text-slate-500"><%= t("habits.auto_hint") %></span>
+    </span>
+  </label>
 
-  <div data-habit-form-target="weeklyDays">
-    <span class="mb-1 block text-sm font-medium text-slate-700"><%= Habit.human_attribute_name(:weekdays) %></span>
-    <%= hidden_field_tag "habit[weekdays][]", "" %>
-    <div class="flex flex-wrap gap-2">
-      <% Habit::WEEKDAYS.each do |d| %>
-        <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50">
-          <%= check_box_tag "habit[weekdays][]", d, Array(@habit.weekdays).include?(d), class: "accent-emerald-600" %>
-          <%= t("date.abbr_day_names")[d] %>
-        </label>
-      <% end %>
+  <div data-habit-form-target="autoFields" class="hidden space-y-4 rounded-lg border border-emerald-100 bg-emerald-50/40 p-4">
+    <div>
+      <%= f.label :metric_key, t("habits.metric"), class: "mb-1 block text-sm font-medium text-slate-700" %>
+      <%= f.select :metric_key,
+            options_for_select(Habit::AUTO_METRICS.keys.map { |k| [t("habits.auto_metrics.#{k}"), k] }, @habit.metric_key),
+            { include_blank: false },
+            class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
     </div>
-    <p class="mt-1 text-xs text-slate-500"><%= t("habits.weekdays_hint") %></p>
+    <div class="flex items-end gap-3">
+      <div>
+        <%= f.label :comparator, t("habits.comparator"), class: "mb-1 block text-sm font-medium text-slate-700" %>
+        <%= f.select :comparator,
+              options_for_select(Habit::COMPARATORS.map { |c| [t("habits.comparators.#{c}"), c] }, @habit.comparator || "lte"),
+              {},
+              class: "rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+      </div>
+      <div>
+        <%= f.label :threshold_value, t("habits.threshold"), class: "mb-1 block text-sm font-medium text-slate-700" %>
+        <%= f.number_field :threshold_value, step: "any",
+              class: "w-28 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+      </div>
+    </div>
+    <p class="text-xs text-slate-500"><%= t("habits.auto_metric_hint") %></p>
   </div>
 
-  <div data-habit-form-target="weeklyCount" class="hidden">
-    <%= f.label :weekly_target, t("habits.weekly_target"), class: "mb-1 block text-sm font-medium text-slate-700" %>
-    <%= f.number_field :weekly_target, min: 1, max: 7, value: @habit.weekly_target || 3,
-          class: "w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
-    <p class="mt-1 text-xs text-slate-500"><%= t("habits.weekly_target_hint") %></p>
+  <%# Cadência (somente para hábitos manuais) %>
+  <div data-habit-form-target="cadenceFields" class="space-y-4">
+    <div>
+      <%= f.label :frequency, t("habits.frequency"), class: "mb-1 block text-sm font-medium text-slate-700" %>
+      <%= f.select :frequency,
+            options_for_select(Habit::FREQUENCIES.map { |freq| [t("habits.frequencies.#{freq}"), freq] }, @habit.frequency),
+            {},
+            data: { habit_form_target: "frequency", action: "change->habit-form#toggleFrequency" },
+            class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+    </div>
+
+    <div data-habit-form-target="weeklyDays">
+      <span class="mb-1 block text-sm font-medium text-slate-700"><%= Habit.human_attribute_name(:weekdays) %></span>
+      <%= hidden_field_tag "habit[weekdays][]", "" %>
+      <div class="flex flex-wrap gap-2">
+        <% Habit::WEEKDAYS.each do |d| %>
+          <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50">
+            <%= check_box_tag "habit[weekdays][]", d, Array(@habit.weekdays).include?(d), class: "accent-emerald-600" %>
+            <%= t("date.abbr_day_names")[d] %>
+          </label>
+        <% end %>
+      </div>
+      <p class="mt-1 text-xs text-slate-500"><%= t("habits.weekdays_hint") %></p>
+    </div>
+
+    <div data-habit-form-target="weeklyCount" class="hidden">
+      <%= f.label :weekly_target, t("habits.weekly_target"), class: "mb-1 block text-sm font-medium text-slate-700" %>
+      <%= f.number_field :weekly_target, min: 1, max: 7, value: @habit.weekly_target || 3,
+            class: "w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+      <p class="mt-1 text-xs text-slate-500"><%= t("habits.weekly_target_hint") %></p>
+    </div>
   </div>
 
   <div>

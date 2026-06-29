@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_29_000002) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_29_000003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -52,12 +52,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_29_000002) do
   create_table "habits", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.boolean "active", default: true, null: false
+    t.boolean "auto", default: false, null: false
     t.string "color", default: "#6366f1", null: false
+    t.string "comparator"
     t.datetime "created_at", null: false
     t.text "description"
     t.string "frequency", default: "weekly_days", null: false
+    t.string "metric_key"
     t.string "name", null: false
     t.integer "position", default: 0, null: false
+    t.decimal "threshold_value", precision: 12, scale: 3
     t.datetime "updated_at", null: false
     t.integer "weekdays", default: [0, 1, 2, 3, 4, 5, 6], null: false, array: true
     t.integer "weekly_target"

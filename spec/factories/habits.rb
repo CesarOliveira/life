@@ -11,5 +11,12 @@ FactoryBot.define do
       frequency { "weekly_count" }
       weekly_target { 3 }
     end
+
+    trait :auto_screen_time do
+      auto { true }
+      metric_key { "screen_time_total" }
+      comparator { "lte" }
+      threshold_value { 3 }
+    end
   end
 end

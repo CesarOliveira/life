@@ -87,6 +87,23 @@ en:
     legend_done: "Done"
     legend_missed: "Missed"
     legend_idle: "Not scheduled"
+    auto: "Automatic habit (from a metric)"
+    auto_hint: "Checks itself based on screen time/sleep/steps. No manual toggle."
+    metric: "Metric"
+    comparator: "Condition"
+    threshold: "Threshold"
+    auto_metric_hint: "E.g. Screen ≤ 3 h, Sleep ≥ 7 h, Steps ≥ 8000."
+    auto_badge: "Auto"
+    auto_badge_hint: "Computed automatically from the metric."
+    auto_locked: "Automatic habit: the check comes from the metric and can't be toggled manually."
+    comparators:
+      lte: "≤ (at most)"
+      gte: "≥ (at least)"
+    auto_metrics:
+      screen_time_total: "Screen time (daily total)"
+      sleep_hours: "Sleep"
+      steps: "Steps"
+      resting_hr: "Resting HR"
     flash:
       created: "Habit created."
       updated: "Habit updated."
@@ -356,6 +373,9 @@ en:
         weekdays: "Weekdays"
         frequency: "Cadence"
         weekly_target: "Weekly target"
+        metric_key: "Metric"
+        comparator: "Condition"
+        threshold_value: "Threshold"
       account:
         name: "Account name"
         height_cm: "Height (cm)"

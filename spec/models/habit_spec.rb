@@ -39,6 +39,21 @@ RSpec.describe Habit, type: :model do
     end
   end
 
+  describe "automatic habits" do
+    it "requires metric_key, comparator and threshold when auto" do
+      expect(build(:habit, auto: true, metric_key: nil, comparator: "lte", threshold_value: 3)).not_to be_valid
+      expect(build(:habit, auto: true, metric_key: "screen_time_total", comparator: "bad", threshold_value: 3)).not_to be_valid
+      expect(build(:habit, auto: true, metric_key: "screen_time_total", comparator: "lte", threshold_value: nil)).not_to be_valid
+      expect(build(:habit, auto: true, metric_key: "screen_time_total", comparator: "lte", threshold_value: 3)).to be_valid
+    end
+
+    it "is scheduled every day" do
+      habit = build(:habit, :auto_screen_time)
+      expect(habit.scheduled_on?(Date.new(2026, 6, 22))).to be(true)
+      expect(habit.scheduled_on?(Date.new(2026, 6, 23))).to be(true)
+    end
+  end
+
   describe "#effective_weekly_target" do
     it "is the weekly_target for weekly_count" do
       expect(build(:habit, :weekly_count, weekly_target: 4).effective_weekly_target).to eq(4)

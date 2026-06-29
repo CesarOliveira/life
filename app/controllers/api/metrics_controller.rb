@@ -28,7 +28,10 @@ module Api
       end
 
       rows = rows.reverse.uniq { |r| [r[:key], r[:measured_on]] }.reverse
-      Measurement.upsert_all(rows, unique_by: :idx_measurements_unique, record_timestamps: true) if rows.any?
+      if rows.any?
+        Measurement.upsert_all(rows, unique_by: :idx_measurements_unique, record_timestamps: true)
+        HabitRuleEvaluator.new(current_account).evaluate(rows.map { |r| r[:measured_on] })
+      end
 
       render json: { ok: true, upserted: rows.size, skipped: skipped }
     end

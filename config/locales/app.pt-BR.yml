@@ -87,6 +87,23 @@ pt-BR:
     legend_done: "Feito"
     legend_missed: "Perdido"
     legend_idle: "Não agendado"
+    auto: "Hábito automático (de métrica)"
+    auto_hint: "Marca sozinho com base em tela/sono/passos. Sem marcação manual."
+    metric: "Métrica"
+    comparator: "Condição"
+    threshold: "Limiar"
+    auto_metric_hint: "Ex.: Tela ≤ 3 h, Sono ≥ 7 h, Passos ≥ 8000."
+    auto_badge: "Auto"
+    auto_badge_hint: "Calculado automaticamente pela métrica."
+    auto_locked: "Hábito automático: a marcação vem da métrica, não dá para alterar à mão."
+    comparators:
+      lte: "≤ (no máximo)"
+      gte: "≥ (no mínimo)"
+    auto_metrics:
+      screen_time_total: "Tela (total/dia)"
+      sleep_hours: "Sono"
+      steps: "Passos"
+      resting_hr: "FC de repouso"
     flash:
       created: "Hábito criado."
       updated: "Hábito atualizado."
@@ -356,6 +373,9 @@ pt-BR:
         weekdays: "Dias da semana"
         frequency: "Cadência"
         weekly_target: "Meta semanal"
+        metric_key: "Métrica"
+        comparator: "Condição"
+        threshold_value: "Limiar"
       account:
         name: "Nome da conta"
         height_cm: "Altura (cm)"

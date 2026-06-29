@@ -36,7 +36,10 @@ module Api
 
       # upsert_all não aceita duplicatas na mesma chamada: mantém a última ocorrência.
       rows = rows.reverse.uniq { |r| [r[:device], r[:date], r[:bundle_id]] }.reverse
-      AppUsage.upsert_all(rows, unique_by: :idx_app_usages_unique, record_timestamps: true) if rows.any?
+      if rows.any?
+        AppUsage.upsert_all(rows, unique_by: :idx_app_usages_unique, record_timestamps: true)
+        HabitRuleEvaluator.new(current_account).evaluate(rows.map { |r| r[:date] })
+      end
 
       render json: { ok: true, upserted: rows.size, skipped: skipped }
     end

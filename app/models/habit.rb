@@ -8,6 +8,17 @@ class Habit < ApplicationRecord
   # - weekly_count: Nx por semana em qualquer dia (usa `weekly_target`).
   FREQUENCIES = %w[weekly_days weekly_count].freeze
 
+  COMPARATORS = %w[lte gte].freeze
+
+  # Métricas que alimentam hábitos automáticos. `source` define de onde sai o
+  # valor do dia; `unit` é a unidade do limiar exibida ao usuário.
+  AUTO_METRICS = {
+    "screen_time_total" => { source: :app_usage, unit: "h" },
+    "sleep_hours"       => { source: :measurement, measurement_key: "sleep_minutes", unit: "h", scale: (1.0 / 60) },
+    "steps"             => { source: :measurement, measurement_key: "steps", unit: "passos" },
+    "resting_hr"        => { source: :measurement, measurement_key: "resting_hr", unit: "bpm" }
+  }.freeze
+
   belongs_to :account
   has_many :habit_checks, dependent: :destroy
 
@@ -17,10 +28,15 @@ class Habit < ApplicationRecord
   validates :weekly_target,
             numericality: { only_integer: true, greater_than: 0, less_than_or_equal_to: 7 },
             if: :weekly_count?
-  validate :weekdays_within_range, unless: :weekly_count?
+  validate :weekdays_within_range, unless: -> { weekly_count? || auto? }
+
+  validates :metric_key, inclusion: { in: AUTO_METRICS.keys }, if: :auto?
+  validates :comparator, inclusion: { in: COMPARATORS }, if: :auto?
+  validates :threshold_value, presence: true, numericality: true, if: :auto?
 
   scope :active, -> { where(active: true) }
   scope :ordered, -> { order(:position, :created_at) }
+  scope :automatic, -> { where(auto: true) }
 
   def weekly_count?
     frequency == "weekly_count"
@@ -30,15 +46,19 @@ class Habit < ApplicationRecord
     frequency == "weekly_days"
   end
 
+  def auto_metric
+    AUTO_METRICS[metric_key] || {}
+  end
+
   # Hábito diário = agendado em todos os dias da semana.
   def daily?
     weekly_days? && Array(weekdays).map(&:to_i).sort == WEEKDAYS
   end
 
   # O hábito está agendado para esta data?
-  # weekly_count não tem dia fixo: pode ser feito em qualquer dia.
+  # weekly_count e auto são avaliados todos os dias.
   def scheduled_on?(date)
-    return true if weekly_count?
+    return true if weekly_count? || auto?
 
     Array(weekdays).include?(date.wday)
   end

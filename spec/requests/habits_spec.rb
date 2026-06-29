@@ -66,6 +66,24 @@ RSpec.describe "Habits", type: :request do
     end
   end
 
+  describe "automatic habits" do
+    it "creates an auto habit and backfills from existing usage" do
+      create(:app_usage, account: account, date: Date.current, seconds: 1 * 3600) # 1h ≤ 3h
+      post habits_path, params: { habit: { name: "Tela", color: "#000000", auto: "1", metric_key: "screen_time_total", comparator: "lte", threshold_value: "3" } }
+      expect(response).to redirect_to(habits_path)
+
+      habit = account.habits.last
+      expect(habit.auto).to be(true)
+      expect(habit.habit_checks.where(date: Date.current)).to exist
+    end
+
+    it "blocks manual toggle on auto habits" do
+      habit = create(:habit, :auto_screen_time, account: account)
+      post toggle_habit_path(habit), params: { date: Date.current.iso8601 }
+      expect(habit.habit_checks.count).to eq(0)
+    end
+  end
+
   describe "POST /habits/:id/toggle" do
     let(:habit) { create(:habit, account: account) }
 

@@ -23,7 +23,10 @@ class MeasurementsController < ApplicationController
 
     rows = result.rows.map { |row| row.merge(account_id: current_account.id) }
     rows = rows.reverse.uniq { |row| [row[:key], row[:measured_on]] }.reverse
-    Measurement.upsert_all(rows, unique_by: :idx_measurements_unique, record_timestamps: true) if rows.any?
+    if rows.any?
+      Measurement.upsert_all(rows, unique_by: :idx_measurements_unique, record_timestamps: true)
+      HabitRuleEvaluator.new(current_account).evaluate(rows.map { |row| row[:measured_on] })
+    end
 
     redirect_to measurements_path(category: "exam"), notice: t("measurements.pdf.imported", count: rows.size)
   end
@@ -35,6 +38,7 @@ class MeasurementsController < ApplicationController
     apply_catalog_defaults(@measurement)
 
     if @measurement.save
+      HabitRuleEvaluator.new(current_account).evaluate([@measurement.measured_on])
       redirect_to measurements_path(category: @measurement.category), notice: t("flash.measurements.saved")
     else
       @category = Measurement::CATEGORIES.include?(@measurement.category) ? @measurement.category : "health"
