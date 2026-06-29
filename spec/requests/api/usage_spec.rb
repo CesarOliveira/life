@@ -69,6 +69,15 @@ RSpec.describe "API::Usage", type: :request do
     expect(account.app_usages.find_by(bundle_id: "Chrome").seconds).to eq(1883)
   end
 
+  it "accepts apps as a JSON string (Shortcuts may stringify the list)" do
+    post "/api/usage",
+         params: { device: "iphone", date: Date.current.iso8601,
+                   apps: [{ name: "Instagram", duration: "1h" }].to_json }.to_json,
+         headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(account.app_usages.find_by(bundle_id: "Instagram").seconds).to eq(3600)
+  end
+
   it "resolves period 'yesterday' to yesterday's date (no date field needed)" do
     post "/api/usage",
          params: { device: "iphone", period: "yesterday",

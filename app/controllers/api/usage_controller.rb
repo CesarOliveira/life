@@ -23,7 +23,7 @@ module Api
 
       device = data["device"].to_s.strip.first(60).presence || "iphone"
       default_date = default_date_from(data)
-      apps = data["apps"]
+      apps = coerce_apps(data["apps"])
       return render_error("invalid_payload") unless apps.is_a?(Array)
       return render_error("too_many_entries", max: MAX_ENTRIES) if apps.size > MAX_ENTRIES
 
@@ -102,6 +102,20 @@ module Api
       JSON.parse(request.raw_post)
     rescue JSON::ParserError
       {}
+    end
+
+    # `apps` pode chegar como array OU como string JSON (o Atalhos às vezes
+    # serializa a lista como texto). Aceita os dois.
+    def coerce_apps(value)
+      return value if value.is_a?(Array)
+      return nil unless value.is_a?(String)
+
+      parsed = begin
+        JSON.parse(value)
+      rescue JSON::ParserError
+        nil
+      end
+      parsed if parsed.is_a?(Array)
     end
 
     # Data padrão do lote: `date` explícito tem prioridade; senão resolve `period`
