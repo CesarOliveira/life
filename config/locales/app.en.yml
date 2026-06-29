@@ -3,6 +3,7 @@ en:
     dashboard: "Dashboard"
     activity: "Activity"
     habits: "Habits"
+    goals: "Goals"
     weight: "Weight"
     health: "Health"
     screen_time: "Screen time"
@@ -108,6 +109,28 @@ en:
       created: "Habit created."
       updated: "Habit updated."
       removed: "Habit deleted."
+
+  goals:
+    title: "Goals"
+    add: "New goal"
+    name: "Name"
+    name_placeholder: "E.g. Reach 80 kg"
+    metric: "Metric"
+    target: "Target"
+    start: "Start"
+    start_auto: "auto"
+    deadline: "Deadline"
+    target_label: "Target:"
+    start_label: "Start:"
+    deadline_label: "Deadline: %{date}"
+    remaining: "%{value} %{unit} to go"
+    achieved: "Achieved 🎉"
+    achieved_on: "Achieved on %{date} 🎉"
+    no_data: "No metric data yet."
+    empty: "No goals yet. Set your first target!"
+    remove_confirm: "Remove this goal?"
+    metrics:
+      weight: "Weight"
 
   measurements:
     title: "Health"
@@ -360,6 +383,9 @@ en:
     measurements:
       saved: "Measurement logged."
       removed: "Measurement removed."
+    goals:
+      created: "Goal created."
+      removed: "Goal removed."
     screen_time:
       token_regenerated: "Token regenerated."
 
@@ -388,3 +414,9 @@ en:
         measured_on: "Date"
         ref_low: "Ref. low"
         ref_high: "Ref. high"
+      goal:
+        name: "Name"
+        metric_key: "Metric"
+        target_value: "Target"
+        start_value: "Start"
+        deadline: "Deadline"

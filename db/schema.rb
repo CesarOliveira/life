@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_29_000003) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_29_000004) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -38,6 +38,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_29_000003) do
     t.datetime "updated_at", null: false
     t.index ["account_id", "device", "date", "bundle_id"], name: "idx_app_usages_unique", unique: true
     t.index ["account_id"], name: "index_app_usages_on_account_id"
+  end
+
+  create_table "goals", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.date "achieved_on"
+    t.datetime "created_at", null: false
+    t.date "deadline"
+    t.string "metric_key", null: false
+    t.string "name", null: false
+    t.decimal "start_value", precision: 12, scale: 3
+    t.decimal "target_value", precision: 12, scale: 3, null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_goals_on_account_id"
   end
 
   create_table "habit_checks", force: :cascade do |t|
@@ -142,6 +155,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_29_000003) do
 
   add_foreign_key "accounts", "users", column: "owner_id"
   add_foreign_key "app_usages", "accounts"
+  add_foreign_key "goals", "accounts"
   add_foreign_key "habit_checks", "habits"
   add_foreign_key "habits", "accounts"
   add_foreign_key "measurements", "accounts"

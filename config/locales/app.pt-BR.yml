@@ -3,6 +3,7 @@ pt-BR:
     dashboard: "Dashboard"
     activity: "Atividade"
     habits: "Hábitos"
+    goals: "Metas"
     weight: "Peso"
     health: "Saúde"
     screen_time: "Tempo de tela"
@@ -108,6 +109,28 @@ pt-BR:
       created: "Hábito criado."
       updated: "Hábito atualizado."
       removed: "Hábito removido."
+
+  goals:
+    title: "Metas"
+    add: "Nova meta"
+    name: "Nome"
+    name_placeholder: "Ex.: Chegar a 80 kg"
+    metric: "Métrica"
+    target: "Alvo"
+    start: "Início"
+    start_auto: "auto"
+    deadline: "Prazo"
+    target_label: "Alvo:"
+    start_label: "Início:"
+    deadline_label: "Prazo: %{date}"
+    remaining: "Faltam %{value} %{unit}"
+    achieved: "Atingida 🎉"
+    achieved_on: "Atingida em %{date} 🎉"
+    no_data: "Sem dados da métrica ainda."
+    empty: "Nenhuma meta ainda. Defina seu primeiro alvo!"
+    remove_confirm: "Remover esta meta?"
+    metrics:
+      weight: "Peso"
 
   measurements:
     title: "Saúde"
@@ -360,6 +383,9 @@ pt-BR:
     measurements:
       saved: "Medição registrada."
       removed: "Medição removida."
+    goals:
+      created: "Meta criada."
+      removed: "Meta removida."
     screen_time:
       token_regenerated: "Token regenerado."
 
@@ -388,3 +414,9 @@ pt-BR:
         measured_on: "Data"
         ref_low: "Ref. mín"
         ref_high: "Ref. máx"
+      goal:
+        name: "Nome"
+        metric_key: "Métrica"
+        target_value: "Alvo"
+        start_value: "Início"
+        deadline: "Prazo"

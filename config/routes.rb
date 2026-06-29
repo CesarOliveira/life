@@ -32,6 +32,7 @@ Rails.application.routes.draw do
   resources :measurements, only: [:index, :create, :destroy] do
     post :import, on: :collection
   end
+  resources :goals, only: [:index, :create, :destroy]
   get "screen-time", to: "screen_time#index", as: :screen_time
   post "screen-time/token", to: "screen_time#regenerate", as: :regenerate_screen_time_token
 
