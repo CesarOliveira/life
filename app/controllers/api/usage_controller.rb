@@ -24,10 +24,7 @@ module Api
       device = data["device"].to_s.strip.first(60).presence || "iphone"
       default_date = default_date_from(data)
       apps = coerce_apps(data["apps"])
-      unless apps.is_a?(Array)
-        return render json: { error: "invalid_payload", debug: payload_debug(data) },
-                      status: :unprocessable_entity
-      end
+      return render_error("invalid_payload") unless apps.is_a?(Array)
       return render_error("too_many_entries", max: MAX_ENTRIES) if apps.size > MAX_ENTRIES
 
       rows = []
@@ -49,7 +46,8 @@ module Api
     def build_row(entry, device, default_date)
       return nil unless entry.is_a?(Hash)
 
-      name = entry["name"].to_s.strip.first(120).presence
+      # Remove marcas de formatação invisíveis (ex.: LRM antes de "WhatsApp").
+      name = entry["name"].to_s.gsub(/\p{Cf}/, "").strip.first(120).presence
       # O Atalho do iPhone só expõe o NOME do app — sem bundle_id, usa o nome como chave.
       bundle = entry["bundle_id"].to_s.strip.first(200).presence || name
       date = parse_date(entry["date"] || default_date)
@@ -107,28 +105,27 @@ module Api
       {}
     end
 
-    # DEBUG TEMPORÁRIO: mostra o que o Atalho mandou, pra diagnosticar o formato.
-    def payload_debug(data)
-      {
-        data_class: data.class.name,
-        apps_class: (data["apps"].class.name if data.is_a?(Hash)),
-        keys: (data.keys.first(20) if data.is_a?(Hash)),
-        raw: request.raw_post.to_s.first(500)
-      }
-    end
-
-    # `apps` pode chegar como array OU como string JSON (o Atalhos às vezes
-    # serializa a lista como texto). Aceita os dois.
+    # `apps` pode chegar como array, como string JSON (array ou objeto único), ou
+    # como objetos JSON separados por quebra de linha — que é como o Atalhos
+    # serializa a lista "Resultados de Repetição". Normaliza tudo para um array.
     def coerce_apps(value)
       return value if value.is_a?(Array)
       return nil unless value.is_a?(String)
 
-      parsed = begin
-        JSON.parse(value)
-      rescue JSON::ParserError
-        nil
-      end
-      parsed if parsed.is_a?(Array)
+      parsed = safe_json(value)
+      return parsed if parsed.is_a?(Array)
+      return [parsed] if parsed.is_a?(Hash)
+
+      rows = value.split(/\r?\n/).filter_map { |line| safe_json(line) }
+      rows.select { |row| row.is_a?(Hash) }.presence
+    end
+
+    def safe_json(str)
+      return nil if str.to_s.strip.empty?
+
+      JSON.parse(str)
+    rescue JSON::ParserError
+      nil
     end
 
     # Data padrão do lote: `date` explícito tem prioridade; senão resolve `period`

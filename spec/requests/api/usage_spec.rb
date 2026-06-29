@@ -78,6 +78,26 @@ RSpec.describe "API::Usage", type: :request do
     expect(account.app_usages.find_by(bundle_id: "Instagram").seconds).to eq(3600)
   end
 
+  it "accepts apps as newline-delimited JSON objects (Shortcuts list serialization)" do
+    apps_str = [
+      { name: "Instagram", duration: "9.909,861 seg" },
+      { name: "Chrome", duration: "1.882,599 seg" }
+    ].map(&:to_json).join("\n")
+
+    post "/api/usage",
+         params: { device: "iphone", period: "yesterday", apps: apps_str }.to_json,
+         headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(JSON.parse(response.body)["upserted"]).to eq(2)
+    expect(account.app_usages.find_by(bundle_id: "Instagram").seconds).to eq(9910)
+  end
+
+  it "strips invisible format marks from the app name (e.g. LRM before WhatsApp)" do
+    post "/api/usage", params: body(apps: [{ name: "‎WhatsApp", duration: "22min" }]),
+         headers: headers
+    expect(account.app_usages.find_by(bundle_id: "WhatsApp")).to be_present
+  end
+
   it "resolves period 'yesterday' to yesterday's date (no date field needed)" do
     post "/api/usage",
          params: { device: "iphone", period: "yesterday",
