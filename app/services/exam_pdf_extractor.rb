@@ -6,8 +6,8 @@ require "json"
 # (Claude, com leitura de PDF) e devolve linhas prontas para virar `Measurement`
 # (categoria "exam"). Sem chave configurada, degrada com erro "not_configured".
 #
-# Requer ENV["ANTHROPIC_API_KEY"]. Modelo via ENV["LIFE_EXTRACTION_MODEL"]
-# (padrão: claude-sonnet-4-6). O PDF é processado em memória — não é persistido.
+# Requer ENV["ANTHROPIC_API_KEY"]. Modelo fixo: claude-sonnet-4-6. O PDF é
+# processado em memória — não é persistido.
 class ExamPdfExtractor
   Result = Struct.new(:rows, :measured_on, :error, keyword_init: true) do
     def ok?
@@ -16,7 +16,7 @@ class ExamPdfExtractor
   end
 
   API_URL = "https://api.anthropic.com/v1/messages"
-  DEFAULT_MODEL = "claude-sonnet-4-6".freeze
+  MODEL = "claude-sonnet-4-6".freeze
   MAX_BYTES = 15 * 1024 * 1024
   OPEN_TIMEOUT = 15
   READ_TIMEOUT = 120
@@ -100,7 +100,7 @@ class ExamPdfExtractor
 
   def payload(base64_pdf)
     {
-      model: ENV["LIFE_EXTRACTION_MODEL"].presence || DEFAULT_MODEL,
+      model: MODEL,
       max_tokens: 2000,
       messages: [
         {
