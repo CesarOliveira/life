@@ -2,8 +2,10 @@ module Api
   # POST /api/usage — ingestão de tempo de uso por app.
   # Fonte principal: Atalho do iPhone com a ação "Get App & Website Activity"
   # (iOS/macOS 26) → POST aqui. Corpo JSON:
-  #   { "device": "iphone", "date": "2026-06-24",
+  #   { "device": "iphone", "period": "yesterday",
   #     "apps": [ { "name": "Instagram", "duration": "2h 36min" } ] }
+  # A data vem de `date` (ISO) OU de `period` ("today"/"yesterday"/"hoje"/"ontem"),
+  # resolvido no fuso do app — assim o Atalho não precisa montar a data.
   # Cada app aceita `bundle_id` E/OU `name` (se faltar bundle_id, usa o name como
   # chave — o Atalho só tem o nome do app), e o tempo como `seconds`, `minutes` OU
   # `duration` (texto que a ação "Obter Atividade em Apps e Sites" devolve, ex.:
@@ -20,7 +22,7 @@ module Api
       return render_error("invalid_payload") unless data.is_a?(Hash)
 
       device = data["device"].to_s.strip.first(60).presence || "iphone"
-      default_date = data["date"]
+      default_date = default_date_from(data)
       apps = data["apps"]
       return render_error("invalid_payload") unless apps.is_a?(Array)
       return render_error("too_many_entries", max: MAX_ENTRIES) if apps.size > MAX_ENTRIES
@@ -79,24 +81,38 @@ module Api
       !value.nil? && value.to_s.strip.present?
     end
 
-    # "2h 36min" -> 9360. Tolerante a espaços/locale: h/hora, min/m, s/seg.
+    # Entende "2h 36min" e também "9.909,861 seg" (a ação do iPhone devolve a
+    # duração em segundos no formato pt-BR: "." = milhar, "," = decimal).
     def parse_duration_text(text)
       str = text.to_s.downcase
-      hours = number_before(str, /h/)
-      minutes = number_before(str, /m(?:in)?/)
-      seconds = number_before(str, /s/)
+      hours = duration_part(str, /h/)
+      minutes = duration_part(str, /m(?:in)?/)
+      seconds = duration_part(str, /s(?:eg)?/)
       hours * 3600 + minutes * 60 + seconds
     end
 
-    def number_before(str, unit)
-      match = str[/(\d+(?:[.,]\d+)?)\s*#{unit.source}/, 1]
-      match ? match.tr(",", ".").to_f : 0
+    def duration_part(str, unit)
+      token = str[/(\d[\d.,]*)\s*#{unit.source}/, 1]
+      return 0 unless token
+
+      token.delete(".").tr(",", ".").to_f
     end
 
     def parsed_body
       JSON.parse(request.raw_post)
     rescue JSON::ParserError
       {}
+    end
+
+    # Data padrão do lote: `date` explícito tem prioridade; senão resolve `period`
+    # ("today"/"yesterday") no fuso do app, pra o Atalho não precisar montar a data.
+    def default_date_from(data)
+      return data["date"] if data["date"].to_s.strip.present?
+
+      case data["period"].to_s.strip.downcase
+      when "yesterday", "ontem" then (Date.current - 1).iso8601
+      when "today", "hoje" then Date.current.iso8601
+      end
     end
 
     def parse_date(raw)

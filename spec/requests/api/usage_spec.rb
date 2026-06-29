@@ -60,6 +60,23 @@ RSpec.describe "API::Usage", type: :request do
     expect(account.app_usages.find_by(bundle_id: "Waze").seconds).to eq(3600)
   end
 
+  it "parses the pt-BR seconds text the iPhone sends (e.g. '9.909,861 seg')" do
+    post "/api/usage", params: body(apps: [
+      { name: "Instagram", duration: "9.909,861 seg" },
+      { name: "Chrome", duration: "1.882,599 seg" }
+    ]), headers: headers
+    expect(account.app_usages.find_by(bundle_id: "Instagram").seconds).to eq(9910)
+    expect(account.app_usages.find_by(bundle_id: "Chrome").seconds).to eq(1883)
+  end
+
+  it "resolves period 'yesterday' to yesterday's date (no date field needed)" do
+    post "/api/usage",
+         params: { device: "iphone", period: "yesterday",
+                   apps: [{ name: "Instagram", duration: "1h" }] }.to_json,
+         headers: headers
+    expect(account.app_usages.find_by(bundle_id: "Instagram").date).to eq(Date.current - 1)
+  end
+
   it "accepts minutes (fractional) as an alternative to seconds" do
     post "/api/usage", params: body(apps: [{ bundle_id: "com.x", minutes: 1.5 }]), headers: headers
     expect(account.app_usages.find_by(bundle_id: "com.x").seconds).to eq(90)
