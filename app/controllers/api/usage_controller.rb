@@ -24,7 +24,10 @@ module Api
       device = data["device"].to_s.strip.first(60).presence || "iphone"
       default_date = default_date_from(data)
       apps = coerce_apps(data["apps"])
-      return render_error("invalid_payload") unless apps.is_a?(Array)
+      unless apps.is_a?(Array)
+        return render json: { error: "invalid_payload", debug: payload_debug(data) },
+                      status: :unprocessable_entity
+      end
       return render_error("too_many_entries", max: MAX_ENTRIES) if apps.size > MAX_ENTRIES
 
       rows = []
@@ -102,6 +105,16 @@ module Api
       JSON.parse(request.raw_post)
     rescue JSON::ParserError
       {}
+    end
+
+    # DEBUG TEMPORÁRIO: mostra o que o Atalho mandou, pra diagnosticar o formato.
+    def payload_debug(data)
+      {
+        data_class: data.class.name,
+        apps_class: (data["apps"].class.name if data.is_a?(Hash)),
+        keys: (data.keys.first(20) if data.is_a?(Hash)),
+        raw: request.raw_post.to_s.first(500)
+      }
     end
 
     # `apps` pode chegar como array OU como string JSON (o Atalhos às vezes
