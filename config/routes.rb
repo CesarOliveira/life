@@ -26,6 +26,7 @@ Rails.application.routes.draw do
 
   # Domínio de tracking
   get "/activity", to: "activity#index", as: :activity
+  get "/insights", to: "insights#index", as: :insights
   resources :habits
   post "habits/:id/toggle", to: "habit_checks#toggle", as: :toggle_habit
   resources :weights, only: [:index, :create, :destroy]

@@ -1,0 +1,74 @@
+<div class="space-y-6">
+  <div>
+    <h1 class="text-2xl font-bold text-slate-900"><%= t("insights.title") %></h1>
+    <p class="text-sm text-slate-500"><%= t("insights.subtitle", days: @window_days) %></p>
+  </div>
+
+  <%# Seletor de métrica %>
+  <div class="flex flex-wrap items-center gap-2">
+    <% @metrics.each do |key| %>
+      <%= link_to insight_metric_label(key), insights_path(metric: key),
+            class: "rounded-lg px-3 py-1.5 text-xs font-medium #{@metric_key == key ? 'bg-emerald-600 text-white' : 'border border-slate-300 text-slate-600 hover:bg-slate-50'}" %>
+    <% end %>
+  </div>
+
+  <% if !@analysis.enough? %>
+    <div class="rounded-2xl border border-slate-200 bg-white p-10 text-center text-slate-500 shadow-sm">
+      <%= t("insights.not_enough", n: @analysis.n, min: CrossAnalysis::MIN_DAYS) %>
+    </div>
+  <% else %>
+    <%# Resumo em linguagem simples %>
+    <% if @analysis.above_avg && @analysis.below_avg %>
+      <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <p class="text-sm text-slate-700">
+          <%= t("insights.headline_html",
+                 metric: content_tag(:strong, insight_metric_label(@metric_key)),
+                 above: content_tag(:strong, "#{@analysis.above_avg}%"),
+                 below: content_tag(:strong, "#{@analysis.below_avg}%")).html_safe %>
+        </p>
+        <% if @analysis.diff&.nonzero? %>
+          <p class="mt-2">
+            <span class="rounded-full px-2 py-0.5 text-xs font-semibold <%= diff_badge_class(@analysis.diff) %>">
+              <%= @analysis.diff.positive? ? "+#{@analysis.diff}" : @analysis.diff %> <%= t("insights.points") %>
+            </span>
+          </p>
+        <% end %>
+      </section>
+    <% end %>
+
+    <div class="grid gap-4 sm:grid-cols-3">
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <p class="text-xs text-slate-500"><%= t("insights.days_analyzed") %></p>
+        <p class="mt-1 text-2xl font-bold text-slate-900"><%= @analysis.n %></p>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <p class="text-xs text-slate-500"><%= t("insights.correlation") %></p>
+        <p class="mt-1 text-2xl font-bold text-slate-900"><%= number_with_delimiter(@analysis.correlation) %></p>
+        <p class="text-xs text-slate-400"><%= correlation_label(@analysis.correlation) %></p>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <p class="text-xs text-slate-500"><%= t("insights.median") %></p>
+        <p class="mt-1 text-2xl font-bold text-slate-900"><%= number_with_delimiter(@analysis.median.round(1)) %> <span class="text-base font-medium text-slate-400"><%= @analysis.unit %></span></p>
+      </div>
+    </div>
+
+    <%# Comparação acima x abaixo da mediana %>
+    <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 class="mb-4 font-semibold text-slate-900"><%= t("insights.comparison") %></h2>
+      <div class="space-y-4">
+        <% [[@analysis.above_avg, t("insights.above_median")], [@analysis.below_avg, t("insights.below_median")]].each do |value, label| %>
+          <div>
+            <div class="mb-1 flex items-center justify-between text-sm">
+              <span class="text-slate-600"><%= label %></span>
+              <span class="font-semibold text-slate-900"><%= value ? "#{value}%" : "—" %></span>
+            </div>
+            <div class="h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
+              <div class="h-full rounded-full bg-emerald-500" style="width: <%= value.to_i %>%"></div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      <p class="mt-4 text-xs text-slate-400"><%= t("insights.disclaimer") %></p>
+    </section>
+  <% end %>
+</div>

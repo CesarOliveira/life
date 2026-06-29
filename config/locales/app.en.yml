@@ -4,6 +4,7 @@ en:
     activity: "Activity"
     habits: "Habits"
     goals: "Goals"
+    insights: "Insights"
     weight: "Weight"
     health: "Health"
     screen_time: "Screen time"
@@ -109,6 +110,28 @@ en:
       created: "Habit created."
       updated: "Habit updated."
       removed: "Habit deleted."
+
+  insights:
+    title: "Insights"
+    subtitle: "How your health relates to your habits (last %{days} days)."
+    not_enough: "Not enough data to analyze (%{n} of %{min} days needed). Keep logging!"
+    headline_html: "On days with more %{metric}, you complete %{above} of your habits; on days with less, %{below}."
+    points: "points"
+    days_analyzed: "Days analyzed"
+    correlation: "Correlation"
+    median: "Median"
+    comparison: "Adherence by metric level"
+    above_median: "Days above the median"
+    below_median: "Days below the median"
+    disclaimer: "Correlation isn't causation. Use it as a hint, not a verdict."
+    strength:
+      strong: "strong"
+      moderate: "moderate"
+      weak: "weak"
+      none: "no correlation"
+    direction:
+      positive: "positive"
+      negative: "negative"
 
   goals:
     title: "Goals"

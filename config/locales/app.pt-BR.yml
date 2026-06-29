@@ -4,6 +4,7 @@ pt-BR:
     activity: "Atividade"
     habits: "Hábitos"
     goals: "Metas"
+    insights: "Análises"
     weight: "Peso"
     health: "Saúde"
     screen_time: "Tempo de tela"
@@ -109,6 +110,28 @@ pt-BR:
       created: "Hábito criado."
       updated: "Hábito atualizado."
       removed: "Hábito removido."
+
+  insights:
+    title: "Análises"
+    subtitle: "Como sua saúde se relaciona com seus hábitos (últimos %{days} dias)."
+    not_enough: "Dados insuficientes para analisar (%{n} de %{min} dias necessários). Continue registrando!"
+    headline_html: "Em dias com mais %{metric}, você cumpre %{above} dos hábitos; em dias com menos, %{below}."
+    points: "pontos"
+    days_analyzed: "Dias analisados"
+    correlation: "Correlação"
+    median: "Mediana"
+    comparison: "Aderência por nível da métrica"
+    above_median: "Dias acima da mediana"
+    below_median: "Dias abaixo da mediana"
+    disclaimer: "Correlação não é causa. Use como pista, não veredito."
+    strength:
+      strong: "forte"
+      moderate: "moderada"
+      weak: "fraca"
+      none: "sem correlação"
+    direction:
+      positive: "positiva"
+      negative: "negativa"
 
   goals:
     title: "Metas"
