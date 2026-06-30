@@ -194,6 +194,8 @@ pt-BR:
         extraction_failed: "Não foi possível extrair os dados do PDF."
     keys:
       sleep_minutes: "Sono (min)"
+      sleep_bedtime: "Hora de dormir"
+      sleep_wake: "Hora de acordar"
       steps: "Passos"
       resting_hr: "FC de repouso"
       active_energy: "Energia ativa"

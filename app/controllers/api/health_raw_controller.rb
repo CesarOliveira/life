@@ -1,20 +1,30 @@
 module Api
-  # POST /api/health_raw?key=steps&period=today&client_version=v5
+  # POST /api/health_raw?key=steps&period=today&client_version=v9
   #
-  # Corpo = amostras CRUAS de Saúde (texto, como o Atalho serializa a lista de
-  # amostras). O atalho NÃO calcula nada: só coleta as amostras e envia. Toda a
-  # agregação (somar passos, média de FC, etc.) acontece AQUI, no Rails.
+  # Corpo = dados CRUAS de Saúde (um por linha), como o Atalho serializa. O atalho
+  # NÃO calcula nada: só coleta e envia. Toda a agregação acontece AQUI, no Rails.
   #
-  # A resposta inclui `raw_preview` (trecho do corpo recebido) para diagnosticar
-  # o formato vindo do iPhone, `value` (agregado) e `client_version` (confirma
-  # qual versão do atalho rodou — evita arquivo cacheado).
+  # Métricas numéricas (steps, resting_hr...): soma ou média das linhas.
+  # Sono (sleep_start / sleep_end): cada linha é um horário (início/fim de uma
+  # amostra). Calculamos dormiu = menor início, acordou = maior fim, e
+  # horas dormidas = acordou - dormiu (janela de sono), gravando sleep_bedtime,
+  # sleep_wake e sleep_minutes.
+  #
+  # A resposta inclui `raw_preview` (trecho do corpo) para diagnosticar o formato
+  # vindo do iPhone, `value` (agregado) e `client_version` (confirma a versão).
   class HealthRawController < BaseController
-    # Como agregar cada métrica a partir das amostras cruas.
+    # Como agregar cada métrica numérica.
     AGG = {
       "steps" => :sum,
       "active_energy" => :sum,
       "sleep_minutes" => :sum,
       "resting_hr" => :avg
+    }.freeze
+
+    # Chaves de sono: cada linha é um horário; reduzimos por min/max.
+    SLEEP_TIME = {
+      "sleep_start" => { reduce: :min, store: "sleep_bedtime" },
+      "sleep_end" => { reduce: :max, store: "sleep_wake" }
     }.freeze
 
     def create
@@ -25,23 +35,47 @@ module Api
       return render_error("invalid_date") if date.nil? || !date_in_window?(date)
 
       raw = request.raw_post.to_s
-      values = parse_values(raw)
-      value = aggregate(key, values)
-
-      upserted = store(key, value, date)
+      result = SLEEP_TIME.key?(key) ? handle_sleep_time(key, raw, date) : handle_numeric(key, raw, date)
 
       render json: {
         ok: true,
         key: key,
-        samples: values.size,
-        value: value,
-        upserted: upserted,
+        **result,
         client_version: params[:client_version].to_s.first(40).presence,
         raw_preview: raw[0, 300]
       }
     end
 
     private
+
+    def handle_numeric(key, raw, date)
+      values = parse_values(raw)
+      value = aggregate(key, values)
+      { samples: values.size, value: value, upserted: store(key, value, date) }
+    end
+
+    # Sono: linhas são horários. Reduz por min/max, grava o horário (minutos
+    # desde a meia-noite) e recalcula a duração quando dormiu e acordou existirem.
+    def handle_sleep_time(key, raw, date)
+      cfg = SLEEP_TIME.fetch(key)
+      times = parse_times(raw)
+      return { samples: 0, value: nil, upserted: 0 } if times.empty?
+
+      chosen = cfg[:reduce] == :min ? times.min : times.max
+      minutes = (chosen.hour * 60) + chosen.min
+      upserted = store(cfg[:store], minutes, date)
+      recompute_sleep_minutes(date)
+      { samples: times.size, value: minutes, stored: cfg[:store], upserted: upserted }
+    end
+
+    # horas dormidas = acordou - dormiu (com wrap de meia-noite).
+    def recompute_sleep_minutes(date)
+      bedtime = current_account.measurements.find_by(key: "sleep_bedtime", measured_on: date)&.value
+      wake = current_account.measurements.find_by(key: "sleep_wake", measured_on: date)&.value
+      return if bedtime.nil? || wake.nil?
+
+      store("sleep_minutes", (wake.to_i - bedtime.to_i) % 1440, date)
+    end
 
     def store(key, value, date)
       return 0 if value.nil?
@@ -68,6 +102,17 @@ module Api
       raw.split(/[\r\n]+/).filter_map do |line|
         token = line[/-?\d[\d.,]*/]
         numeric(token) if token
+      end
+    end
+
+    # Converte cada linha num horário. Aceita ISO 8601 e formatos comuns.
+    def parse_times(raw)
+      raw.split(/[\r\n]+/).filter_map do |line|
+        next if line.strip.empty?
+
+        Time.zone.parse(line.strip)
+      rescue ArgumentError
+        nil
       end
     end
 

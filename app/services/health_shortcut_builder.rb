@@ -21,7 +21,7 @@
 class HealthShortcutBuilder
   # Marcador de versão: vai na query ("client_version"); o servidor devolve na
   # resposta. Bumpe a cada build p/ confirmar que NÃO baixou arquivo cacheado.
-  VERSION = "v8".freeze
+  VERSION = "v9".freeze
 
   TOKEN_UUID = "11111111-1111-1111-1111-111111111111".freeze
   REPEAT_ITEM_VAR = "Repeat Item".freeze # nome interno (inglês) do item do laço
@@ -29,10 +29,15 @@ class HealthShortcutBuilder
   TOKEN_ACTION_INDEX = 0 # a ação Texto do token é a primeira
 
   # Métricas coletadas. `type` é o rótulo do tipo no seletor da Saúde.
+  # `property` é o detalhe extraído de cada amostra ("Value", "Start Date"...).
   # `suffix` torna os UUIDs únicos por bloco (precisa ser 1 hex).
+  # Sono: enviamos início e fim de cada amostra; o Rails calcula dormiu (menor
+  # início), acordou (maior fim) e horas dormidas (acordou - dormiu).
   METRICS = [
-    { key: "steps", type: "Steps", suffix: "a" },
-    { key: "resting_hr", type: "Resting Heart Rate", suffix: "b" }
+    { key: "steps", type: "Steps", property: "Value", suffix: "a" },
+    { key: "resting_hr", type: "Resting Heart Rate", property: "Value", suffix: "b" },
+    { key: "sleep_start", type: "Sleep Analysis", property: "Start Date", suffix: "c" },
+    { key: "sleep_end", type: "Sleep Analysis", property: "End Date", suffix: "d" }
   ].freeze
 
   def initialize(endpoint:)
@@ -131,7 +136,7 @@ class HealthShortcutBuilder
     [
       health_find_action(u[:find], type_label: metric[:type]),
       repeat_start_action(u[:group], u[:find]),
-      detail_value_action(u[:detail]),
+      detail_value_action(u[:detail], metric.fetch(:property, "Value")),
       repeat_end_action(u[:group], u[:repeat_end]),
       combine_text_action(u[:combine], u[:repeat_end]),
       post_action(metric[:key], u[:combine])
@@ -156,8 +161,9 @@ class HealthShortcutBuilder
     XML
   end
 
-  # Obter Detalhes -> "Valor" do Item de Repetição (número puro; leitura, não cálculo).
-  def detail_value_action(uuid)
+  # Obter Detalhes -> propriedade do Item de Repetição (Valor/Início/Fim).
+  # Leitura, não cálculo.
+  def detail_value_action(uuid, property)
     <<~XML
       <dict>
         <key>WFWorkflowActionIdentifier</key>
@@ -167,7 +173,7 @@ class HealthShortcutBuilder
           <key>UUID</key>
           <string>#{uuid}</string>
           <key>WFContentItemPropertyName</key>
-          <string>Value</string>
+          <string>#{xml_escape(property)}</string>
           <key>WFInput</key>
           #{named_variable(REPEAT_ITEM_VAR)}
         </dict>

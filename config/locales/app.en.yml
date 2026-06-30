@@ -194,6 +194,8 @@ en:
         extraction_failed: "Couldn't extract data from the PDF."
     keys:
       sleep_minutes: "Sleep (min)"
+      sleep_bedtime: "Bedtime"
+      sleep_wake: "Wake time"
       steps: "Steps"
       resting_hr: "Resting HR"
       active_energy: "Active energy"
