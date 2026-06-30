@@ -1,5 +1,6 @@
 class HabitsController < ApplicationController
   before_action :set_habit, only: %i[show edit update destroy]
+  before_action :load_apps, only: %i[new create edit update]
 
   def index
     @today = Date.current
@@ -52,6 +53,13 @@ class HabitsController < ApplicationController
     @habit = current_account.habits.find(params[:id])
   end
 
+  # Apps disponíveis para o seletor do hábito "rede social" (bundle_id -> nome).
+  def load_apps
+    names = current_account.app_usages.where.not(name: nil).group(:bundle_id).maximum(:name)
+    @apps = current_account.app_usages.distinct.pluck(:bundle_id).sort
+                           .map { |bundle_id| { bundle_id: bundle_id, name: names[bundle_id].presence || bundle_id } }
+  end
+
   # Backfill da janela recente quando o hábito é automático (preenche o histórico
   # a partir dos dados já existentes de tela/saúde).
   def backfill_auto(habit)
@@ -65,7 +73,7 @@ class HabitsController < ApplicationController
     permitted = params.require(:habit)
                       .permit(:name, :description, :color, :active, :position,
                               :frequency, :weekly_target, :auto, :metric_key, :comparator, :threshold_value,
-                              weekdays: [])
+                              weekdays: [], app_bundle_ids: [])
     permitted[:auto] = ActiveModel::Type::Boolean.new.cast(permitted[:auto]) ? true : false
 
     if permitted[:auto]
@@ -73,13 +81,33 @@ class HabitsController < ApplicationController
       permitted[:frequency] = "weekly_days"
       permitted[:weekdays] = Habit::WEEKDAYS
       permitted[:weekly_target] = nil
+      apply_auto_rule(permitted)
     else
       permitted.merge!(non_auto_cadence(permitted))
       permitted[:metric_key] = nil
       permitted[:comparator] = nil
       permitted[:threshold_value] = nil
+      permitted[:app_bundle_ids] = []
     end
     permitted
+  end
+
+  # Normaliza a regra de um hábito automático: limiar de horário (HH:MM -> min)
+  # e lista de apps (só para a métrica de apps).
+  def apply_auto_rule(permitted)
+    meta = Habit::AUTO_METRICS[permitted[:metric_key]] || {}
+
+    if meta[:time_of_day]
+      time = params.dig(:habit, :threshold_time).to_s
+      permitted[:threshold_value] = time =~ /\A(\d{1,2}):(\d{2})\z/ ? (::Regexp.last_match(1).to_i * 60) + ::Regexp.last_match(2).to_i : permitted[:threshold_value]
+    end
+
+    permitted[:app_bundle_ids] =
+      if meta[:apps]
+        Array(permitted[:app_bundle_ids]).reject(&:blank?).uniq
+      else
+        []
+      end
   end
 
   def non_auto_cadence(permitted)

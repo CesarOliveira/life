@@ -95,7 +95,10 @@ en:
     metric: "Metric"
     comparator: "Condition"
     threshold: "Threshold"
-    auto_metric_hint: "E.g. Screen ≤ 3 h, Sleep ≥ 7 h, Steps ≥ 8000."
+    threshold_time: "Time"
+    apps_label: "Apps that count"
+    no_apps_yet: "No app data yet. Use Screen time first."
+    auto_metric_hint: "E.g. Screen ≤ 3 h, Sleep ≥ 7 h, Bedtime ≤ 00:30, Social ≤ 2 h."
     auto_badge: "Auto"
     auto_badge_hint: "Computed automatically from the metric."
     auto_locked: "Automatic habit: the check comes from the metric and can't be toggled manually."
@@ -104,7 +107,9 @@ en:
       gte: "≥ (at least)"
     auto_metrics:
       screen_time_total: "Screen time (daily total)"
+      social_apps: "Social media (chosen apps)"
       sleep_hours: "Sleep"
+      sleep_bedtime: "Bedtime"
       steps: "Steps"
       resting_hr: "Resting HR"
     flash:

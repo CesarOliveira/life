@@ -36,6 +36,7 @@
       <%= f.select :metric_key,
             options_for_select(Habit::AUTO_METRICS.keys.map { |k| [t("habits.auto_metrics.#{k}"), k] }, @habit.metric_key),
             { include_blank: false },
+            data: { habit_form_target: "metric", action: "change->habit-form#toggleMetric" },
             class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
     </div>
     <div class="flex items-end gap-3">
@@ -46,12 +47,36 @@
               {},
               class: "rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
       </div>
-      <div>
+      <div data-habit-form-target="numberThreshold">
         <%= f.label :threshold_value, t("habits.threshold"), class: "mb-1 block text-sm font-medium text-slate-700" %>
         <%= f.number_field :threshold_value, step: "any",
               class: "w-28 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
       </div>
+      <div data-habit-form-target="timeThreshold" class="hidden">
+        <label class="mb-1 block text-sm font-medium text-slate-700"><%= t("habits.threshold_time") %></label>
+        <% time_value = @habit.time_of_day_metric? ? format("%02d:%02d", @habit.threshold_value.to_i / 60, @habit.threshold_value.to_i % 60) : "" %>
+        <%= text_field_tag "habit[threshold_time]", time_value, type: "time",
+              class: "rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+      </div>
     </div>
+
+    <div data-habit-form-target="appPicker" class="hidden">
+      <span class="mb-1 block text-sm font-medium text-slate-700"><%= t("habits.apps_label") %></span>
+      <% if @apps.present? %>
+        <%= hidden_field_tag "habit[app_bundle_ids][]", "" %>
+        <div class="flex flex-wrap gap-2">
+          <% @apps.each do |a| %>
+            <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50">
+              <%= check_box_tag "habit[app_bundle_ids][]", a[:bundle_id], Array(@habit.app_bundle_ids).include?(a[:bundle_id]), class: "accent-emerald-600" %>
+              <%= a[:name] %>
+            </label>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="text-xs text-slate-500"><%= t("habits.no_apps_yet") %></p>
+      <% end %>
+    </div>
+
     <p class="text-xs text-slate-500"><%= t("habits.auto_metric_hint") %></p>
   </div>
 

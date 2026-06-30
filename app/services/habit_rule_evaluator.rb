@@ -43,11 +43,24 @@ class HabitRuleEvaluator
   end
 
   def satisfied?(habit, value)
+    threshold = habit.threshold_value.to_f
+    if habit.time_of_day_metric?
+      value = night_minutes(value)
+      threshold = night_minutes(threshold)
+    end
+
     case habit.comparator
-    when "lte" then value <= habit.threshold_value
-    when "gte" then value >= habit.threshold_value
+    when "lte" then value <= threshold
+    when "gte" then value >= threshold
     else false
     end
+  end
+
+  # Horários no "ciclo da noite": tarde/noite (>= 12h) viram offset negativo da
+  # meia-noite, p/ que 23:30 conte como ANTES de 00:30. Manhãs ficam iguais.
+  def night_minutes(minutes)
+    minutes = minutes.to_f
+    minutes >= 720 ? minutes - 1440 : minutes
   end
 
   # Valor da métrica do hábito naquele dia, ou nil se não houver dado.
@@ -55,10 +68,11 @@ class HabitRuleEvaluator
     meta = habit.auto_metric
     case meta[:source]
     when :app_usage
-      usages = @account.app_usages.where(date: date)
-      return nil unless usages.exists?
+      day = @account.app_usages.where(date: date)
+      return nil unless day.exists? # nenhum dado no dia (não sincronizou) -> não mexe
 
-      usages.sum(:seconds) / 3600.0
+      scope = meta[:apps] ? day.where(bundle_id: Array(habit.app_bundle_ids)) : day
+      scope.sum(:seconds) / 3600.0 # apps escolhidos sem uso = 0 (cumpre o máximo)
     when :measurement
       measurement = @account.measurements.find_by(key: meta[:measurement_key], measured_on: date)
       return nil unless measurement

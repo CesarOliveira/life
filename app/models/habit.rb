@@ -12,9 +12,14 @@ class Habit < ApplicationRecord
 
   # Métricas que alimentam hábitos automáticos. `source` define de onde sai o
   # valor do dia; `unit` é a unidade do limiar exibida ao usuário.
+  # - `apps: true`     -> soma só os apps escolhidos (app_bundle_ids).
+  # - `time_of_day: true` -> o valor/limiar é um horário (minutos desde meia-noite),
+  #   comparado com ciclo de meia-noite (ver HabitRuleEvaluator).
   AUTO_METRICS = {
     "screen_time_total" => { source: :app_usage, unit: "h" },
+    "social_apps"       => { source: :app_usage, unit: "h", apps: true },
     "sleep_hours"       => { source: :measurement, measurement_key: "sleep_minutes", unit: "h", scale: (1.0 / 60) },
+    "sleep_bedtime"     => { source: :measurement, measurement_key: "sleep_bedtime", unit: "hh:mm", time_of_day: true },
     "steps"             => { source: :measurement, measurement_key: "steps", unit: "passos" },
     "resting_hr"        => { source: :measurement, measurement_key: "resting_hr", unit: "bpm" }
   }.freeze
@@ -33,6 +38,7 @@ class Habit < ApplicationRecord
   validates :metric_key, inclusion: { in: AUTO_METRICS.keys }, if: :auto?
   validates :comparator, inclusion: { in: COMPARATORS }, if: :auto?
   validates :threshold_value, presence: true, numericality: true, if: :auto?
+  validate :apps_selected_for_app_metric, if: :auto?
 
   scope :active, -> { where(active: true) }
   scope :ordered, -> { order(:position, :created_at) }
@@ -48,6 +54,16 @@ class Habit < ApplicationRecord
 
   def auto_metric
     AUTO_METRICS[metric_key] || {}
+  end
+
+  # A métrica soma apenas apps escolhidos?
+  def app_filtered?
+    auto? && auto_metric[:apps] == true
+  end
+
+  # O limiar é um horário (minutos desde a meia-noite)?
+  def time_of_day_metric?
+    auto? && auto_metric[:time_of_day] == true
   end
 
   # Hábito diário = agendado em todos os dias da semana.
@@ -86,5 +102,11 @@ class Habit < ApplicationRecord
     elsif days.any? { |d| !WEEKDAYS.include?(d.to_i) }
       errors.add(:weekdays, "contém um dia inválido")
     end
+  end
+
+  def apps_selected_for_app_metric
+    return unless auto_metric[:apps]
+
+    errors.add(:app_bundle_ids, :blank) if Array(app_bundle_ids).reject(&:blank?).empty?
   end
 end

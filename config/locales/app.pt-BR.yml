@@ -95,7 +95,10 @@ pt-BR:
     metric: "Métrica"
     comparator: "Condição"
     threshold: "Limiar"
-    auto_metric_hint: "Ex.: Tela ≤ 3 h, Sono ≥ 7 h, Passos ≥ 8000."
+    threshold_time: "Horário"
+    apps_label: "Apps que contam"
+    no_apps_yet: "Nenhum app com dados ainda. Use o Tempo de tela primeiro."
+    auto_metric_hint: "Ex.: Tela ≤ 3 h, Sono ≥ 7 h, Dormir ≤ 00:30, Rede social ≤ 2 h."
     auto_badge: "Auto"
     auto_badge_hint: "Calculado automaticamente pela métrica."
     auto_locked: "Hábito automático: a marcação vem da métrica, não dá para alterar à mão."
@@ -104,7 +107,9 @@ pt-BR:
       gte: "≥ (no mínimo)"
     auto_metrics:
       screen_time_total: "Tela (total/dia)"
+      social_apps: "Rede social (apps escolhidos)"
       sleep_hours: "Sono"
+      sleep_bedtime: "Hora de dormir"
       steps: "Passos"
       resting_hr: "FC de repouso"
     flash:
