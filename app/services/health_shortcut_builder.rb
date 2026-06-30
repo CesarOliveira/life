@@ -4,21 +4,22 @@
 #
 # Regenerar e reassinar (rodar no Mac, na raiz do repo):
 #   ruby -e 'require "./app/services/health_shortcut_builder"; \
-#     print HealthShortcutBuilder.new(endpoint: "https://life.cesaroliveira.online/api/metrics").plist' \
+#     print HealthShortcutBuilder.new(endpoint: "https://life.cesaroliveira.online/api/health_raw").plist' \
 #     > /tmp/sc.shortcut
 #   shortcuts sign --mode anyone --input /tmp/sc.shortcut --output public/shortcuts/saude-life.shortcut
 #
-# v3: token perguntado no import (sem edição manual) + passos reais.
-#   Ordem importa: a "Somar" vem LOGO DEPOIS da busca de passos, e o Texto do
-#   token vem DEPOIS — assim o encaixe automático do iOS (caso o link explícito
-#   falhe) pega a ação anterior correta, não o token.
-#   Ações: [Localizar passos] -> [Somar] -> [Texto JSON c/ soma] -> [Texto token] -> [POST]
+# v5 — "cano burro": o atalho NÃO calcula nada. Só coleta as amostras de passos
+# e ENVIA cruas; o Rails (POST /api/health_raw) soma e grava.
+#   Ações: [Localizar passos] -> [Texto = amostras] -> [Texto token] -> [POST]
 # O caractere U+FFFC (￼) marca onde uma variável é inserida no texto.
 class HealthShortcutBuilder
-  TOKEN_UUID = "11111111-1111-1111-1111-111111111111".freeze
+  # Marcador de versão: vai na query ("client_version") e o servidor devolve na
+  # resposta. Bumpe a cada build para confirmar que NÃO baixou arquivo cacheado.
+  VERSION = "v5".freeze
+
   STEPS_FIND_UUID = "22222222-2222-2222-2222-222222222222".freeze
-  STEPS_SUM_UUID = "33333333-3333-3333-3333-333333333333".freeze
-  BODY_UUID = "44444444-4444-4444-4444-444444444444".freeze
+  RAW_TEXT_UUID = "33333333-3333-3333-3333-333333333333".freeze
+  TOKEN_UUID = "11111111-1111-1111-1111-111111111111".freeze
   OBJ = "\u{FFFC}".freeze # placeholder de anexo (object replacement char)
 
   def initialize(endpoint:)
@@ -27,6 +28,11 @@ class HealthShortcutBuilder
 
   def filename
     "Saude-Life.shortcut"
+  end
+
+  # URL com metadados na query (a versão fica embutida no arquivo assinado).
+  def post_url
+    "#{@endpoint}?key=steps&period=today&client_version=#{VERSION}"
   end
 
   def plist
@@ -62,8 +68,7 @@ class HealthShortcutBuilder
         <key>WFWorkflowActions</key>
         <array>
           #{steps_find_action}
-          #{steps_sum_action}
-          #{body_action}
+          #{raw_text_action}
           #{token_action}
           #{post_action}
         </array>
@@ -74,7 +79,7 @@ class HealthShortcutBuilder
 
   private
 
-  # Pergunta o token na hora de instalar e preenche a ação Texto do token (índice 3).
+  # Pergunta o token na hora de instalar e preenche a ação Texto do token (índice 2).
   def import_questions
     <<~XML
       <array>
@@ -84,7 +89,7 @@ class HealthShortcutBuilder
           <key>Category</key>
           <string>Parameter</string>
           <key>ActionIndex</key>
-          <integer>3</integer>
+          <integer>2</integer>
           <key>Text</key>
           <string>Cole seu token do Life (página Tempo de tela)</string>
           <key>DefaultValue</key>
@@ -94,25 +99,13 @@ class HealthShortcutBuilder
     XML
   end
 
-  def token_action
-    text_action(TOKEN_UUID, "")
-  end
-
   # Localizar Amostras de Saúde: Passos, Data de Início nos últimos 1 dia.
   def steps_find_action
     health_find_action(STEPS_FIND_UUID, type_label: "Steps")
   end
 
-  # Calcular Estatísticas: Soma. SEM WFInput — usa o encaixe automático do iOS,
-  # somando a saída da ação anterior (Localizar passos). O link explícito por
-  # UUID não casa na importação para a saída do "Localizar Amostras".
-  def steps_sum_action
-    statistics_action(STEPS_SUM_UUID, operation: "Sum")
-  end
-
-  # Texto com o JSON do corpo, inserindo a soma de passos (como string).
-  def body_action
-    json = %({"period":"yesterday","metrics":[{"key":"steps","value":"#{OBJ}"}]})
+  # Texto = a lista de amostras (coerção para texto). Sem cálculo: é só coleta.
+  def raw_text_action
     <<~XML
       <dict>
         <key>WFWorkflowActionIdentifier</key>
@@ -120,12 +113,16 @@ class HealthShortcutBuilder
         <key>WFWorkflowActionParameters</key>
         <dict>
           <key>UUID</key>
-          <string>#{BODY_UUID}</string>
+          <string>#{RAW_TEXT_UUID}</string>
           <key>WFTextActionText</key>
-          #{attachment_token(json, STEPS_SUM_UUID, "Statistics Result")}
+          #{attachment_token(OBJ.dup, STEPS_FIND_UUID, "Health Samples")}
         </dict>
       </dict>
     XML
+  end
+
+  def token_action
+    text_action(TOKEN_UUID, "")
   end
 
   def post_action
@@ -136,7 +133,7 @@ class HealthShortcutBuilder
         <key>WFWorkflowActionParameters</key>
         <dict>
           <key>WFURL</key>
-          <string>#{xml_escape(@endpoint)}</string>
+          <string>#{xml_escape(post_url)}</string>
           <key>WFHTTPMethod</key>
           <string>POST</string>
           <key>WFHTTPHeaders</key>
@@ -144,7 +141,7 @@ class HealthShortcutBuilder
           <key>WFHTTPBodyType</key>
           <string>File</string>
           <key>WFRequestVariable</key>
-          #{output_variable(BODY_UUID, "Text")}
+          #{output_variable(RAW_TEXT_UUID, "Text")}
         </dict>
       </dict>
     XML
@@ -234,22 +231,6 @@ class HealthShortcutBuilder
     XML
   end
 
-  def statistics_action(uuid, operation:)
-    <<~XML
-      <dict>
-        <key>WFWorkflowActionIdentifier</key>
-        <string>is.workflow.actions.statistics</string>
-        <key>WFWorkflowActionParameters</key>
-        <dict>
-          <key>UUID</key>
-          <string>#{uuid}</string>
-          <key>WFStatisticsOperation</key>
-          <string>#{operation}</string>
-        </dict>
-      </dict>
-    XML
-  end
-
   # --- helpers de tokens/variáveis ---
 
   # Referência a toda a saída de uma ação (variável inteira).
@@ -323,7 +304,7 @@ class HealthShortcutBuilder
           <key>WFDictionaryFieldValueItems</key>
           <array>
             #{header_item(plain_text_token("Authorization"), attachment_token("Bearer #{OBJ}", TOKEN_UUID, "Token"))}
-            #{header_item(plain_text_token("Content-Type"), plain_text_token("application/json"))}
+            #{header_item(plain_text_token("Content-Type"), plain_text_token("text/plain"))}
           </array>
         </dict>
       </dict>

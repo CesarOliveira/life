@@ -33,7 +33,9 @@ module Api
         HabitRuleEvaluator.new(current_account).evaluate(rows.map { |r| r[:measured_on] })
       end
 
-      render json: { ok: true, upserted: rows.size, skipped: skipped }
+      response = { ok: true, upserted: rows.size, skipped: skipped }
+      response[:client_version] = data["client_version"].to_s.first(40) if data["client_version"].present?
+      render json: response
     end
 
     private

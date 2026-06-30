@@ -45,6 +45,7 @@ Rails.application.routes.draw do
   namespace :api do
     post "usage", to: "usage#create"
     post "metrics", to: "metrics#create"
+    post "health_raw", to: "health_raw#create"
   end
 
   namespace :admin do
