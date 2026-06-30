@@ -18,13 +18,15 @@
       <ul class="space-y-3">
         <% @apps.each do |a| %>
           <li>
-            <div class="mb-1 flex items-center justify-between gap-3 text-sm">
-              <span class="truncate font-medium text-slate-700"><%= a[:name] %></span>
-              <span class="shrink-0 text-slate-500"><%= humanize_duration(a[:seconds]) %></span>
-            </div>
-            <div class="h-2 w-full rounded-full bg-slate-100">
-              <div class="h-2 rounded-full bg-emerald-500" style="width: <%= @max_app.zero? ? 0 : (a[:seconds] * 100 / @max_app) %>%"></div>
-            </div>
+            <%= link_to screen_time_app_path(bundle_id: a[:bundle_id]), class: "block rounded-lg -mx-2 px-2 py-1 hover:bg-slate-50" do %>
+              <div class="mb-1 flex items-center justify-between gap-3 text-sm">
+                <span class="truncate font-medium text-slate-700"><%= a[:name] %></span>
+                <span class="shrink-0 text-slate-500"><%= humanize_duration(a[:seconds]) %> ›</span>
+              </div>
+              <div class="h-2 w-full rounded-full bg-slate-100">
+                <div class="h-2 rounded-full bg-emerald-500" style="width: <%= @max_app.zero? ? 0 : (a[:seconds] * 100 / @max_app) %>%"></div>
+              </div>
+            <% end %>
           </li>
         <% end %>
       </ul>
@@ -44,10 +46,10 @@
         <p class="mb-1 text-xs font-medium text-slate-600"><%= t("screen_time.endpoint_label") %></p>
         <code class="block break-all rounded-lg bg-slate-100 px-3 py-2 text-xs text-slate-700"><%= api_usage_url %></code>
       </div>
-      <div data-controller="clipboard" data-clipboard-copied-value="<%= t("screen_time.copied") %>" data-clipboard-label-value="<%= t("screen_time.copy") %>">
+      <div data-controller="clipboard" data-clipboard-copied-value="<%= t("screen_time.copied") %>" data-clipboard-label-value="<%= t("screen_time.copy") %>" data-clipboard-fetch-url-value="<%= screen_time_token_path %>">
         <p class="mb-1 text-xs font-medium text-slate-600"><%= t("screen_time.token_label") %></p>
         <div class="flex items-stretch gap-2">
-          <code data-clipboard-target="source" class="block flex-1 break-all rounded-lg bg-slate-100 px-3 py-2 text-xs text-slate-700"><%= @token %></code>
+          <code class="block flex-1 break-all rounded-lg bg-slate-100 px-3 py-2 text-xs text-slate-700"><%= masked_token(@token) %></code>
           <button type="button" data-clipboard-target="button" data-action="clipboard#copy"
                   class="shrink-0 rounded-lg border border-slate-300 px-3 text-xs font-medium text-slate-600 hover:bg-slate-50"><%= t("screen_time.copy") %></button>
         </div>

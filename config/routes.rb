@@ -35,6 +35,8 @@ Rails.application.routes.draw do
   end
   resources :goals, only: [:index, :create, :destroy]
   get "screen-time", to: "screen_time#index", as: :screen_time
+  get "screen-time/token", to: "screen_time#token", as: :screen_time_token
+  get "screen-time/app", to: "screen_time#app", as: :screen_time_app
   post "screen-time/token", to: "screen_time#regenerate", as: :regenerate_screen_time_token
 
   # Atalho de Saúde (.shortcut) gerado com o token da conta, para o iPhone enviar

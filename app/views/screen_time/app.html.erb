@@ -1,0 +1,29 @@
+<div class="space-y-6">
+  <div>
+    <%= link_to "‹ #{t('screen_time.app_back')}", screen_time_path, class: "text-sm text-slate-500 hover:text-slate-900" %>
+    <h1 class="mt-1 text-2xl font-bold text-slate-900"><%= @name %></h1>
+    <p class="text-sm text-slate-500"><%= t("screen_time.app_period", days: 30) %></p>
+  </div>
+
+  <% if @chart.any? %>
+    <div class="grid grid-cols-2 gap-3 sm:gap-4">
+      <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <p class="text-xs font-medium uppercase tracking-wide text-slate-400"><%= t("screen_time.app_total") %></p>
+        <p class="mt-1 text-2xl font-bold text-slate-900"><%= humanize_duration(@total) %></p>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <p class="text-xs font-medium uppercase tracking-wide text-slate-400"><%= t("screen_time.app_days") %></p>
+        <p class="mt-1 text-2xl font-bold text-slate-900"><%= @days %></p>
+      </div>
+    </div>
+
+    <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 class="mb-4 font-semibold text-slate-900"><%= t("screen_time.app_daily") %></h2>
+      <%= render "measurements/chart", chart: @chart, unit: t("screen_time.minutes_unit") %>
+    </section>
+  <% else %>
+    <div class="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+      <p class="text-slate-500"><%= t("screen_time.app_empty") %></p>
+    </div>
+  <% end %>
+</div>

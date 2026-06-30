@@ -17,6 +17,28 @@ class ScreenTimeController < ApplicationController
     @max_app = @apps.map { |a| a[:seconds] }.max || 0
   end
 
+  # Token inteiro (texto puro) — buscado pela ação "Copiar" só na hora de copiar,
+  # para não exibir o token completo na página.
+  def token
+    render plain: current_account.api_token.to_s
+  end
+
+  # Histórico diário de um app específico (gráfico).
+  def app
+    @bundle_id = params[:bundle_id].to_s
+    return redirect_to(screen_time_path) if @bundle_id.blank?
+
+    @today = Date.current
+    @range = (@today - 29.days)..@today
+    rows = current_account.app_usages.where(bundle_id: @bundle_id, date: @range)
+    @name = rows.where.not(name: nil).maximum(:name).presence || @bundle_id
+
+    by_date = rows.group(:date).sum(:seconds)
+    @total = by_date.values.sum
+    @days = by_date.size
+    @chart = MetricChart.new(by_date.map { |date, seconds| { date: date, value: (seconds / 60.0).round(1) } })
+  end
+
   def regenerate
     current_account.regenerate_api_token
     redirect_to screen_time_path, notice: t("flash.screen_time.token_regenerated")

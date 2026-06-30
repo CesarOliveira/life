@@ -55,16 +55,35 @@ class Measurement < ApplicationRecord
 
   # Chaves cujo valor é um horário (minutos desde a meia-noite) -> exibir HH:MM.
   TIME_KEYS = %w[sleep_bedtime sleep_wake].freeze
+  # Chaves cujo valor é uma duração em minutos -> exibir "Xh Ym".
+  DURATION_KEYS = %w[sleep_minutes].freeze
 
   def time_of_day?
     TIME_KEYS.include?(key.to_s)
   end
 
-  # Valor formatado para exibição: horários como HH:MM; demais como número.
+  def duration?
+    DURATION_KEYS.include?(key.to_s)
+  end
+
+  # Mostra valor sem a unidade separada (horário ou duração já são auto-explicativos).
+  def self_explanatory?
+    time_of_day? || duration?
+  end
+
+  # Valor formatado para exibição: horários HH:MM; durações "Xh Ym"; demais número.
   def display_value
     return value if value.nil?
     return format("%02d:%02d", value.to_i / 60, value.to_i % 60) if time_of_day?
+    return duration_label if duration?
 
     value == value.to_i ? value.to_i : value
+  end
+
+  def duration_label
+    minutes = value.to_i
+    hours = minutes / 60
+    rest = minutes % 60
+    hours.positive? ? "#{hours}h #{rest}min" : "#{rest}min"
   end
 end
