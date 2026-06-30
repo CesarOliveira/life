@@ -29,9 +29,16 @@ RSpec.describe HealthShortcutBuilder do
     expect(xml).to include("key=resting_hr")
   end
 
-  it "has a distinct find action per metric" do
+  it "has a find action per metric and a POST per metric plus screen time" do
     expect(xml.scan("is.workflow.actions.filter.health.quantity").size).to eq(described_class::METRICS.size)
-    expect(xml.scan("is.workflow.actions.downloadurl").size).to eq(described_class::METRICS.size)
+    # um POST por métrica de saúde + um POST de tempo de tela
+    expect(xml.scan("is.workflow.actions.downloadurl").size).to eq(described_class::METRICS.size + 1)
+  end
+
+  it "includes the screen-time block (App Activity -> usage_raw)" do
+    expect(xml).to include(described_class::ACTIVITY_ACTION_ID)
+    expect(xml).to include("/api/usage_raw")
+    expect(xml).to include("activityType")
   end
 
   it "asks for the token at import time, targeting the token action index" do

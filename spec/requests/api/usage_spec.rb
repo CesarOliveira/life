@@ -154,4 +154,24 @@ RSpec.describe "API::Usage", type: :request do
     post "/api/usage", params: body(apps: apps), headers: headers
     expect(response).to have_http_status(:unprocessable_entity)
   end
+
+  describe "create_raw (cano burro: texto cru + eco)" do
+    let(:raw_headers) { { "Authorization" => "Bearer #{account.api_token}", "CONTENT_TYPE" => "text/plain" } }
+
+    it "parses name + duration per line and echoes a preview" do
+      raw = "WhatsApp 2h 36min\nInstagram 22min\nlixo sem duração"
+      post "/api/usage_raw?period=yesterday&device=iphone&client_version=v11", params: raw, headers: raw_headers
+
+      expect(response).to have_http_status(:ok)
+      json = response.parsed_body
+      expect(json["apps"]).to eq(2)
+      expect(json["upserted"]).to eq(2)
+      expect(json["client_version"]).to eq("v11")
+      expect(json["raw_preview"]).to include("WhatsApp")
+
+      wpp = account.app_usages.find_by(bundle_id: "WhatsApp")
+      expect(wpp.seconds).to eq((2 * 3600) + (36 * 60))
+      expect(account.app_usages.find_by(bundle_id: "Instagram").seconds).to eq(22 * 60)
+    end
+  end
 end

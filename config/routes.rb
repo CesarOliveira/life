@@ -47,6 +47,7 @@ Rails.application.routes.draw do
   # API de ingestão (token pessoal) — ex.: Atalho do iPhone enviando uso/saúde.
   namespace :api do
     post "usage", to: "usage#create"
+    post "usage_raw", to: "usage#create_raw"
     post "metrics", to: "metrics#create"
     post "health_raw", to: "health_raw#create"
   end

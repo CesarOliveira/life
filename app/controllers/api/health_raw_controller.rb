@@ -34,7 +34,7 @@ module Api
       date = parse_date(default_date_from(params) || Date.current.iso8601)
       return render_error("invalid_date") if date.nil? || !date_in_window?(date)
 
-      raw = request.raw_post.to_s
+      raw = request.raw_post.to_s.dup.force_encoding("UTF-8").scrub
       result = SLEEP_TIME.key?(key) ? handle_sleep_time(key, raw, date) : handle_numeric(key, raw, date)
 
       render json: {

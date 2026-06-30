@@ -21,12 +21,20 @@
 class HealthShortcutBuilder
   # Marcador de versão: vai na query ("client_version"); o servidor devolve na
   # resposta. Bumpe a cada build p/ confirmar que NÃO baixou arquivo cacheado.
-  VERSION = "v10".freeze
+  VERSION = "v11".freeze
 
   TOKEN_UUID = "11111111-1111-1111-1111-111111111111".freeze
   REPEAT_ITEM_VAR = "Repeat Item".freeze # nome interno (inglês) do item do laço
   OBJ = "\u{FFFC}".freeze # placeholder de anexo (object replacement char)
   TOKEN_ACTION_INDEX = 0 # a ação Texto do token é a primeira
+
+  # Bloco de Tempo de tela (App Intents, iOS 26).
+  ACTIVITY_ACTION_ID = "com.apple.intelligenceplatform.IntelligencePlatform.IntelligencePlatformDataActionsAppIntentsExtension.CalculateAppUsageIntent".freeze
+  ACT_UUID = "77777777-7777-7777-7777-777777777777".freeze
+  ST_GROUP_UUID = "88888888-8888-8888-8888-888888888888".freeze
+  STX_UUID = "99999999-9999-9999-9999-999999999999".freeze
+  ST_END_UUID = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa".freeze
+  SCOMB_UUID = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb".freeze
 
   # Métricas coletadas. `type` é o rótulo do tipo no seletor da Saúde.
   # `property` é o detalhe extraído de cada amostra ("Value", "Start Date"...).
@@ -42,6 +50,7 @@ class HealthShortcutBuilder
 
   def initialize(endpoint:)
     @endpoint = endpoint
+    @usage_endpoint = endpoint.sub("health_raw", "usage_raw")
   end
 
   def filename
@@ -52,8 +61,12 @@ class HealthShortcutBuilder
     "#{@endpoint}?key=#{key}&period=today&client_version=#{VERSION}"
   end
 
+  def usage_url
+    "#{@usage_endpoint}?period=yesterday&device=iphone&client_version=#{VERSION}"
+  end
+
   def plist
-    actions = [token_action] + METRICS.flat_map { |m| metric_block(m) }
+    actions = [token_action] + METRICS.flat_map { |m| metric_block(m) } + screen_time_block
     <<~XML
       <?xml version="1.0" encoding="UTF-8"?>
       <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -241,6 +254,77 @@ class HealthShortcutBuilder
     XML
   end
 
+  # --- Bloco de Tempo de tela (App Intents) ---
+  # Obter Atividade -> Repetir(Texto do item) -> Combinar -> POST /api/usage_raw.
+  # Cada item da atividade é coagido a texto; o servidor parseia nome+duração.
+  def screen_time_block
+    [
+      activity_action(ACT_UUID),
+      repeat_start_action(ST_GROUP_UUID, ACT_UUID),
+      activity_item_text_action(STX_UUID),
+      repeat_end_action(ST_GROUP_UUID, ST_END_UUID),
+      combine_text_action(SCOMB_UUID, ST_END_UUID),
+      usage_post_action(SCOMB_UUID)
+    ]
+  end
+
+  def activity_action(uuid)
+    <<~XML
+      <dict>
+        <key>WFWorkflowActionIdentifier</key>
+        <string>#{ACTIVITY_ACTION_ID}</string>
+        <key>WFWorkflowActionParameters</key>
+        <dict>
+          <key>UUID</key>
+          <string>#{uuid}</string>
+          <key>during</key>
+          <string>yesterday</string>
+          <key>activityType</key>
+          <string>app</string>
+        </dict>
+      </dict>
+    XML
+  end
+
+  # Texto = o item atual do laço (entidade de atividade) coagido a texto.
+  def activity_item_text_action(uuid)
+    <<~XML
+      <dict>
+        <key>WFWorkflowActionIdentifier</key>
+        <string>is.workflow.actions.gettext</string>
+        <key>WFWorkflowActionParameters</key>
+        <dict>
+          <key>UUID</key>
+          <string>#{uuid}</string>
+          <key>WFTextActionText</key>
+          #{attachment_variable_token(OBJ.dup, REPEAT_ITEM_VAR)}
+        </dict>
+      </dict>
+    XML
+  end
+
+  def usage_post_action(combine_uuid)
+    <<~XML
+      <dict>
+        <key>WFWorkflowActionIdentifier</key>
+        <string>is.workflow.actions.downloadurl</string>
+        <key>WFWorkflowActionParameters</key>
+        <dict>
+          <key>WFURL</key>
+          <string>#{xml_escape(usage_url)}</string>
+          <key>WFHTTPMethod</key>
+          <string>POST</string>
+          <key>WFHTTPHeaders</key>
+          #{headers_field}
+          <key>WFHTTPBodyType</key>
+          <string>File</string>
+          <key>WFRequestVariable</key>
+          #{output_variable(combine_uuid, "Combined Text")}
+        </dict>
+      </dict>
+    XML
+  end
+
   # --- helpers de ações ---
 
   def text_action(uuid, text)
@@ -384,6 +468,32 @@ class HealthShortcutBuilder
               <string>#{uuid}</string>
               <key>Type</key>
               <string>ActionOutput</string>
+            </dict>
+          </dict>
+        </dict>
+      </dict>
+    XML
+  end
+
+  # Texto com UMA variável NOMEADA embutida (ex.: "Repeat Item").
+  def attachment_variable_token(text, var_name)
+    offset = text.index(OBJ)
+    <<~XML
+      <dict>
+        <key>WFSerializationType</key>
+        <string>WFTextTokenString</string>
+        <key>Value</key>
+        <dict>
+          <key>string</key>
+          <string>#{xml_escape(text)}</string>
+          <key>attachmentsByRange</key>
+          <dict>
+            <key>{#{offset}, 1}</key>
+            <dict>
+              <key>Type</key>
+              <string>Variable</string>
+              <key>VariableName</key>
+              <string>#{xml_escape(var_name)}</string>
             </dict>
           </dict>
         </dict>
