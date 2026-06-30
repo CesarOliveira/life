@@ -231,6 +231,8 @@ pt-BR:
     setup_title: "Conectar (via Mac)"
     setup_intro: "O iPhone sincroniza o Tempo de Uso com o Mac (Ajustes → Tempo de Uso → Compartilhar Entre Dispositivos). Um script no Mac lê esses dados e envia pra cá automaticamente."
     token_label: "Seu token pessoal"
+    copy: "Copiar"
+    copied: "Copiado!"
     endpoint_label: "Endpoint (POST)"
     regenerate: "Gerar novo token"
     regenerate_confirm: "Gerar um novo token invalida o atual. Continuar?"

@@ -231,6 +231,8 @@ en:
     setup_title: "Connect (via Mac)"
     setup_intro: "Your iPhone syncs Screen Time to the Mac (Settings → Screen Time → Share Across Devices). A script on the Mac reads it and sends it here automatically."
     token_label: "Your personal token"
+    copy: "Copy"
+    copied: "Copied!"
     endpoint_label: "Endpoint (POST)"
     regenerate: "Generate new token"
     regenerate_confirm: "Generating a new token invalidates the current one. Continue?"

@@ -9,3 +9,6 @@ application.register("pwa-install", PwaInstallController)
 
 import HabitFormController from "./habit_form_controller"
 application.register("habit-form", HabitFormController)
+
+import ClipboardController from "./clipboard_controller"
+application.register("clipboard", ClipboardController)

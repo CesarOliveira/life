@@ -44,9 +44,13 @@
         <p class="mb-1 text-xs font-medium text-slate-600"><%= t("screen_time.endpoint_label") %></p>
         <code class="block break-all rounded-lg bg-slate-100 px-3 py-2 text-xs text-slate-700"><%= api_usage_url %></code>
       </div>
-      <div>
+      <div data-controller="clipboard" data-clipboard-copied-value="<%= t("screen_time.copied") %>" data-clipboard-label-value="<%= t("screen_time.copy") %>">
         <p class="mb-1 text-xs font-medium text-slate-600"><%= t("screen_time.token_label") %></p>
-        <code class="block break-all rounded-lg bg-slate-100 px-3 py-2 text-xs text-slate-700"><%= @token %></code>
+        <div class="flex items-stretch gap-2">
+          <code data-clipboard-target="source" class="block flex-1 break-all rounded-lg bg-slate-100 px-3 py-2 text-xs text-slate-700"><%= @token %></code>
+          <button type="button" data-clipboard-target="button" data-action="clipboard#copy"
+                  class="shrink-0 rounded-lg border border-slate-300 px-3 text-xs font-medium text-slate-600 hover:bg-slate-50"><%= t("screen_time.copy") %></button>
+        </div>
         <p class="mt-1 text-xs text-amber-600"><%= t("screen_time.keep_secret") %></p>
       </div>
       <div class="flex items-center gap-3 pt-1">
