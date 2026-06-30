@@ -105,15 +105,30 @@ module Api
       end
     end
 
-    # Converte cada linha num horário. Aceita ISO 8601 e formatos comuns.
-    def parse_times(raw)
-      raw.split(/[\r\n]+/).filter_map do |line|
-        next if line.strip.empty?
+    # Abreviações de mês em pt-BR (o iPhone serializa datas no idioma do aparelho).
+    PT_MONTHS = {
+      "jan" => 1, "fev" => 2, "mar" => 3, "abr" => 4, "mai" => 5, "jun" => 6,
+      "jul" => 7, "ago" => 8, "set" => 9, "out" => 10, "nov" => 11, "dez" => 12
+    }.freeze
 
-        Time.zone.parse(line.strip)
-      rescue ArgumentError
-        nil
+    # Converte cada linha num horário. Aceita ISO 8601 e o formato pt-BR do iOS
+    # ("29 de jun. de 2026, 00:41"). Usa data absoluta p/ min/max corretos (sono
+    # cruza a meia-noite).
+    def parse_times(raw)
+      raw.split(/[\r\n]+/).filter_map { |line| parse_time(line.strip) }
+    end
+
+    def parse_time(line)
+      return nil if line.empty?
+
+      m = line.match(/(\d{1,2})\s+de\s+([a-zç]{3,})\.?\s+de\s+(\d{4}),?\s+(\d{1,2}):(\d{2})/i)
+      if m && (month = PT_MONTHS[m[2].downcase[0, 3]])
+        return Time.zone.local(m[3].to_i, month, m[1].to_i, m[4].to_i, m[5].to_i)
       end
+
+      Time.zone.parse(line)
+    rescue ArgumentError
+      nil
     end
 
     def aggregate(key, values)

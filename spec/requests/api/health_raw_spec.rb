@@ -81,5 +81,14 @@ RSpec.describe "API::HealthRaw", type: :request do
       expect(response.parsed_body["samples"]).to eq(0)
       expect(response.parsed_body["upserted"]).to eq(0)
     end
+
+    it "parses the pt-BR date format the iPhone sends (incl. non-English months)" do
+      post "/api/health_raw?key=sleep_start&period=today",
+           params: "28 de fev. de 2026, 23:50\n01 de mar. de 2026, 06:10", headers: headers
+      body = response.parsed_body
+      expect(body["samples"]).to eq(2)
+      # menor início (absoluto) = 28/02 23:50 -> 23*60+50 = 1430
+      expect(body["value"]).to eq(1430)
+    end
   end
 end
