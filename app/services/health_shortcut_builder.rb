@@ -21,7 +21,7 @@
 class HealthShortcutBuilder
   # Marcador de versão: vai na query ("client_version"); o servidor devolve na
   # resposta. Bumpe a cada build p/ confirmar que NÃO baixou arquivo cacheado.
-  VERSION = "v9".freeze
+  VERSION = "v10".freeze
 
   TOKEN_UUID = "11111111-1111-1111-1111-111111111111".freeze
   REPEAT_ITEM_VAR = "Repeat Item".freeze # nome interno (inglês) do item do laço
@@ -36,8 +36,8 @@ class HealthShortcutBuilder
   METRICS = [
     { key: "steps", type: "Steps", property: "Value", suffix: "a" },
     { key: "resting_hr", type: "Resting Heart Rate", property: "Value", suffix: "b" },
-    { key: "sleep_start", type: "Sleep Analysis", property: "Start Date", suffix: "c" },
-    { key: "sleep_end", type: "Sleep Analysis", property: "End Date", suffix: "d" }
+    { key: "sleep_start", type: "Sleep", property: "Start Date", suffix: "c" },
+    { key: "sleep_end", type: "Sleep", property: "End Date", suffix: "d" }
   ].freeze
 
   def initialize(endpoint:)
