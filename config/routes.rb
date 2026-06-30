@@ -37,6 +37,10 @@ Rails.application.routes.draw do
   get "screen-time", to: "screen_time#index", as: :screen_time
   post "screen-time/token", to: "screen_time#regenerate", as: :regenerate_screen_time_token
 
+  # Atalho de Saúde (.shortcut) gerado com o token da conta, para o iPhone enviar
+  # sono/passos para /api/metrics. Download autenticado (token só vai pro dono).
+  get "saude-shortcut", to: "shortcuts#health", as: :health_shortcut
+
   # API de ingestão (token pessoal) — ex.: Atalho do iPhone enviando uso/saúde.
   namespace :api do
     post "usage", to: "usage#create"

@@ -172,6 +172,10 @@ en:
     out_of_range: "Out of range"
     in_range: "Normal"
     remove_confirm: "Remove this measurement?"
+    shortcut:
+      title: "Health Shortcut (iPhone)"
+      hint: "Download and install to send sleep and steps automatically. Requires \"Allow Untrusted Shortcuts\" in Settings."
+      download: "Download Shortcut"
     pdf:
       title: "Import lab test (PDF)"
       intro: "Upload the report PDF; values are extracted automatically by AI. Review afterwards."
