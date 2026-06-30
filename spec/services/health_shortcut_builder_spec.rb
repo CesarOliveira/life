@@ -23,9 +23,15 @@ RSpec.describe HealthShortcutBuilder do
     expect(xml).to include("Repeat Results")
   end
 
-  it "carries the version marker and metadata in the URL" do
+  it "carries the version marker and one POST per metric in the URL" do
     expect(xml).to include("client_version=#{described_class::VERSION}")
     expect(xml).to include("key=steps")
+    expect(xml).to include("key=resting_hr")
+  end
+
+  it "has a distinct find action per metric" do
+    expect(xml.scan("is.workflow.actions.filter.health.quantity").size).to eq(described_class::METRICS.size)
+    expect(xml.scan("is.workflow.actions.downloadurl").size).to eq(described_class::METRICS.size)
   end
 
   it "asks for the token at import time, targeting the token action index" do
