@@ -103,9 +103,11 @@ class HealthShortcutBuilder
     health_find_action(STEPS_FIND_UUID, type_label: "Steps")
   end
 
-  # Calcular Estatísticas: Soma sobre as amostras de passos.
+  # Calcular Estatísticas: Soma. SEM WFInput — usa o encaixe automático do iOS,
+  # somando a saída da ação anterior (Localizar passos). O link explícito por
+  # UUID não casa na importação para a saída do "Localizar Amostras".
   def steps_sum_action
-    statistics_action(STEPS_SUM_UUID, input_uuid: STEPS_FIND_UUID, operation: "Sum", input_name: "Health Samples")
+    statistics_action(STEPS_SUM_UUID, operation: "Sum")
   end
 
   # Texto com o JSON do corpo, inserindo a soma de passos (como string).
@@ -232,7 +234,7 @@ class HealthShortcutBuilder
     XML
   end
 
-  def statistics_action(uuid, input_uuid:, operation:, input_name:)
+  def statistics_action(uuid, operation:)
     <<~XML
       <dict>
         <key>WFWorkflowActionIdentifier</key>
@@ -243,8 +245,6 @@ class HealthShortcutBuilder
           <string>#{uuid}</string>
           <key>WFStatisticsOperation</key>
           <string>#{operation}</string>
-          <key>WFInput</key>
-          #{output_variable(input_uuid, input_name)}
         </dict>
       </dict>
     XML
