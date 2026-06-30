@@ -12,3 +12,6 @@ application.register("habit-form", HabitFormController)
 
 import ClipboardController from "./clipboard_controller"
 application.register("clipboard", ClipboardController)
+
+import ChecklistController from "./checklist_controller"
+application.register("checklist", ChecklistController)

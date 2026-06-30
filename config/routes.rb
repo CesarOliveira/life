@@ -34,6 +34,7 @@ Rails.application.routes.draw do
     post :import, on: :collection
   end
   resources :goals, only: [:index, :create, :destroy]
+  get "configurar", to: "setup#index", as: :setup
   get "screen-time", to: "screen_time#index", as: :screen_time
   get "screen-time/token", to: "screen_time#token", as: :screen_time_token
   get "screen-time/app", to: "screen_time#app", as: :screen_time_app

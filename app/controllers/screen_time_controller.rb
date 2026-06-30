@@ -36,7 +36,9 @@ class ScreenTimeController < ApplicationController
     by_date = rows.group(:date).sum(:seconds)
     @total = by_date.values.sum
     @days = by_date.size
-    @chart = MetricChart.new(by_date.map { |date, seconds| { date: date, value: (seconds / 60.0).round(1) } })
+    # Barras horizontais, um dia por linha (mais legível no celular que linha).
+    @daily = by_date.sort_by { |date, _| date }.reverse.map { |date, seconds| { date: date, seconds: seconds } }
+    @max_day = by_date.values.max || 0
   end
 
   def regenerate
