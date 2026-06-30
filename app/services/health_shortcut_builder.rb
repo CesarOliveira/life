@@ -8,8 +8,11 @@
 #     > /tmp/sc.shortcut
 #   shortcuts sign --mode anyone --input /tmp/sc.shortcut --output public/shortcuts/saude-life.shortcut
 #
-# v2: token perguntado no import (sem edição manual) + passos reais.
-#   Ações: [Texto token] -> [Localizar passos] -> [Somar] -> [Texto JSON c/ soma] -> [POST]
+# v3: token perguntado no import (sem edição manual) + passos reais.
+#   Ordem importa: a "Somar" vem LOGO DEPOIS da busca de passos, e o Texto do
+#   token vem DEPOIS — assim o encaixe automático do iOS (caso o link explícito
+#   falhe) pega a ação anterior correta, não o token.
+#   Ações: [Localizar passos] -> [Somar] -> [Texto JSON c/ soma] -> [Texto token] -> [POST]
 # O caractere U+FFFC (￼) marca onde uma variável é inserida no texto.
 class HealthShortcutBuilder
   TOKEN_UUID = "11111111-1111-1111-1111-111111111111".freeze
@@ -58,10 +61,10 @@ class HealthShortcutBuilder
         </array>
         <key>WFWorkflowActions</key>
         <array>
-          #{token_action}
           #{steps_find_action}
           #{steps_sum_action}
           #{body_action}
+          #{token_action}
           #{post_action}
         </array>
       </dict>
@@ -71,7 +74,7 @@ class HealthShortcutBuilder
 
   private
 
-  # Pergunta o token na hora de instalar e preenche a ação Texto do token (índice 0).
+  # Pergunta o token na hora de instalar e preenche a ação Texto do token (índice 3).
   def import_questions
     <<~XML
       <array>
@@ -81,7 +84,7 @@ class HealthShortcutBuilder
           <key>Category</key>
           <string>Parameter</string>
           <key>ActionIndex</key>
-          <integer>0</integer>
+          <integer>3</integer>
           <key>Text</key>
           <string>Cole seu token do Life (página Tempo de tela)</string>
           <key>DefaultValue</key>
