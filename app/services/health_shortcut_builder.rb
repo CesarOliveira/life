@@ -8,19 +8,31 @@
 #     > /tmp/sc.shortcut
 #   shortcuts sign --mode anyone --input /tmp/sc.shortcut --output public/shortcuts/saude-life.shortcut
 #
-# v5 — "cano burro": o atalho NÃO calcula nada. Só coleta as amostras de passos
-# e ENVIA cruas; o Rails (POST /api/health_raw) soma e grava.
-#   Ações: [Localizar passos] -> [Texto = amostras] -> [Texto token] -> [POST]
+# v6 — "cano burro" + driblando o bloqueio de privacidade do iOS.
+# O iOS não deixa enviar OBJETOS de Saúde para uma URL ("tentando compartilhar
+# N itens do app Saúde"). Então, em vez de mandar as amostras cruas, o atalho
+# percorre cada amostra e EXTRAI só o número (Obter Detalhes -> Valor) — isso é
+# leitura, não cálculo — junta os números (um por linha) e envia texto puro.
+# O Rails (POST /api/health_raw) é quem SOMA.
+#   Ações: [Localizar passos] -> [Repetir: Obter Valor -> Adicionar à variável]
+#          -> [Combinar texto] -> [Texto token] -> [POST]
 # O caractere U+FFFC (￼) marca onde uma variável é inserida no texto.
 class HealthShortcutBuilder
   # Marcador de versão: vai na query ("client_version") e o servidor devolve na
   # resposta. Bumpe a cada build para confirmar que NÃO baixou arquivo cacheado.
-  VERSION = "v5".freeze
+  VERSION = "v6".freeze
 
-  STEPS_FIND_UUID = "22222222-2222-2222-2222-222222222222".freeze
-  RAW_TEXT_UUID = "33333333-3333-3333-3333-333333333333".freeze
   TOKEN_UUID = "11111111-1111-1111-1111-111111111111".freeze
+  STEPS_FIND_UUID = "22222222-2222-2222-2222-222222222222".freeze
+  COMBINE_UUID = "33333333-3333-3333-3333-333333333333".freeze
+  REPEAT_GROUP_UUID = "44444444-4444-4444-4444-444444444444".freeze
+  DETAIL_UUID = "55555555-5555-5555-5555-555555555555".freeze
+  SAMPLES_VAR = "Samples".freeze
   OBJ = "\u{FFFC}".freeze # placeholder de anexo (object replacement char)
+
+  # Índice (0-based) da ação Texto do token na lista de ações — usado pela
+  # pergunta de importação que preenche o token.
+  TOKEN_ACTION_INDEX = 6
 
   def initialize(endpoint:)
     @endpoint = endpoint
@@ -68,7 +80,11 @@ class HealthShortcutBuilder
         <key>WFWorkflowActions</key>
         <array>
           #{steps_find_action}
-          #{raw_text_action}
+          #{repeat_start_action}
+          #{detail_value_action}
+          #{append_variable_action}
+          #{repeat_end_action}
+          #{combine_text_action}
           #{token_action}
           #{post_action}
         </array>
@@ -79,7 +95,7 @@ class HealthShortcutBuilder
 
   private
 
-  # Pergunta o token na hora de instalar e preenche a ação Texto do token (índice 2).
+  # Pergunta o token na hora de instalar e preenche a ação Texto do token.
   def import_questions
     <<~XML
       <array>
@@ -89,7 +105,7 @@ class HealthShortcutBuilder
           <key>Category</key>
           <string>Parameter</string>
           <key>ActionIndex</key>
-          <integer>2</integer>
+          <integer>#{TOKEN_ACTION_INDEX}</integer>
           <key>Text</key>
           <string>Cole seu token do Life (página Tempo de tela)</string>
           <key>DefaultValue</key>
@@ -99,32 +115,107 @@ class HealthShortcutBuilder
     XML
   end
 
-  # Localizar Amostras de Saúde: Passos, Data de Início nos últimos 1 dia.
+  # 1) Localizar Amostras de Saúde: Passos, Data de Início nos últimos 1 dia.
   def steps_find_action
     health_find_action(STEPS_FIND_UUID, type_label: "Steps")
   end
 
-  # Texto = a lista de amostras (coerção para texto). Sem cálculo: é só coleta.
-  def raw_text_action
+  # 2) Repetir com Cada (início) sobre as amostras de passos.
+  def repeat_start_action
     <<~XML
       <dict>
         <key>WFWorkflowActionIdentifier</key>
-        <string>is.workflow.actions.gettext</string>
+        <string>is.workflow.actions.repeat.each</string>
         <key>WFWorkflowActionParameters</key>
         <dict>
-          <key>UUID</key>
-          <string>#{RAW_TEXT_UUID}</string>
-          <key>WFTextActionText</key>
-          #{attachment_token(OBJ.dup, STEPS_FIND_UUID, "Health Samples")}
+          <key>WFControlFlowMode</key>
+          <integer>0</integer>
+          <key>GroupingIdentifier</key>
+          <string>#{REPEAT_GROUP_UUID}</string>
+          <key>WFInput</key>
+          #{output_variable(STEPS_FIND_UUID, "Health Samples")}
         </dict>
       </dict>
     XML
   end
 
+  # 3) Obter Detalhes da Amostra de Saúde -> "Valor" (número puro). Sem WFInput:
+  #    usa o item atual do laço (Repeat Item). Ler o valor NÃO é cálculo.
+  def detail_value_action
+    <<~XML
+      <dict>
+        <key>WFWorkflowActionIdentifier</key>
+        <string>is.workflow.actions.properties.health.quantity</string>
+        <key>WFWorkflowActionParameters</key>
+        <dict>
+          <key>UUID</key>
+          <string>#{DETAIL_UUID}</string>
+          <key>WFContentItemPropertyName</key>
+          <string>Value</string>
+        </dict>
+      </dict>
+    XML
+  end
+
+  # 4) Adicionar à Variável "Samples" (acumula a lista; não é cálculo).
+  def append_variable_action
+    <<~XML
+      <dict>
+        <key>WFWorkflowActionIdentifier</key>
+        <string>is.workflow.actions.appendvariable</string>
+        <key>WFWorkflowActionParameters</key>
+        <dict>
+          <key>WFVariableName</key>
+          <string>#{SAMPLES_VAR}</string>
+          <key>WFInput</key>
+          #{output_variable(DETAIL_UUID, "Health Sample Value")}
+        </dict>
+      </dict>
+    XML
+  end
+
+  # 5) Repetir com Cada (fim).
+  def repeat_end_action
+    <<~XML
+      <dict>
+        <key>WFWorkflowActionIdentifier</key>
+        <string>is.workflow.actions.repeat.each</string>
+        <key>WFWorkflowActionParameters</key>
+        <dict>
+          <key>WFControlFlowMode</key>
+          <integer>2</integer>
+          <key>GroupingIdentifier</key>
+          <string>#{REPEAT_GROUP_UUID}</string>
+        </dict>
+      </dict>
+    XML
+  end
+
+  # 6) Combinar Texto: junta os números por quebra de linha -> texto puro.
+  def combine_text_action
+    <<~XML
+      <dict>
+        <key>WFWorkflowActionIdentifier</key>
+        <string>is.workflow.actions.text.combine</string>
+        <key>WFWorkflowActionParameters</key>
+        <dict>
+          <key>UUID</key>
+          <string>#{COMBINE_UUID}</string>
+          <key>WFTextSeparator</key>
+          <string>New Lines</string>
+          <key>WFInput</key>
+          #{named_variable(SAMPLES_VAR)}
+        </dict>
+      </dict>
+    XML
+  end
+
+  # 7) Texto do token (preenchido na importação).
   def token_action
     text_action(TOKEN_UUID, "")
   end
 
+  # 8) POST com o texto combinado no corpo (File).
   def post_action
     <<~XML
       <dict>
@@ -141,7 +232,7 @@ class HealthShortcutBuilder
           <key>WFHTTPBodyType</key>
           <string>File</string>
           <key>WFRequestVariable</key>
-          #{output_variable(RAW_TEXT_UUID, "Text")}
+          #{output_variable(COMBINE_UUID, "Combined Text")}
         </dict>
       </dict>
     XML
@@ -247,6 +338,23 @@ class HealthShortcutBuilder
           <string>#{uuid}</string>
           <key>Type</key>
           <string>ActionOutput</string>
+        </dict>
+      </dict>
+    XML
+  end
+
+  # Referência a uma variável NOMEADA (criada por "Adicionar à Variável").
+  def named_variable(name)
+    <<~XML
+      <dict>
+        <key>WFSerializationType</key>
+        <string>WFTextTokenAttachment</string>
+        <key>Value</key>
+        <dict>
+          <key>Type</key>
+          <string>Variable</string>
+          <key>VariableName</key>
+          <string>#{xml_escape(name)}</string>
         </dict>
       </dict>
     XML

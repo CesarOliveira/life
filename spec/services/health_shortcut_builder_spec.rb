@@ -4,12 +4,19 @@ require "rexml/document"
 RSpec.describe HealthShortcutBuilder do
   subject(:xml) { described_class.new(endpoint: "https://x.test/api/health_raw").plist }
 
-  it "is a dumb pipe: collects samples and posts, no in-shortcut calculation" do
+  it "posts to the raw endpoint without any in-shortcut calculation" do
     expect(xml).to include("https://x.test/api/health_raw")
     expect(xml).to include("is.workflow.actions.downloadurl")
-    expect(xml).to include("is.workflow.actions.gettext")
-    expect(xml).to include("is.workflow.actions.filter.health.quantity")
     expect(xml).not_to include("is.workflow.actions.statistics")
+  end
+
+  it "extracts each sample's Value in a loop to dodge the iOS Health-share block" do
+    expect(xml).to include("is.workflow.actions.filter.health.quantity")
+    expect(xml).to include("is.workflow.actions.repeat.each")
+    expect(xml).to include("is.workflow.actions.properties.health.quantity")
+    expect(xml).to include("<string>Value</string>")
+    expect(xml).to include("is.workflow.actions.appendvariable")
+    expect(xml).to include("is.workflow.actions.text.combine")
   end
 
   it "carries the version marker and metadata in the URL" do
@@ -17,9 +24,10 @@ RSpec.describe HealthShortcutBuilder do
     expect(xml).to include("key=steps")
   end
 
-  it "asks for the token at import time (no manual edit)" do
+  it "asks for the token at import time, targeting the token action index" do
     expect(xml).to include("WFWorkflowImportQuestions")
     expect(xml).to include("Cole seu token")
+    expect(xml).to include("<integer>#{described_class::TOKEN_ACTION_INDEX}</integer>")
     expect(xml).to include("Bearer ")
   end
 
