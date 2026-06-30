@@ -8,31 +8,32 @@
 #     > /tmp/sc.shortcut
 #   shortcuts sign --mode anyone --input /tmp/sc.shortcut --output public/shortcuts/saude-life.shortcut
 #
-# v6 — "cano burro" + driblando o bloqueio de privacidade do iOS.
+# v7 — "cano burro" + driblando o bloqueio de privacidade do iOS.
 # O iOS não deixa enviar OBJETOS de Saúde para uma URL ("tentando compartilhar
 # N itens do app Saúde"). Então, em vez de mandar as amostras cruas, o atalho
-# percorre cada amostra e EXTRAI só o número (Obter Detalhes -> Valor) — isso é
-# leitura, não cálculo — junta os números (um por linha) e envia texto puro.
-# O Rails (POST /api/health_raw) é quem SOMA.
-#   Ações: [Localizar passos] -> [Repetir: Obter Valor -> Adicionar à variável]
-#          -> [Combinar texto] -> [Texto token] -> [POST]
+# percorre cada amostra e EXTRAI só o número (Obter Detalhes -> Valor, com a
+# entrada apontando pro Item de Repetição) — isso é leitura, não cálculo — junta
+# os números (um por linha) e envia texto puro. O Rails (/api/health_raw) SOMA.
+#   Ações: [Localizar passos] -> [Repetir: Obter Valor] -> [Combinar Repeat
+#          Results] -> [Texto token] -> [POST]
 # O caractere U+FFFC (￼) marca onde uma variável é inserida no texto.
 class HealthShortcutBuilder
   # Marcador de versão: vai na query ("client_version") e o servidor devolve na
   # resposta. Bumpe a cada build para confirmar que NÃO baixou arquivo cacheado.
-  VERSION = "v6".freeze
+  VERSION = "v7".freeze
 
   TOKEN_UUID = "11111111-1111-1111-1111-111111111111".freeze
   STEPS_FIND_UUID = "22222222-2222-2222-2222-222222222222".freeze
   COMBINE_UUID = "33333333-3333-3333-3333-333333333333".freeze
   REPEAT_GROUP_UUID = "44444444-4444-4444-4444-444444444444".freeze
   DETAIL_UUID = "55555555-5555-5555-5555-555555555555".freeze
-  SAMPLES_VAR = "Samples".freeze
+  REPEAT_END_UUID = "66666666-6666-6666-6666-666666666666".freeze
+  REPEAT_ITEM_VAR = "Repeat Item".freeze # nome interno (inglês) do item do laço
   OBJ = "\u{FFFC}".freeze # placeholder de anexo (object replacement char)
 
   # Índice (0-based) da ação Texto do token na lista de ações — usado pela
   # pergunta de importação que preenche o token.
-  TOKEN_ACTION_INDEX = 6
+  TOKEN_ACTION_INDEX = 5
 
   def initialize(endpoint:)
     @endpoint = endpoint
@@ -82,7 +83,6 @@ class HealthShortcutBuilder
           #{steps_find_action}
           #{repeat_start_action}
           #{detail_value_action}
-          #{append_variable_action}
           #{repeat_end_action}
           #{combine_text_action}
           #{token_action}
@@ -139,8 +139,9 @@ class HealthShortcutBuilder
     XML
   end
 
-  # 3) Obter Detalhes da Amostra de Saúde -> "Valor" (número puro). Sem WFInput:
-  #    usa o item atual do laço (Repeat Item). Ler o valor NÃO é cálculo.
+  # 3) Obter Detalhes da Amostra de Saúde -> "Valor" (número puro). WFInput
+  #    aponta EXPLICITAMENTE para o item atual do laço (Repeat Item) — sem isso
+  #    a ação lê a saída anterior e vem vazio. Ler o valor NÃO é cálculo.
   def detail_value_action
     <<~XML
       <dict>
@@ -152,29 +153,15 @@ class HealthShortcutBuilder
           <string>#{DETAIL_UUID}</string>
           <key>WFContentItemPropertyName</key>
           <string>Value</string>
-        </dict>
-      </dict>
-    XML
-  end
-
-  # 4) Adicionar à Variável "Samples" (acumula a lista; não é cálculo).
-  def append_variable_action
-    <<~XML
-      <dict>
-        <key>WFWorkflowActionIdentifier</key>
-        <string>is.workflow.actions.appendvariable</string>
-        <key>WFWorkflowActionParameters</key>
-        <dict>
-          <key>WFVariableName</key>
-          <string>#{SAMPLES_VAR}</string>
           <key>WFInput</key>
-          #{output_variable(DETAIL_UUID, "Health Sample Value")}
+          #{named_variable(REPEAT_ITEM_VAR)}
         </dict>
       </dict>
     XML
   end
 
-  # 5) Repetir com Cada (fim).
+  # 4) Repetir com Cada (fim). Ganha UUID + CustomOutputName para que a saída
+  #    automática "Repeat Results" (lista dos Valores) seja referenciável.
   def repeat_end_action
     <<~XML
       <dict>
@@ -186,12 +173,17 @@ class HealthShortcutBuilder
           <integer>2</integer>
           <key>GroupingIdentifier</key>
           <string>#{REPEAT_GROUP_UUID}</string>
+          <key>UUID</key>
+          <string>#{REPEAT_END_UUID}</string>
+          <key>CustomOutputName</key>
+          <string>Repeat Results</string>
         </dict>
       </dict>
     XML
   end
 
-  # 6) Combinar Texto: junta os números por quebra de linha -> texto puro.
+  # 5) Combinar Texto: junta os Valores (Repeat Results) por quebra de linha ->
+  #    texto puro (um número por linha). O Rails soma.
   def combine_text_action
     <<~XML
       <dict>
@@ -204,7 +196,7 @@ class HealthShortcutBuilder
           <key>WFTextSeparator</key>
           <string>New Lines</string>
           <key>WFInput</key>
-          #{named_variable(SAMPLES_VAR)}
+          #{output_variable(REPEAT_END_UUID, "Repeat Results")}
         </dict>
       </dict>
     XML

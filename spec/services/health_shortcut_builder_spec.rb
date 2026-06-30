@@ -15,8 +15,12 @@ RSpec.describe HealthShortcutBuilder do
     expect(xml).to include("is.workflow.actions.repeat.each")
     expect(xml).to include("is.workflow.actions.properties.health.quantity")
     expect(xml).to include("<string>Value</string>")
-    expect(xml).to include("is.workflow.actions.appendvariable")
     expect(xml).to include("is.workflow.actions.text.combine")
+  end
+
+  it "feeds the current Repeat Item into Get Details and combines the Repeat Results" do
+    expect(xml).to include("Repeat Item")
+    expect(xml).to include("Repeat Results")
   end
 
   it "carries the version marker and metadata in the URL" do
