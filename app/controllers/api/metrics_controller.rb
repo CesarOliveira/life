@@ -65,18 +65,19 @@ module Api
       value.is_a?(Numeric) || value.to_s.strip.match?(/\A-?\d[\d.,]*\z/)
     end
 
-    # Aceita número JSON e texto pt-BR ("1.234,5") ou simples ("437", "7.5").
+    # Aceita número JSON e texto: "1.234,5" (pt-BR), "8.021" (milhar), "7.5", "437".
     def numeric(value)
       return value.to_f if value.is_a?(Numeric)
 
       str = value.to_s.strip
-      str = if str.include?(".") && str.include?(",")
-              str.delete(".").tr(",", ".")
-      elsif str.include?(",")
-              str.tr(",", ".")
-      else
-              str
-      end
+      str =
+        if str.include?(",")
+          str.delete(".").tr(",", ".")            # pt-BR: "." milhar, "," decimal
+        elsif str.match?(/\A-?\d{1,3}(\.\d{3})+\z/)
+          str.delete(".")                          # só milhar com ponto (ex.: 8.021)
+        else
+          str                                      # decimal simples (ex.: 7.5)
+        end
       str.to_f
     end
   end
