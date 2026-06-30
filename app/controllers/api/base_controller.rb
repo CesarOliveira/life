@@ -73,5 +73,28 @@ module Api
     def render_error(code, **extra)
       render json: { error: code, **extra }, status: :unprocessable_entity
     end
+
+    # Normaliza um valor que deveria ser uma lista de hashes: aceita Array, string
+    # JSON (array ou hash único) ou hashes separados por quebra de linha — que é
+    # como o app Atalhos às vezes serializa listas. Retorna Array ou nil.
+    def coerce_list(value)
+      return value if value.is_a?(Array)
+      return nil unless value.is_a?(String)
+
+      parsed = safe_json(value)
+      return parsed if parsed.is_a?(Array)
+      return [parsed] if parsed.is_a?(Hash)
+
+      rows = value.split(/\r?\n/).filter_map { |line| safe_json(line) }
+      rows.select { |row| row.is_a?(Hash) }.presence
+    end
+
+    def safe_json(str)
+      return nil if str.to_s.strip.empty?
+
+      JSON.parse(str)
+    rescue JSON::ParserError
+      nil
+    end
   end
 end

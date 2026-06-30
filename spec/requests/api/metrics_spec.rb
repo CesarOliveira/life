@@ -50,6 +50,20 @@ RSpec.describe "API::Metrics", type: :request do
     expect(row.measured_on).to eq(Date.current - 1)
   end
 
+  it "accepts metrics as a JSON string (Shortcuts serialization)" do
+    body = { date: Date.current.iso8601, metrics: [{ key: "steps", value: 8021 }].to_json }.to_json
+    post "/api/metrics", params: body, headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(account.measurements.find_by(key: "steps").value).to eq(8021)
+  end
+
+  it "accepts metrics as newline-delimited JSON objects" do
+    lines = [{ key: "steps", value: 5000 }, { key: "sleep_minutes", value: 420 }].map(&:to_json).join("\n")
+    post "/api/metrics", params: { date: Date.current.iso8601, metrics: lines }.to_json, headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(JSON.parse(response.body)["upserted"]).to eq(2)
+  end
+
   it "skips entries without a numeric value" do
     post "/api/metrics", params: body(metrics: [{ key: "steps", value: "abc" }, { key: "glucose", value: 90 }]), headers: headers
     json = JSON.parse(response.body)

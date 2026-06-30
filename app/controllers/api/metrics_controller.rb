@@ -16,7 +16,7 @@ module Api
       return render_error("invalid_payload") unless data.is_a?(Hash)
 
       default_date = default_date_from(data)
-      metrics = data["metrics"]
+      metrics = coerce_list(data["metrics"])
       return render_error("invalid_payload") unless metrics.is_a?(Array)
       return render_error("too_many_entries", max: MAX_ENTRIES) if metrics.size > MAX_ENTRIES
 
