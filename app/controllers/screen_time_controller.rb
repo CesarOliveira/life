@@ -53,9 +53,12 @@ class ScreenTimeController < ApplicationController
 
     @total = usages.sum(:seconds)
     by_date = usages.group(:date).sum(:seconds)
-    @daily = (@from..@to).map { |date| { date: date, seconds: by_date[date] || 0 } }
-    @max_day = @daily.map { |d| d[:seconds] }.max || 0
-    @avg = @daily.any? ? (@total / @daily.size) : 0
+    # Só dias COM registro: o gráfico não cai a zero em dias sem dado e termina
+    # no último registro real.
+    @daily = by_date.sort_by { |date, _| date }.map { |date, seconds| { date: date, seconds: seconds } }
+    @max_day = by_date.values.max || 0
+    days_in_period = (@to - @from).to_i + 1
+    @avg = days_in_period.positive? ? (@total / days_in_period) : 0
     @chart = MetricChart.new(@daily.map { |d| { date: d[:date], value: (d[:seconds] / 3600.0).round(2) } })
   end
 
