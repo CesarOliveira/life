@@ -9,6 +9,7 @@ class MeasurementsController < ApplicationController
     @groups = build_groups(@category)
     @catalog_keys = Measurement.catalog_keys(@category)
     @pdf_import = ExamPdfExtractor.configured?
+    @panels = ExamCatalog.group(@groups) if @category == "exam"
     load_weight if @category == "health"
   end
 
@@ -53,6 +54,12 @@ class MeasurementsController < ApplicationController
     category = @measurement.category
     @measurement.destroy
     redirect_to measurements_path(category: category), notice: t("flash.measurements.removed")
+  end
+
+  # Apaga todos os exames (para reimportar limpo após ajustes de catálogo).
+  def destroy_exams
+    current_account.measurements.where(category: "exam").delete_all
+    redirect_to measurements_path(category: "exam"), notice: t("measurements.exams_cleared")
   end
 
   private

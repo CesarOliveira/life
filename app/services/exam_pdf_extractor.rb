@@ -122,21 +122,24 @@ class ExamPdfExtractor
   end
 
   def prompt
-    catalog = Measurement.catalog_keys("exam").join(", ")
     <<~PROMPT
-      Você recebe o PDF de um exame laboratorial. Extraia TODOS os resultados numéricos.
+      Você recebe o PDF de um exame laboratorial (pt-BR). Extraia TODOS os resultados numéricos.
       Responda APENAS com JSON válido (sem markdown, sem comentários), neste formato:
       {"measured_on":"YYYY-MM-DD","results":[{"key":"glucose","value":92,"unit":"mg/dL","ref_low":70,"ref_high":99}]}
 
+      Use SOMENTE as chaves canônicas abaixo (a coluna antes dos ":"). Cada linha traz
+      o nome e, entre parênteses, os apelidos/termos que o laudo pode usar — mapeie por eles:
+
+      #{ExamCatalog.prompt_reference}
+
       Regras:
-      - "measured_on": data da coleta (ISO). Se não houver, omita.
-      - Use estas chaves canônicas quando o analito corresponder: #{catalog}.
-        Ex.: "Glicose"->glucose, "Colesterol total"->cholesterol_total, "HDL"->hdl,
-        "LDL"->ldl, "Triglicerídeos"->triglycerides, "TSH"->tsh, "Vitamina D"->vitamin_d.
-      - Para analitos sem chave canônica, gere uma chave em snake_case em inglês.
-      - "value" deve ser número (ponto decimal). Inclua "unit" e a faixa de referência
-        (ref_low/ref_high) quando o laudo informar; senão omita esses campos.
-      - Ignore textos descritivos, métodos e valores não numéricos.
+      - "measured_on": data da coleta (ISO). Se houver datas diferentes por exame, use a mais comum.
+      - Para o hemograma (série branca), use o valor em PORCENTAGEM (%) do diferencial
+        (neutrofilos/segmentados, linfocitos, monocitos, eosinofilos, basofilos), não o absoluto.
+      - "value": número com ponto decimal. SEMPRE inclua "unit" e a faixa de referência
+        (ref_low/ref_high) EXATAMENTE como o laudo informa (preferir a do laudo à padrão).
+      - Se um analito NÃO estiver na lista acima, IGNORE (não invente chave).
+      - Ignore textos, métodos, materiais, resultados anteriores e valores não numéricos.
     PROMPT
   end
 

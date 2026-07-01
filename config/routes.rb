@@ -31,7 +31,10 @@ Rails.application.routes.draw do
   post "habits/:id/toggle", to: "habit_checks#toggle", as: :toggle_habit
   resources :weights, only: [:create, :destroy]
   resources :measurements, only: [:index, :create, :destroy] do
-    post :import, on: :collection
+    collection do
+      post :import
+      delete :destroy_exams
+    end
   end
   resources :goals, only: [:index, :create, :destroy]
   get "configurar", to: "setup#index", as: :setup

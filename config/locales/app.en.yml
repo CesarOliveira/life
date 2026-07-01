@@ -178,6 +178,9 @@ en:
     out_of_range: "Out of range"
     in_range: "Normal"
     remove_confirm: "Remove this measurement?"
+    clear_exams: "Delete all exams"
+    clear_exams_confirm: "Delete ALL imported exams? (to re-import clean)"
+    exams_cleared: "Exams deleted."
     shortcut:
       title: "Health Shortcut (iPhone)"
       hint: "Download and install to send sleep and steps automatically. Requires \"Allow Untrusted Shortcuts\" in Settings."

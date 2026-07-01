@@ -81,4 +81,23 @@ RSpec.describe "Measurements", type: :request do
       expect(response).to have_http_status(:not_found)
     end
   end
+
+  describe "DELETE /measurements/destroy_exams" do
+    it "clears all exams (keeps health)" do
+      create(:measurement, account: account, category: "exam", key: "glucose")
+      create(:measurement, account: account, category: "health", key: "steps")
+      delete destroy_exams_measurements_path
+      expect(account.measurements.where(category: "exam").count).to eq(0)
+      expect(account.measurements.where(category: "health").count).to eq(1)
+    end
+  end
+
+  describe "exam grouping (painéis)" do
+    it "groups exams by panel with PT labels (TGO/AST)" do
+      create(:measurement, account: account, category: "exam", key: "ast", value: 23, unit: "U/L")
+      get measurements_path(category: "exam")
+      expect(response.body).to include("Função hepática")
+      expect(response.body).to include("TGO / AST")
+    end
+  end
 end

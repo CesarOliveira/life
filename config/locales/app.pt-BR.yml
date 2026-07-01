@@ -178,6 +178,9 @@ pt-BR:
     out_of_range: "Fora da faixa"
     in_range: "Normal"
     remove_confirm: "Remover esta medição?"
+    clear_exams: "Apagar todos os exames"
+    clear_exams_confirm: "Apagar TODOS os exames importados? (para reimportar limpo)"
+    exams_cleared: "Exames apagados."
     shortcut:
       title: "Atalho de Saúde (iPhone)"
       hint: "Baixe e instale para enviar sono e passos automaticamente. Requer \"Permitir Atalhos Não Confiáveis\" nos Ajustes."

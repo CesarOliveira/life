@@ -35,12 +35,25 @@ class Measurement < ApplicationRecord
   scope :recent_first, -> { order(measured_on: :desc) }
 
   def self.meta(key)
-    CATALOG[key.to_s] || {}
+    return CATALOG[key.to_s] if CATALOG.key?(key.to_s)
+
+    exam = ExamCatalog.meta(key)
+    return {} unless exam
+
+    { category: "exam", unit: exam[:unit], ref_low: exam[:ref_low], ref_high: exam[:ref_high],
+      label: exam[:label], panel: exam[:panel] }
   end
 
   # Chaves do catálogo de uma categoria (para o seletor manual).
   def self.catalog_keys(category)
-    CATALOG.select { |_, meta| meta[:category] == category }.keys
+    keys = CATALOG.select { |_, meta| meta[:category] == category }.keys
+    keys += ExamCatalog.keys if category == "exam"
+    keys.uniq
+  end
+
+  # Nome de exibição de uma chave (catálogo de exames -> i18n -> humanize).
+  def self.key_label(key)
+    ExamCatalog.meta(key)&.dig(:label) || I18n.t("measurements.keys.#{key}", default: key.to_s.humanize)
   end
 
   def out_of_range?
@@ -50,7 +63,7 @@ class Measurement < ApplicationRecord
   end
 
   def label
-    I18n.t("measurements.keys.#{key}", default: key.to_s.humanize)
+    self.class.key_label(key)
   end
 
   # Chaves cujo valor é um horário (minutos desde a meia-noite) -> exibir HH:MM.
