@@ -29,7 +29,7 @@ Rails.application.routes.draw do
   get "/insights", to: "insights#index", as: :insights
   resources :habits
   post "habits/:id/toggle", to: "habit_checks#toggle", as: :toggle_habit
-  resources :weights, only: [:index, :create, :destroy]
+  resources :weights, only: [:create, :destroy]
   resources :measurements, only: [:index, :create, :destroy] do
     post :import, on: :collection
   end

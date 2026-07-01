@@ -1,10 +1,7 @@
+# Peso vive dentro da Saúde (measurements, categoria health) — sem aba própria.
+# Aqui só criamos/removemos entradas e voltamos para a Saúde.
 class WeightsController < ApplicationController
   before_action :set_entry, only: [:destroy]
-
-  def index
-    load_collection
-    @entry = current_account.weight_entries.new(date: Date.current)
-  end
 
   def create
     date = weight_params[:date].presence || Date.current
@@ -12,25 +9,18 @@ class WeightsController < ApplicationController
     @entry.weight_kg = weight_params[:weight_kg]
 
     if @entry.save
-      redirect_to weights_path, notice: t("flash.weights.saved")
+      redirect_to measurements_path(category: "health"), notice: t("flash.weights.saved")
     else
-      load_collection
-      render :index, status: :unprocessable_entity
+      redirect_to measurements_path(category: "health"), alert: @entry.errors.full_messages.to_sentence
     end
   end
 
   def destroy
     @entry.destroy
-    redirect_to weights_path, notice: t("flash.weights.removed")
+    redirect_to measurements_path(category: "health"), notice: t("flash.weights.removed")
   end
 
   private
-
-  def load_collection
-    @entries = current_account.weight_entries.recent_first.to_a
-    @latest = @entries.first
-    @chart = WeightChart.new(current_account.weight_entries.chronological.to_a)
-  end
 
   def set_entry
     @entry = current_account.weight_entries.find(params[:id])

@@ -9,6 +9,7 @@ class MeasurementsController < ApplicationController
     @groups = build_groups(@category)
     @catalog_keys = Measurement.catalog_keys(@category)
     @pdf_import = ExamPdfExtractor.configured?
+    load_weight if @category == "health"
   end
 
   # Importa um PDF de exame: extrai os resultados (IA) e cria as medições.
@@ -58,6 +59,14 @@ class MeasurementsController < ApplicationController
 
   def current_category
     Measurement::CATEGORIES.include?(params[:category]) ? params[:category] : "health"
+  end
+
+  # Peso agora vive dentro da Saúde (não tem aba própria).
+  def load_weight
+    @weight_entries = current_account.weight_entries.recent_first.to_a
+    @weight_latest = @weight_entries.first
+    @weight_chart = WeightChart.new(current_account.weight_entries.chronological.to_a)
+    @weight_entry = current_account.weight_entries.new(date: Date.current)
   end
 
   # Agrupa as medições por chave: [{ key, label, unit, latest, rows, chart }, ...].
