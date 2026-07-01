@@ -1,0 +1,10 @@
+<%# locals: daily (array {date, seconds}), max (Integer) — barras verticais por dia. %>
+<div class="flex h-48 items-end gap-px overflow-x-auto pb-1">
+  <% daily.each do |d| %>
+    <% pct = max.zero? ? 0 : (d[:seconds] * 100 / max) %>
+    <div class="flex min-w-[3px] flex-1 flex-col justify-end self-stretch"
+         title="<%= d[:date].strftime('%d/%m') %> — <%= humanize_duration(d[:seconds]) %>">
+      <div class="rounded-t bg-emerald-500" style="height: <%= pct %>%"></div>
+    </div>
+  <% end %>
+</div>

@@ -33,6 +33,21 @@ RSpec.describe "Screen time", type: :request do
     expect(response.body.strip).to eq("abcd1234567890efgh")
   end
 
+  it "shows the total history with period filter and totals" do
+    create(:app_usage, account: account, bundle_id: "Instagram", date: Date.current - 1, seconds: 3600)
+    create(:app_usage, account: account, bundle_id: "Instagram", date: Date.current - 5, seconds: 1800)
+
+    get screen_time_history_path(range: 7)
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include(I18n.t("screen_time.daily_total"))
+    expect(response.body).to include("1h 30m") # total = 1h + 30m
+
+    # período específico
+    get screen_time_history_path(from: (Date.current - 2).iso8601, to: Date.current.iso8601)
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("1h 0m") # só o de ontem entra na janela
+  end
+
   it "shows a per-app daily chart" do
     create(:app_usage, account: account, bundle_id: "Instagram", name: "Instagram", date: Date.current, seconds: 3600)
     create(:app_usage, account: account, bundle_id: "Instagram", name: "Instagram", date: Date.current - 1, seconds: 1800)

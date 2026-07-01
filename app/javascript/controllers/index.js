@@ -15,3 +15,6 @@ application.register("clipboard", ClipboardController)
 
 import ChecklistController from "./checklist_controller"
 application.register("checklist", ChecklistController)
+
+import ChartToggleController from "./chart_toggle_controller"
+application.register("chart-toggle", ChartToggleController)

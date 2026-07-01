@@ -8,7 +8,8 @@ class ScreenTimeController < ApplicationController
     usages = current_account.app_usages.in_range(@range)
 
     @total_week = usages.sum(:seconds)
-    @total_today = usages.where(date: @today).sum(:seconds)
+    # "Hoje" é sempre 0 (o atalho envia o dia anterior); mostramos "Ontem".
+    @total_yesterday = current_account.app_usages.where(date: @today - 1).sum(:seconds)
 
     names = usages.where.not(name: nil).group(:bundle_id).maximum(:name)
     @apps = usages.group(:bundle_id).sum(:seconds)
@@ -41,8 +42,44 @@ class ScreenTimeController < ApplicationController
     @max_day = by_date.values.max || 0
   end
 
+  # Histórico do tempo de tela TOTAL por dia, com filtro de período e gráfico
+  # (barras ou linha — a troca é no cliente).
+  RANGES = { "7" => 7, "30" => 30, "90" => 90, "365" => 365 }.freeze
+
+  def history
+    @today = Date.current
+    @from, @to, @range_key = resolve_range
+    usages = current_account.app_usages.where(date: @from..@to)
+
+    @total = usages.sum(:seconds)
+    by_date = usages.group(:date).sum(:seconds)
+    @daily = (@from..@to).map { |date| { date: date, seconds: by_date[date] || 0 } }
+    @max_day = @daily.map { |d| d[:seconds] }.max || 0
+    @avg = @daily.any? ? (@total / @daily.size) : 0
+    @chart = MetricChart.new(@daily.map { |d| { date: d[:date], value: (d[:seconds] / 3600.0).round(2) } })
+  end
+
   def regenerate
     current_account.regenerate_api_token
     redirect_back fallback_location: setup_path, notice: t("flash.screen_time.token_regenerated")
+  end
+
+  private
+
+  # Resolve o intervalo: from/to específicos, ou range predefinido (dias).
+  def resolve_range
+    today = Date.current
+    from = parse_date(params[:from])
+    to = parse_date(params[:to])
+    return [from, [to, today].min, "custom"] if from && to && from <= to
+
+    key = RANGES.key?(params[:range]) ? params[:range] : "30"
+    [today - (RANGES[key] - 1), today, key]
+  end
+
+  def parse_date(raw)
+    Date.iso8601(raw.to_s)
+  rescue ArgumentError, TypeError
+    nil
   end
 end

@@ -1,0 +1,56 @@
+<div class="space-y-6" data-controller="chart-toggle">
+  <div>
+    <%= link_to "‹ #{t('nav.screen_time')}", screen_time_path, class: "text-sm text-slate-500 hover:text-slate-900" %>
+    <h1 class="mt-1 text-2xl font-bold text-slate-900"><%= t("screen_time.history_title") %></h1>
+  </div>
+
+  <%# Filtro de período %>
+  <div class="flex flex-wrap items-center gap-2">
+    <% { "7" => t("screen_time.range_7"), "30" => t("screen_time.range_30"), "90" => t("screen_time.range_90"), "365" => t("screen_time.range_365") }.each do |k, label| %>
+      <%= link_to label, screen_time_history_path(range: k),
+            class: "rounded-lg border px-3 py-1.5 text-xs font-medium #{@range_key == k ? "border-emerald-500 bg-emerald-600 text-white" : "border-slate-300 text-slate-600 hover:bg-slate-50"}" %>
+    <% end %>
+    <%= form_with url: screen_time_history_path, method: :get, class: "flex items-center gap-1" do %>
+      <input type="date" name="from" value="<%= @from.iso8601 %>" class="rounded-lg border border-slate-300 px-2 py-1 text-xs text-slate-700">
+      <span class="text-xs text-slate-400">–</span>
+      <input type="date" name="to" value="<%= @to.iso8601 %>" class="rounded-lg border border-slate-300 px-2 py-1 text-xs text-slate-700">
+      <button class="rounded-lg border border-slate-300 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50"><%= t("screen_time.apply") %></button>
+    <% end %>
+  </div>
+
+  <%# Totais %>
+  <div class="grid grid-cols-2 gap-3 sm:gap-4">
+    <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <p class="text-xs font-medium uppercase tracking-wide text-slate-400"><%= t("screen_time.total_period") %></p>
+      <p class="mt-1 text-2xl font-bold text-slate-900"><%= humanize_duration(@total) %></p>
+    </div>
+    <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <p class="text-xs font-medium uppercase tracking-wide text-slate-400"><%= t("screen_time.avg_day") %></p>
+      <p class="mt-1 text-2xl font-bold text-slate-900"><%= humanize_duration(@avg) %></p>
+    </div>
+  </div>
+
+  <%# Gráfico + alternador barras/linha %>
+  <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div class="mb-4 flex items-center justify-between gap-2">
+      <h2 class="font-semibold text-slate-900"><%= t("screen_time.daily_total") %></h2>
+      <div class="inline-flex overflow-hidden rounded-lg border border-slate-200 text-xs">
+        <button type="button" data-chart-toggle-target="button" data-chart-type="bars" data-action="chart-toggle#select"
+                class="bg-emerald-600 px-3 py-1.5 font-medium text-white"><%= t("screen_time.chart_bars") %></button>
+        <button type="button" data-chart-toggle-target="button" data-chart-type="line" data-action="chart-toggle#select"
+                class="px-3 py-1.5 font-medium text-slate-600"><%= t("screen_time.chart_line") %></button>
+      </div>
+    </div>
+
+    <% if @max_day.zero? %>
+      <p class="text-sm text-slate-500"><%= t("screen_time.app_empty") %></p>
+    <% else %>
+      <div data-chart-toggle-target="chart" data-chart-type="bars">
+        <%= render "bars_vertical", daily: @daily, max: @max_day %>
+      </div>
+      <div data-chart-toggle-target="chart" data-chart-type="line" class="hidden">
+        <%= render "measurements/chart", chart: @chart, unit: t("screen_time.hours_unit") %>
+      </div>
+    <% end %>
+  </section>
+</div>
