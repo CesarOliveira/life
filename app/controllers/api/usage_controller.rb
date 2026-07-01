@@ -54,6 +54,9 @@ module Api
       return render_error("invalid_date") if date.nil? || !date_in_window?(date)
 
       raw = request.raw_post.to_s.dup.force_encoding("UTF-8").scrub
+      # Auto-limpeza: remove artefatos de um parser antigo ("Instagram ()").
+      current_account.app_usages.where("bundle_id LIKE ?", "%()").delete_all
+
       apps = parse_raw_apps(raw)
       rows = apps.filter_map { |entry| build_row(entry, device, date.iso8601) }
       rows = rows.reverse.uniq { |r| [r[:device], r[:date], r[:bundle_id]] }.reverse
@@ -73,18 +76,23 @@ module Api
 
     DURATION_TOKEN = /((?:\d[\d.,]*\s*(?:horas?|hr|h|min|m|seg|sec|s)\b[\s,]*)+)/i
 
-    # Best-effort: cada linha "Nome ... <duração>" -> {name, duration}. A duração
-    # é o trecho com h/min/seg; o resto da linha é o nome. (O formato exato vem do
-    # raw_preview; ajusto o parser conforme o que o iPhone enviar.)
+    # Formato da ação "Obter Atividade em Apps e Sites": "Nome (2h 36min)".
+    # Fallback: duração no fim da linha sem parênteses. Retorna {name, duration}.
     def parse_raw_apps(raw)
       raw.split(/\r?\n/).filter_map do |line|
         line = line.gsub(/\p{Cf}/, "").strip
         next if line.empty?
 
-        duration = line[DURATION_TOKEN, 0]
-        next if duration.blank?
+        m = line.match(/\A(.+?)\s*\((.+?)\)\s*\z/)
+        if m && m[2].match?(DURATION_TOKEN)
+          name = m[1].strip
+          duration = m[2].strip
+        else
+          duration = line[DURATION_TOKEN, 0]
+          next if duration.blank?
 
-        name = line.sub(duration, "").gsub(/[\-–—·:,\s]+\z/, "").strip
+          name = line.sub(duration, "").gsub(/[\-–—·:()\s]+\z/, "").strip
+        end
         next if name.blank?
 
         { "name" => name, "duration" => duration }

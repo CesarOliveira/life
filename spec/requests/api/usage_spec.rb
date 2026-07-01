@@ -158,20 +158,25 @@ RSpec.describe "API::Usage", type: :request do
   describe "create_raw (cano burro: texto cru + eco)" do
     let(:raw_headers) { { "Authorization" => "Bearer #{account.api_token}", "CONTENT_TYPE" => "text/plain" } }
 
-    it "parses name + duration per line and echoes a preview" do
-      raw = "WhatsApp 2h 36min\nInstagram 22min\nlixo sem duração"
+    it "parses the 'Name (duration)' format the App Activity action returns" do
+      raw = "Instagram (3h 16min)\n‎WhatsApp (26min)\nYouTube (25s)\nlixo sem duração"
       post "/api/usage_raw?period=yesterday&device=iphone&client_version=v11", params: raw, headers: raw_headers
 
       expect(response).to have_http_status(:ok)
       json = response.parsed_body
-      expect(json["apps"]).to eq(2)
-      expect(json["upserted"]).to eq(2)
+      expect(json["apps"]).to eq(3)
+      expect(json["upserted"]).to eq(3)
       expect(json["client_version"]).to eq("v11")
-      expect(json["raw_preview"]).to include("WhatsApp")
 
-      wpp = account.app_usages.find_by(bundle_id: "WhatsApp")
-      expect(wpp.seconds).to eq((2 * 3600) + (36 * 60))
-      expect(account.app_usages.find_by(bundle_id: "Instagram").seconds).to eq(22 * 60)
+      expect(account.app_usages.find_by(bundle_id: "Instagram").seconds).to eq((3 * 3600) + (16 * 60))
+      expect(account.app_usages.find_by(bundle_id: "WhatsApp").seconds).to eq(26 * 60) # sem LRM e sem "()"
+      expect(account.app_usages.find_by(bundle_id: "YouTube").seconds).to eq(25)
+    end
+
+    it "cleans up old '()' artifacts on ingest" do
+      create(:app_usage, account: account, bundle_id: "Instagram ()", name: "Instagram ()", date: Date.current - 1)
+      post "/api/usage_raw?period=yesterday", params: "Instagram (1h)", headers: raw_headers
+      expect(account.app_usages.where("bundle_id LIKE ?", "%()")).to be_empty
     end
   end
 end
