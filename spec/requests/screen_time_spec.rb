@@ -17,11 +17,11 @@ RSpec.describe "Screen time", type: :request do
     expect(account.reload.api_token).to be_present
   end
 
-  it "regenerates the token" do
+  it "regenerates the token and returns to the caller (fallback: setup)" do
     old = account.api_token
     post regenerate_screen_time_token_path
     expect(account.reload.api_token).not_to eq(old)
-    expect(response).to redirect_to(screen_time_path)
+    expect(response).to redirect_to(setup_path)
   end
 
   it "masks the token on the page but serves the full token on demand" do

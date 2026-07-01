@@ -43,6 +43,6 @@ class ScreenTimeController < ApplicationController
 
   def regenerate
     current_account.regenerate_api_token
-    redirect_to screen_time_path, notice: t("flash.screen_time.token_regenerated")
+    redirect_back fallback_location: setup_path, notice: t("flash.screen_time.token_regenerated")
   end
 end
