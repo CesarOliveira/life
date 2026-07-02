@@ -29,7 +29,7 @@ class GoalsController < ApplicationController
   def load_goals
     @goals = current_account.goals.ordered.to_a
     @progress = @goals.to_h { |goal| [goal, GoalProgress.new(goal)] }
-    @metric_keys = Goal::METRIC_KEYS
+    @metric_keys = Goal.metric_keys
   end
 
   def set_goal

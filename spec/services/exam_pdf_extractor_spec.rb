@@ -18,7 +18,6 @@ RSpec.describe ExamPdfExtractor do
 
       glucose = result.rows.find { |r| r[:key] == "glucose" }
       expect(glucose[:value]).to eq(92.0)
-      expect(glucose[:category]).to eq("exam")
       expect(glucose[:source]).to eq("pdf")
       expect(glucose[:ref_high]).to eq(99)
 

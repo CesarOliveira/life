@@ -13,34 +13,72 @@
   <% if @category == "health" %>
     <%# Peso (mora dentro da Saúde) %>
     <%= render "weights/panel", entry: @weight_entry, latest: @weight_latest, chart: @weight_chart, entries: @weight_entries %>
-  <% end %>
 
-  <%# Formulário de entrada manual %>
-  <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-    <h2 class="mb-3 font-semibold text-slate-900"><%= t("measurements.add") %></h2>
-    <%= form_with model: @measurement, url: measurements_path, method: :post, class: "flex flex-wrap items-end gap-3" do |f| %>
-      <% if @measurement.errors.any? %>
-        <div class="w-full rounded-lg border border-rose-200 bg-rose-50 p-2 text-sm text-rose-700">
-          <%= @measurement.errors.full_messages.to_sentence %>
+    <%# Entrada manual de sinais %>
+    <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 class="mb-3 font-semibold text-slate-900"><%= t("measurements.add") %></h2>
+      <%= form_with model: @measurement, url: measurements_path, method: :post, class: "flex flex-wrap items-end gap-3" do |f| %>
+        <% if @measurement.errors.any? %>
+          <div class="w-full rounded-lg border border-rose-200 bg-rose-50 p-2 text-sm text-rose-700">
+            <%= @measurement.errors.full_messages.to_sentence %>
+          </div>
+        <% end %>
+        <div>
+          <%= f.label :key, t("measurements.metric"), class: "mb-1 block text-xs font-medium text-slate-600" %>
+          <%= f.select :key,
+                options_for_select(@catalog_keys.map { |k| [Measurement.key_label(k), k] }, @measurement.key),
+                {},
+                class: "rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
         </div>
+        <div>
+          <%= f.label :value, t("measurements.value"), class: "mb-1 block text-xs font-medium text-slate-600" %>
+          <%= f.number_field :value, step: "any", required: true, class: "w-28 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+        </div>
+        <div>
+          <%= f.label :measured_on, t("measurements.date"), class: "mb-1 block text-xs font-medium text-slate-600" %>
+          <%= f.date_field :measured_on, class: "rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+        </div>
+        <%= f.submit t("measurements.add"), class: "rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700" %>
       <% end %>
-      <%= f.hidden_field :category, value: @category %>
-      <div>
-        <%= f.label :key, t("measurements.metric"), class: "mb-1 block text-xs font-medium text-slate-600" %>
-        <%= f.select :key,
-              options_for_select(@catalog_keys.map { |k| [Measurement.key_label(k), k] }, @measurement.key),
-              {},
-              class: "rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+    </section>
+
+    <% if @groups.empty? %>
+      <div class="rounded-2xl border border-slate-200 bg-white p-10 text-center text-slate-500 shadow-sm">
+        <%= t("measurements.empty") %>
       </div>
-      <div>
-        <%= f.label :value, t("measurements.value"), class: "mb-1 block text-xs font-medium text-slate-600" %>
-        <%= f.number_field :value, step: "any", required: true, class: "w-28 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+    <% else %>
+      <div class="grid gap-4 lg:grid-cols-2">
+        <% @groups.each do |g| %>
+          <%= render "metric_card", g: g, category: @category %>
+        <% end %>
       </div>
-      <div>
-        <%= f.label :measured_on, t("measurements.date"), class: "mb-1 block text-xs font-medium text-slate-600" %>
-        <%= f.date_field :measured_on, class: "rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
-      </div>
-      <% if @category == "exam" %>
+    <% end %>
+  <% else %>
+    <%# ===== Aba Exames (ExamResult / catálogo ExamType) ===== %>
+
+    <%# Entrada manual de exame %>
+    <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 class="mb-3 font-semibold text-slate-900"><%= t("measurements.add") %></h2>
+      <%= form_with model: @exam_result, url: exam_results_path, method: :post, class: "flex flex-wrap items-end gap-3" do |f| %>
+        <div>
+          <%= f.label :exam_type_id, t("measurements.metric"), class: "mb-1 block text-xs font-medium text-slate-600" %>
+          <%= f.select :exam_type_id,
+                options_for_select(@exam_types.map { |type| [type.name, type.id] }, @exam_result.exam_type_id),
+                {},
+                class: "rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+        </div>
+        <div>
+          <%= f.label :value, t("measurements.value"), class: "mb-1 block text-xs font-medium text-slate-600" %>
+          <%= f.number_field :value, step: "any", required: true, class: "w-28 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+        </div>
+        <div>
+          <%= f.label :unit, t("measurements.unit"), class: "mb-1 block text-xs font-medium text-slate-600" %>
+          <%= f.text_field :unit, class: "w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+        </div>
+        <div>
+          <%= f.label :measured_on, t("measurements.date"), class: "mb-1 block text-xs font-medium text-slate-600" %>
+          <%= f.date_field :measured_on, class: "rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+        </div>
         <div>
           <%= f.label :ref_low, t("measurements.ref_low"), class: "mb-1 block text-xs font-medium text-slate-600" %>
           <%= f.number_field :ref_low, step: "any", class: "w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
@@ -49,13 +87,11 @@
           <%= f.label :ref_high, t("measurements.ref_high"), class: "mb-1 block text-xs font-medium text-slate-600" %>
           <%= f.number_field :ref_high, step: "any", class: "w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
         </div>
+        <%= f.submit t("measurements.add"), class: "rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700" %>
       <% end %>
-      <%= f.submit t("measurements.add"), class: "rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700" %>
-    <% end %>
-  </section>
+    </section>
 
-  <%# Import de PDF de exame (extração por IA) %>
-  <% if @category == "exam" %>
+    <%# Import de PDF de exame (extração por IA) %>
     <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <h2 class="mb-1 font-semibold text-slate-900"><%= t("measurements.pdf.title") %></h2>
       <p class="mb-3 text-xs text-slate-500"><%= t("measurements.pdf.intro") %></p>
@@ -72,47 +108,42 @@
         <p class="rounded-lg border border-amber-200 bg-amber-50 p-2 text-xs text-amber-700"><%= t("measurements.pdf.errors.not_configured") %></p>
       <% end %>
     </section>
-  <% end %>
 
-  <% if @groups.empty? %>
-    <div class="rounded-2xl border border-slate-200 bg-white p-10 text-center text-slate-500 shadow-sm">
-      <%= t("measurements.empty") %>
-    </div>
-  <% elsif @category == "exam" %>
-    <p class="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-500"><%= t("measurements.ref_note") %></p>
+    <% if @exam_groups.empty? %>
+      <div class="rounded-2xl border border-slate-200 bg-white p-10 text-center text-slate-500 shadow-sm">
+        <%= t("measurements.empty") %>
+      </div>
+    <% else %>
+      <p class="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-500"><%= t("measurements.ref_note") %></p>
 
-    <%# Exames agrupados por painel (Hemograma, Lipidograma, ...) %>
-    <% @panels.each do |panel| %>
-      <section class="space-y-3">
-        <h2 class="text-lg font-bold text-slate-900"><%= panel[:label] %></h2>
-        <div class="grid gap-4 lg:grid-cols-2">
-          <% panel[:groups].each do |g| %>
-            <%= render "metric_card", g: g, category: @category %>
+      <%# Exames agrupados por grupo do catálogo (Hemograma, Lipidograma, ...) %>
+      <% @exam_groups.each do |entry| %>
+        <section class="space-y-3">
+          <h2 class="text-lg font-bold text-slate-900"><%= entry[:group].name %></h2>
+          <% if entry[:group].description.present? %>
+            <p class="text-xs text-slate-500"><%= entry[:group].description %></p>
           <% end %>
-        </div>
-      </section>
-    <% end %>
-  <% else %>
-    <div class="grid gap-4 lg:grid-cols-2">
-      <% @groups.each do |g| %>
-        <%= render "metric_card", g: g, category: @category %>
+          <div class="grid gap-4 lg:grid-cols-2">
+            <% entry[:items].each do |item| %>
+              <%= render "exam_card", item: item %>
+            <% end %>
+          </div>
+        </section>
       <% end %>
-    </div>
-  <% end %>
 
-  <%# Zona de perigo (fim da página): apagar todos os exames, com dupla confirmação %>
-  <% if @category == "exam" && @groups.any? %>
-    <div class="border-t border-slate-200 pt-4 text-center">
-      <%= button_to t("measurements.clear_exams"), destroy_exams_measurements_path, method: :delete,
-            class: "text-xs font-medium text-rose-600 hover:underline",
-            form: {
-              data: {
-                controller: "double-confirm",
-                action: "submit->double-confirm#check",
-                double_confirm_first_value: t("measurements.clear_exams_confirm"),
-                double_confirm_second_value: t("measurements.clear_exams_confirm2")
-              }
-            } %>
-    </div>
+      <%# Zona de perigo (fim da página): apagar todos os exames, com dupla confirmação %>
+      <div class="border-t border-slate-200 pt-4 text-center">
+        <%= button_to t("measurements.clear_exams"), destroy_exams_measurements_path, method: :delete,
+              class: "text-xs font-medium text-rose-600 hover:underline",
+              form: {
+                data: {
+                  controller: "double-confirm",
+                  action: "submit->double-confirm#check",
+                  double_confirm_first_value: t("measurements.clear_exams_confirm"),
+                  double_confirm_second_value: t("measurements.clear_exams_confirm2")
+                }
+              } %>
+      </div>
+    <% end %>
   <% end %>
 </div>

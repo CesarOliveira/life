@@ -28,6 +28,7 @@ class Account < ApplicationRecord
   has_many :measurements, dependent: :destroy
   has_many :goals, dependent: :destroy
   has_many :exam_extractions, dependent: :destroy
+  has_many :exam_results, dependent: :destroy
 
   # Token pessoal para a API de ingestão (ex.: script do Mac enviando uso por app).
   has_secure_token :api_token

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_02_113135) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_02_130122) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -55,6 +55,49 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_02_113135) do
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_exam_extractions_on_account_id"
     t.index ["created_at"], name: "index_exam_extractions_on_created_at"
+  end
+
+  create_table "exam_groups", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "description_en"
+    t.text "description_pt"
+    t.string "key", null: false
+    t.string "name_en", null: false
+    t.string "name_pt", null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["key"], name: "index_exam_groups_on_key", unique: true
+  end
+
+  create_table "exam_results", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "exam_type_id", null: false
+    t.date "measured_on", null: false
+    t.decimal "ref_high", precision: 12, scale: 3
+    t.decimal "ref_low", precision: 12, scale: 3
+    t.string "source", default: "manual", null: false
+    t.string "unit"
+    t.datetime "updated_at", null: false
+    t.decimal "value", precision: 12, scale: 3, null: false
+    t.index ["account_id", "exam_type_id", "measured_on"], name: "idx_exam_results_unique", unique: true
+    t.index ["account_id"], name: "index_exam_results_on_account_id"
+    t.index ["exam_type_id"], name: "index_exam_results_on_exam_type_id"
+  end
+
+  create_table "exam_types", force: :cascade do |t|
+    t.string "aliases", default: [], null: false, array: true
+    t.datetime "created_at", null: false
+    t.text "description_en"
+    t.text "description_pt"
+    t.bigint "exam_group_id", null: false
+    t.string "key", null: false
+    t.string "name_en", null: false
+    t.string "name_pt", null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["exam_group_id"], name: "index_exam_types_on_exam_group_id"
+    t.index ["key"], name: "index_exam_types_on_key", unique: true
   end
 
   create_table "goals", force: :cascade do |t|
@@ -174,6 +217,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_02_113135) do
   add_foreign_key "accounts", "users", column: "owner_id"
   add_foreign_key "app_usages", "accounts"
   add_foreign_key "exam_extractions", "accounts"
+  add_foreign_key "exam_results", "accounts"
+  add_foreign_key "exam_results", "exam_types"
+  add_foreign_key "exam_types", "exam_groups"
   add_foreign_key "goals", "accounts"
   add_foreign_key "habit_checks", "habits"
   add_foreign_key "habits", "accounts"

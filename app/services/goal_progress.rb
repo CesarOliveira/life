@@ -69,6 +69,8 @@ class GoalProgress
   def load_series
     if @goal.metric_key == "weight"
       @goal.account.weight_entries.chronological.map { |e| { date: e.date, value: e.weight_kg } }
+    elsif (type = @goal.exam_type)
+      @goal.account.exam_results.where(exam_type: type).chronological.map { |r| { date: r.measured_on, value: r.value } }
     else
       @goal.account.measurements.for_key(@goal.metric_key).chronological.map { |m| { date: m.measured_on, value: m.value } }
     end

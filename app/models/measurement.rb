@@ -3,23 +3,14 @@ class Measurement < ApplicationRecord
 
   CATEGORIES = %w[health exam].freeze
 
-  # Catálogo de métricas conhecidas: categoria, unidade e faixa de referência
-  # padrão (exames). Chaves fora do catálogo também são aceitas (ex.: extração
-  # de PDF) e exibidas com o nome humanizado.
+  # Catálogo de métricas de SAÚDE (sinais). Exames vivem em ExamType/ExamResult.
   CATALOG = {
-    "sleep_minutes"     => { category: "health", unit: "min" },
-    "sleep_bedtime"     => { category: "health", unit: "hh:mm" },
-    "sleep_wake"        => { category: "health", unit: "hh:mm" },
-    "steps"             => { category: "health", unit: "passos" },
-    "resting_hr"        => { category: "health", unit: "bpm" },
-    "active_energy"     => { category: "health", unit: "kcal" },
-    "glucose"           => { category: "exam", unit: "mg/dL", ref_low: 70, ref_high: 99 },
-    "cholesterol_total" => { category: "exam", unit: "mg/dL", ref_high: 190 },
-    "hdl"               => { category: "exam", unit: "mg/dL", ref_low: 40 },
-    "ldl"               => { category: "exam", unit: "mg/dL", ref_high: 130 },
-    "triglycerides"     => { category: "exam", unit: "mg/dL", ref_high: 150 },
-    "tsh"               => { category: "exam", unit: "µUI/mL", ref_low: 0.4, ref_high: 4.0 },
-    "vitamin_d"         => { category: "exam", unit: "ng/mL", ref_low: 30, ref_high: 100 }
+    "sleep_minutes" => { category: "health", unit: "min" },
+    "sleep_bedtime" => { category: "health", unit: "hh:mm" },
+    "sleep_wake"    => { category: "health", unit: "hh:mm" },
+    "steps"         => { category: "health", unit: "passos" },
+    "resting_hr"    => { category: "health", unit: "bpm" },
+    "active_energy" => { category: "health", unit: "kcal" }
   }.freeze
 
   validates :key, presence: true
@@ -35,25 +26,17 @@ class Measurement < ApplicationRecord
   scope :recent_first, -> { order(measured_on: :desc) }
 
   def self.meta(key)
-    return CATALOG[key.to_s] if CATALOG.key?(key.to_s)
-
-    exam = ExamCatalog.meta(key)
-    return {} unless exam
-
-    { category: "exam", unit: exam[:unit], ref_low: exam[:ref_low], ref_high: exam[:ref_high],
-      label: exam[:label], panel: exam[:panel] }
+    CATALOG[key.to_s] || {}
   end
 
   # Chaves do catálogo de uma categoria (para o seletor manual).
   def self.catalog_keys(category)
-    keys = CATALOG.select { |_, meta| meta[:category] == category }.keys
-    keys += ExamCatalog.keys if category == "exam"
-    keys.uniq
+    CATALOG.select { |_, meta| meta[:category] == category }.keys
   end
 
-  # Nome de exibição de uma chave (catálogo de exames -> i18n -> humanize).
+  # Nome de exibição de uma chave (i18n -> humanize).
   def self.key_label(key)
-    ExamCatalog.meta(key)&.dig(:label) || I18n.t("measurements.keys.#{key}", default: key.to_s.humanize)
+    I18n.t("measurements.keys.#{key}", default: key.to_s.humanize)
   end
 
   def out_of_range?

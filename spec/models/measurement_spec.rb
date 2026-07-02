@@ -40,12 +40,12 @@ RSpec.describe Measurement, type: :model do
 
   describe ".meta / .catalog_keys" do
     it "returns catalog metadata for a known key" do
-      expect(Measurement.meta("glucose")[:category]).to eq("exam")
+      expect(Measurement.meta("steps")[:category]).to eq("health")
     end
 
-    it "lists catalog keys by category" do
-      expect(Measurement.catalog_keys("exam")).to include("glucose", "hdl")
+    it "lists catalog keys by category (health only; exams live in ExamType)" do
       expect(Measurement.catalog_keys("health")).to include("steps", "sleep_minutes")
+      expect(Measurement.catalog_keys("exam")).to be_empty
     end
   end
 end

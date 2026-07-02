@@ -30,7 +30,8 @@ RSpec.describe GoalProgress do
     let(:goal) { create(:goal, :exam, account: account) } # vitamin_d 20 -> 40
 
     it "tracks progress upward" do
-      create(:measurement, account: account, key: "vitamin_d", value: 30, measured_on: Date.current, category: "exam")
+      goal # materializa o goal (a factory cria o ExamType vitamin_d)
+      create(:exam_result, account: account, exam_type: ExamType.find_by(key: "vitamin_d"), value: 30, measured_on: Date.current)
       progress = described_class.new(goal)
       expect(progress.direction).to eq(:up)
       expect(progress.progress_pct).to eq(50)

@@ -124,13 +124,11 @@ class ExamPdfExtractor
     key = item["key"].to_s.strip.downcase.gsub(/[^a-z0-9]+/, "_").gsub(/\A_|_\z/, "").first(60).presence
     return nil if key.blank? || !numeric?(item["value"])
 
-    meta = Measurement.meta(key)
     {
       key: key,
       value: numeric(item["value"]),
-      unit: item["unit"].to_s.strip.first(20).presence || meta[:unit],
+      unit: item["unit"].to_s.strip.first(20).presence,
       measured_on: parse_date(item["measured_on"]) || default_date,
-      category: "exam",
       # Faixas de referência vêm SÓ do laudo (o Life não fornece referência
       # médica). Sem faixa no laudo, o exame fica sem selo Normal/Fora da faixa.
       ref_low: present_number(item["ref_low"]),
@@ -198,7 +196,7 @@ class ExamPdfExtractor
       Use SOMENTE as chaves canônicas abaixo (a coluna antes dos ":"). Cada linha traz
       o nome e, entre parênteses, os apelidos/termos que o laudo pode usar — mapeie por eles:
 
-      #{ExamCatalog.prompt_reference}
+      #{ExamType.prompt_reference}
 
       Regras:
       - "measured_on": data da coleta (ISO). Se houver datas diferentes por exame, use a mais comum.

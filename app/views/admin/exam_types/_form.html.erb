@@ -1,0 +1,49 @@
+<%= form_with model: [:admin, type], class: "max-w-lg space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" do |f| %>
+  <% if type.errors.any? %>
+    <div class="rounded-lg border border-rose-200 bg-rose-50 p-2 text-sm text-rose-700"><%= type.errors.full_messages.to_sentence %></div>
+  <% end %>
+  <div>
+    <%= f.label :exam_group_id, t("admin.catalog.group"), class: "mb-1 block text-sm font-medium text-slate-700" %>
+    <%= f.select :exam_group_id, options_for_select(ExamGroup.ordered.map { |g| [g.name_pt, g.id] }, type.exam_group_id),
+          {}, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
+  </div>
+  <div>
+    <%= f.label :key, "Key", class: "mb-1 block text-sm font-medium text-slate-700" %>
+    <%= f.text_field :key, required: true, class: "w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-sm" %>
+    <p class="mt-1 text-xs text-slate-500"><%= t("admin.catalog.key_hint") %></p>
+  </div>
+  <div class="grid grid-cols-2 gap-3">
+    <div>
+      <%= f.label :name_pt, "Nome (PT)", class: "mb-1 block text-sm font-medium text-slate-700" %>
+      <%= f.text_field :name_pt, required: true, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
+    </div>
+    <div>
+      <%= f.label :name_en, "Name (EN)", class: "mb-1 block text-sm font-medium text-slate-700" %>
+      <%= f.text_field :name_en, required: true, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
+    </div>
+  </div>
+  <div class="grid grid-cols-2 gap-3">
+    <div>
+      <%= f.label :description_pt, "Descrição (PT)", class: "mb-1 block text-sm font-medium text-slate-700" %>
+      <%= f.text_area :description_pt, rows: 2, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
+    </div>
+    <div>
+      <%= f.label :description_en, "Description (EN)", class: "mb-1 block text-sm font-medium text-slate-700" %>
+      <%= f.text_area :description_en, rows: 2, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
+    </div>
+  </div>
+  <div>
+    <%= label_tag "exam_type[aliases_text]", t("admin.catalog.aliases"), class: "mb-1 block text-sm font-medium text-slate-700" %>
+    <%= text_area_tag "exam_type[aliases_text]", type.aliases.join(", "), rows: 2,
+          class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
+    <p class="mt-1 text-xs text-slate-500"><%= t("admin.catalog.aliases_hint") %></p>
+  </div>
+  <div>
+    <%= f.label :position, class: "mb-1 block text-sm font-medium text-slate-700" %>
+    <%= f.number_field :position, class: "w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
+  </div>
+  <div class="flex items-center gap-3 pt-2">
+    <%= f.submit t("admin.catalog.save"), class: "rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700" %>
+    <%= link_to t("habits.cancel"), admin_exam_groups_path, class: "text-sm text-slate-500 hover:underline" %>
+  </div>
+<% end %>

@@ -1,19 +1,23 @@
-# Saúde: sinais (sono, passos…) e exames (glicemia, colesterol…). Listagem com
-# tendência por métrica + entrada manual. Exames podem ter faixa de referência.
+# Saúde: sinais (sono, passos…) em Measurement e exames (glicemia, hemograma…)
+# em ExamResult (catálogo em ExamGroup/ExamType). Listagem com tendência +
+# entrada manual + import de PDF.
 class MeasurementsController < ApplicationController
   before_action :set_measurement, only: [:destroy]
 
   def index
     @category = current_category
-    @measurement = current_account.measurements.new(measured_on: Date.current, category: @category)
-    @groups = build_groups(@category)
-    @catalog_keys = Measurement.catalog_keys(@category)
     @pdf_import = ExamPdfExtractor.configured?
-    @panels = ExamCatalog.group(@groups) if @category == "exam"
-    load_weight if @category == "health"
+    if @category == "exam"
+      load_exams
+    else
+      @measurement = current_account.measurements.new(measured_on: Date.current, category: "health")
+      @groups = build_groups("health")
+      @catalog_keys = Measurement.catalog_keys("health")
+      load_weight
+    end
   end
 
-  # Importa um PDF de exame: extrai os resultados (IA) e cria as medições.
+  # Importa um PDF de exame: extrai os resultados (IA) e cria os ExamResult.
   def import
     return redirect_with_pdf_alert("not_configured") unless ExamPdfExtractor.configured?
 
@@ -24,14 +28,8 @@ class MeasurementsController < ApplicationController
     record_extraction(result)
     return redirect_with_pdf_alert(result.error) unless result.ok?
 
-    rows = result.rows.map { |row| row.merge(account_id: current_account.id) }
-    rows = rows.reverse.uniq { |row| [row[:key], row[:measured_on]] }.reverse
-    if rows.any?
-      Measurement.upsert_all(rows, unique_by: :idx_measurements_unique, record_timestamps: true)
-      HabitRuleEvaluator.new(current_account).evaluate(rows.map { |row| row[:measured_on] })
-    end
-
-    redirect_to measurements_path(category: "exam"), notice: t("measurements.pdf.imported", count: rows.size)
+    count = store_exam_rows(result.rows)
+    redirect_to measurements_path(category: "exam"), notice: t("measurements.pdf.imported", count: count)
   end
 
   def create
@@ -42,24 +40,24 @@ class MeasurementsController < ApplicationController
 
     if @measurement.save
       HabitRuleEvaluator.new(current_account).evaluate([@measurement.measured_on])
-      redirect_to measurements_path(category: @measurement.category), notice: t("flash.measurements.saved")
+      redirect_to measurements_path(category: "health"), notice: t("flash.measurements.saved")
     else
-      @category = Measurement::CATEGORIES.include?(@measurement.category) ? @measurement.category : "health"
-      @groups = build_groups(@category)
-      @catalog_keys = Measurement.catalog_keys(@category)
+      @category = "health"
+      @groups = build_groups("health")
+      @catalog_keys = Measurement.catalog_keys("health")
+      load_weight
       render :index, status: :unprocessable_entity
     end
   end
 
   def destroy
-    category = @measurement.category
     @measurement.destroy
-    redirect_to measurements_path(category: category), notice: t("flash.measurements.removed")
+    redirect_to measurements_path(category: "health"), notice: t("flash.measurements.removed")
   end
 
   # Apaga todos os exames (para reimportar limpo após ajustes de catálogo).
   def destroy_exams
-    current_account.measurements.where(category: "exam").delete_all
+    current_account.exam_results.delete_all
     redirect_to measurements_path(category: "exam"), notice: t("measurements.exams_cleared")
   end
 
@@ -67,6 +65,44 @@ class MeasurementsController < ApplicationController
 
   def current_category
     Measurement::CATEGORIES.include?(params[:category]) ? params[:category] : "health"
+  end
+
+  # Exames agrupados: grupos do catálogo -> tipos com resultados -> série.
+  def load_exams
+    results = current_account.exam_results.includes(exam_type: :exam_group).chronological.to_a
+    by_type = results.group_by(&:exam_type)
+    @exam_result = current_account.exam_results.new(measured_on: Date.current)
+    @exam_types = ExamType.ordered.includes(:exam_group).to_a
+    @exam_groups = by_type.keys.group_by(&:exam_group).sort_by { |g, _| [g.position, g.id] }.map do |group, types|
+      {
+        group: group,
+        items: types.sort_by { |t| [t.position, t.id] }.map do |type|
+          rows = by_type[type]
+          {
+            type: type,
+            latest: rows.last,
+            rows: rows.reverse,
+            chart: MetricChart.new(rows.map { |r| { date: r.measured_on, value: r.value } })
+          }
+        end
+      }
+    end
+  end
+
+  # Grava as linhas extraídas do PDF como ExamResult (mapeando key -> ExamType).
+  # Chaves fora do catálogo são ignoradas (o prompt já restringe às conhecidas).
+  def store_exam_rows(rows)
+    types = ExamType.where(key: rows.map { |r| r[:key] }.uniq).index_by(&:key)
+    payload = rows.filter_map do |row|
+      type = types[row[:key]]
+      next if type.nil?
+
+      { account_id: current_account.id, exam_type_id: type.id, value: row[:value], unit: row[:unit],
+        measured_on: row[:measured_on], ref_low: row[:ref_low], ref_high: row[:ref_high], source: "pdf" }
+    end
+    payload = payload.reverse.uniq { |r| [r[:exam_type_id], r[:measured_on]] }.reverse
+    ExamResult.upsert_all(payload, unique_by: :idx_exam_results_unique, record_timestamps: true) if payload.any?
+    payload.size
   end
 
   # Registra a extração (tokens/custo) para acompanhamento no /admin.
@@ -87,7 +123,7 @@ class MeasurementsController < ApplicationController
     Rails.logger.error("record_extraction: #{e.class}: #{e.message}")
   end
 
-  # Peso agora vive dentro da Saúde (não tem aba própria).
+  # Peso vive dentro da Saúde (não tem aba própria).
   def load_weight
     @weight_entries = current_account.weight_entries.recent_first.to_a
     @weight_latest = @weight_entries.first
@@ -111,12 +147,9 @@ class MeasurementsController < ApplicationController
   end
 
   # Preenche categoria/unidade a partir do catálogo quando não informados.
-  # Faixas de referência NÃO são preenchidas pelo app: vêm do laudo (import)
-  # ou do que o usuário digitar — o Life não fornece referência médica.
   def apply_catalog_defaults(measurement)
     meta = Measurement.meta(measurement.key)
-    measurement.category = meta[:category] if measurement.category.blank? && meta[:category]
-    measurement.category = "health" if measurement.category.blank?
+    measurement.category = "health"
     measurement.unit = meta[:unit] if measurement.unit.blank? && meta[:unit]
   end
 
@@ -131,6 +164,6 @@ class MeasurementsController < ApplicationController
   end
 
   def measurement_params
-    params.require(:measurement).permit(:key, :value, :unit, :measured_on, :category, :ref_low, :ref_high)
+    params.require(:measurement).permit(:key, :value, :unit, :measured_on, :category)
   end
 end

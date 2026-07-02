@@ -10,6 +10,11 @@ FactoryBot.define do
       metric_key { "vitamin_d" }
       start_value { 20 }
       target_value { 40 }
+
+      after(:build) do |_goal|
+        ExamType.find_by(key: "vitamin_d") ||
+          create(:exam_type, key: "vitamin_d", name_pt: "Vitamina D (25-OH)", name_en: "Vitamin D (25-OH)")
+      end
     end
   end
 end

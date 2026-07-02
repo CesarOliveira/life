@@ -1,0 +1,42 @@
+<div class="mb-6 flex items-center justify-between">
+  <h1 class="text-2xl font-bold text-slate-900"><%= t("admin.catalog.title") %></h1>
+  <%= link_to t("admin.catalog.new_group"), new_admin_exam_group_path,
+        class: "rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-emerald-700" %>
+</div>
+
+<p class="mb-6 text-sm text-slate-500"><%= t("admin.catalog.hint") %></p>
+
+<div class="space-y-6">
+  <% @groups.each do |group| %>
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="flex items-center justify-between gap-2 border-b border-slate-100 px-5 py-3">
+        <div>
+          <h2 class="font-semibold text-slate-900"><%= group.name_pt %> <span class="text-xs font-normal text-slate-400">(<%= group.name_en %> · <%= group.key %>)</span></h2>
+          <% if group.description_pt.present? %><p class="text-xs text-slate-500"><%= group.description_pt %></p><% end %>
+        </div>
+        <div class="flex shrink-0 items-center gap-3 text-sm">
+          <%= link_to t("admin.catalog.edit"), edit_admin_exam_group_path(group), class: "text-emerald-700 hover:underline" %>
+          <%= link_to t("admin.catalog.new_type"), new_admin_exam_type_path(exam_group_id: group.id), class: "text-emerald-700 hover:underline" %>
+        </div>
+      </div>
+      <table class="min-w-full divide-y divide-slate-100 text-sm">
+        <tbody class="divide-y divide-slate-100">
+          <% group.exam_types.each do |type| %>
+            <tr>
+              <td class="px-5 py-2 font-mono text-xs text-slate-500"><%= type.key %></td>
+              <td class="px-5 py-2"><%= type.name_pt %></td>
+              <td class="px-5 py-2 text-slate-500"><%= type.name_en %></td>
+              <td class="px-5 py-2 text-xs text-slate-400"><%= type.aliases.join(", ").truncate(60) %></td>
+              <td class="px-5 py-2 text-right">
+                <%= link_to t("admin.catalog.edit"), edit_admin_exam_type_path(type), class: "text-emerald-700 hover:underline" %>
+                <%= button_to t("admin.catalog.remove"), admin_exam_type_path(type), method: :delete,
+                      class: "ml-3 inline text-rose-600 hover:underline",
+                      form: { class: "inline", data: { turbo_confirm: t("admin.catalog.remove_confirm") } } %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </section>
+  <% end %>
+</div>
