@@ -19,5 +19,14 @@ application.register("checklist", ChecklistController)
 import ChartToggleController from "./chart_toggle_controller"
 application.register("chart-toggle", ChartToggleController)
 
-import DoubleConfirmController from "./double_confirm_controller"
-application.register("double-confirm", DoubleConfirmController)
+import ModalController from "./modal_controller"
+application.register("modal", ModalController)
+
+import FilterController from "./filter_controller"
+application.register("filter", FilterController)
+
+import AccordionController from "./accordion_controller"
+application.register("accordion", AccordionController)
+
+import TypeToConfirmController from "./type_to_confirm_controller"
+application.register("type-to-confirm", TypeToConfirmController)
