@@ -1,3 +1,26 @@
+# == Schema Information
+#
+# Table name: goals
+#
+#  id           :bigint           not null, primary key
+#  achieved_on  :date
+#  deadline     :date
+#  metric_key   :string           not null
+#  name         :string           not null
+#  start_value  :decimal(12, 3)
+#  target_value :decimal(12, 3)   not null
+#  created_at   :datetime         not null
+#  updated_at   :datetime         not null
+#  account_id   :bigint           not null
+#
+# Indexes
+#
+#  index_goals_on_account_id  (account_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (account_id => accounts.id)
+#
 FactoryBot.define do
   factory :goal do
     association :account

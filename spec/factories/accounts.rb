@@ -2,15 +2,18 @@
 #
 # Table name: accounts
 #
-#  id                   :bigint           not null, primary key
-#  join_code            :string
-#  name                 :string           not null
-#  created_at           :datetime         not null
-#  updated_at           :datetime         not null
-#  owner_id             :bigint
+#  id         :bigint           not null, primary key
+#  api_token  :string
+#  height_cm  :integer
+#  join_code  :string
+#  name       :string           not null
+#  created_at :datetime         not null
+#  updated_at :datetime         not null
+#  owner_id   :bigint
 #
 # Indexes
 #
+#  index_accounts_on_api_token  (api_token) UNIQUE
 #  index_accounts_on_join_code  (join_code) UNIQUE
 #  index_accounts_on_owner_id   (owner_id)
 #

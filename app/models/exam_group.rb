@@ -1,5 +1,23 @@
 # Grupo/painel de exames (Hemograma, Lipidograma, ...). Nomes/descrições
 # internacionalizados por coluna (pt/en) e editáveis no admin.
+# == Schema Information
+#
+# Table name: exam_groups
+#
+#  id             :bigint           not null, primary key
+#  description_en :text
+#  description_pt :text
+#  key            :string           not null
+#  name_en        :string           not null
+#  name_pt        :string           not null
+#  position       :integer          default(0), not null
+#  created_at     :datetime         not null
+#  updated_at     :datetime         not null
+#
+# Indexes
+#
+#  index_exam_groups_on_key  (key) UNIQUE
+#
 class ExamGroup < ApplicationRecord
   has_many :exam_types, -> { order(:position, :id) }, dependent: :destroy, inverse_of: :exam_group
 

@@ -1,6 +1,33 @@
 # Um resultado de exame do usuário: valor, unidade e a faixa de referência
 # COMO VEIO DO LAUDO (ou digitada) — pode não existir. O catálogo (ExamType)
 # só dá nome/descrição/grupo; o Life não fornece referência médica.
+# == Schema Information
+#
+# Table name: exam_results
+#
+#  id           :bigint           not null, primary key
+#  measured_on  :date             not null
+#  ref_high     :decimal(12, 3)
+#  ref_low      :decimal(12, 3)
+#  source       :string           default("manual"), not null
+#  unit         :string
+#  value        :decimal(12, 3)   not null
+#  created_at   :datetime         not null
+#  updated_at   :datetime         not null
+#  account_id   :bigint           not null
+#  exam_type_id :bigint           not null
+#
+# Indexes
+#
+#  idx_exam_results_unique             (account_id,exam_type_id,measured_on) UNIQUE
+#  index_exam_results_on_account_id    (account_id)
+#  index_exam_results_on_exam_type_id  (exam_type_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (account_id => accounts.id)
+#  fk_rails_...  (exam_type_id => exam_types.id)
+#
 class ExamResult < ApplicationRecord
   belongs_to :account
   belongs_to :exam_type

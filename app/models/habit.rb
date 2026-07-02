@@ -1,3 +1,34 @@
+# == Schema Information
+#
+# Table name: habits
+#
+#  id              :bigint           not null, primary key
+#  active          :boolean          default(TRUE), not null
+#  app_bundle_ids  :string           default([]), not null, is an Array
+#  auto            :boolean          default(FALSE), not null
+#  color           :string           default("#6366f1"), not null
+#  comparator      :string
+#  description     :text
+#  frequency       :string           default("weekly_days"), not null
+#  metric_key      :string
+#  name            :string           not null
+#  position        :integer          default(0), not null
+#  threshold_value :decimal(12, 3)
+#  weekdays        :integer          default([0, 1, 2, 3, 4, 5, 6]), not null, is an Array
+#  weekly_target   :integer
+#  created_at      :datetime         not null
+#  updated_at      :datetime         not null
+#  account_id      :bigint           not null
+#
+# Indexes
+#
+#  index_habits_on_account_id             (account_id)
+#  index_habits_on_account_id_and_active  (account_id,active)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (account_id => accounts.id)
+#
 class Habit < ApplicationRecord
   WEEKDAYS = (0..6).to_a.freeze                            # 0=domingo ... 6=sábado
   WEEKDAY_NAMES = %w[Dom Seg Ter Qua Qui Sex Sáb].freeze
