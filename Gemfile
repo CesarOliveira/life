@@ -24,6 +24,7 @@ gem "omniauth-google-oauth2"
 gem "omniauth-rails_csrf_protection"
 gem "pagy", "~> 9.0"
 gem "activeadmin"
+gem "pdf-reader", "~> 2.12" # extrai texto do PDF localmente (import de exames barato)
 
 group :development, :test do
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"

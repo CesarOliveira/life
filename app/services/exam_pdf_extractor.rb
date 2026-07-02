@@ -1,13 +1,17 @@
 require "net/http"
 require "base64"
 require "json"
+require "stringio"
+require "pdf/reader"
 
-# Extrai resultados de um PDF de exame laboratorial usando a API da Anthropic
-# (Claude, com leitura de PDF) e devolve linhas prontas para virar `Measurement`
-# (categoria "exam"). Sem chave configurada, degrada com erro "not_configured".
+# Extrai resultados de um PDF de exame laboratorial e devolve linhas prontas
+# para virar `Measurement` (categoria "exam"). Sem chave configurada, degrada
+# com erro "not_configured". Requer ENV["ANTHROPIC_API_KEY"].
 #
-# Requer ENV["ANTHROPIC_API_KEY"]. Modelo fixo: claude-sonnet-4-6. O PDF é
-# processado em memória — não é persistido.
+# Custo: primeiro extrai o TEXTO do PDF localmente (grátis) e manda só o texto
+# para o Claude Haiku (barato). Se o Haiku não achar nada, ESCALA para o Sonnet
+# (no texto) e, por fim, manda o PDF em imagem para o Sonnet (laudo escaneado).
+# O PDF é processado em memória — não é persistido.
 class ExamPdfExtractor
   Result = Struct.new(:rows, :measured_on, :error, keyword_init: true) do
     def ok?
@@ -16,8 +20,12 @@ class ExamPdfExtractor
   end
 
   API_URL = "https://api.anthropic.com/v1/messages"
-  MODEL = "claude-sonnet-4-6".freeze
+  PRIMARY_MODEL = "claude-haiku-4-5-20251001".freeze # barato (texto)
+  FALLBACK_MODEL = "claude-sonnet-4-6".freeze        # escala quando o Haiku falha
   MAX_BYTES = 15 * 1024 * 1024
+  MAX_OUTPUT = 4096       # tokens de saída (hemograma completo tem ~45 linhas)
+  MAX_TEXT = 30_000       # chars de texto enviados ao modelo
+  MIN_TEXT = 80           # abaixo disso, o PDF é imagem/escaneado -> vai pro Sonnet
   OPEN_TIMEOUT = 15
   READ_TIMEOUT = 120
 
@@ -35,13 +43,12 @@ class ExamPdfExtractor
     return Result.new(error: "empty") if @data.blank?
     return Result.new(error: "too_large") if @data.bytesize > MAX_BYTES
 
-    json = request_extraction(Base64.strict_encode64(@data))
-    build_result(json)
-  rescue Net::OpenTimeout, Net::ReadTimeout
-    Result.new(error: "timeout")
-  rescue StandardError => e
-    Rails.logger.error("ExamPdfExtractor: #{e.class}: #{e.message}")
-    Result.new(error: "extraction_failed")
+    last = nil
+    attempts.each do |model, content|
+      last = safe_attempt(model, content)
+      return last if last&.rows&.any?
+    end
+    last || Result.new(error: "extraction_failed")
   end
 
   # Converte o JSON do modelo em linhas normalizadas (testável sem HTTP).
@@ -59,6 +66,47 @@ class ExamPdfExtractor
   end
 
   private
+
+  # Ordem de tentativas: [modelo, conteúdo]. Texto+Haiku primeiro (barato);
+  # escala p/ Sonnet no texto; por fim Sonnet no PDF (imagem).
+  def attempts
+    text = extract_text
+    list = []
+    if text.length >= MIN_TEXT
+      list << [PRIMARY_MODEL, text_content(text)]
+      list << [FALLBACK_MODEL, text_content(text)]
+    end
+    list << [FALLBACK_MODEL, document_content]
+    list
+  end
+
+  def safe_attempt(model, content)
+    build_result(request_extraction(model, content))
+  rescue Net::OpenTimeout, Net::ReadTimeout
+    Result.new(error: "timeout")
+  rescue StandardError => e
+    Rails.logger.error("ExamPdfExtractor(#{model}): #{e.class}: #{e.message}")
+    nil
+  end
+
+  # Texto do PDF (grátis). Vazio se o PDF não tiver camada de texto.
+  def extract_text
+    reader = PDF::Reader.new(StringIO.new(@data))
+    reader.pages.map(&:text).join("\n").strip.first(MAX_TEXT)
+  rescue StandardError
+    ""
+  end
+
+  def text_content(text)
+    [{ type: "text", text: "#{prompt}\n\n--- TEXTO DO LAUDO ---\n#{text}" }]
+  end
+
+  def document_content
+    [
+      { type: "document", source: { type: "base64", media_type: "application/pdf", data: Base64.strict_encode64(@data) } },
+      { type: "text", text: prompt }
+    ]
+  end
 
   def normalize(item, default_date)
     return nil unless item.is_a?(Hash)
@@ -79,7 +127,7 @@ class ExamPdfExtractor
     }
   end
 
-  def request_extraction(base64_pdf)
+  def request_extraction(model, content)
     uri = URI(API_URL)
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
@@ -90,28 +138,12 @@ class ExamPdfExtractor
     request["x-api-key"] = ENV["ANTHROPIC_API_KEY"]
     request["anthropic-version"] = "2023-06-01"
     request["content-type"] = "application/json"
-    request.body = payload(base64_pdf).to_json
+    request.body = { model: model, max_tokens: MAX_OUTPUT, messages: [{ role: "user", content: content }] }.to_json
 
     response = http.request(request)
     raise "HTTP #{response.code}: #{response.body}" unless response.code.to_i == 200
 
     extract_json(JSON.parse(response.body))
-  end
-
-  def payload(base64_pdf)
-    {
-      model: MODEL,
-      max_tokens: 2000,
-      messages: [
-        {
-          role: "user",
-          content: [
-            { type: "document", source: { type: "base64", media_type: "application/pdf", data: base64_pdf } },
-            { type: "text", text: prompt }
-          ]
-        }
-      ]
-    }
   end
 
   # Pega o texto da resposta do Claude e faz parse do JSON (tolera cercas ```json).
@@ -123,7 +155,7 @@ class ExamPdfExtractor
 
   def prompt
     <<~PROMPT
-      Você recebe o PDF de um exame laboratorial (pt-BR). Extraia TODOS os resultados numéricos.
+      Você recebe um exame laboratorial (pt-BR), como PDF ou texto. Extraia TODOS os resultados numéricos.
       Responda APENAS com JSON válido (sem markdown, sem comentários), neste formato:
       {"measured_on":"YYYY-MM-DD","results":[{"key":"glucose","value":92,"unit":"mg/dL","ref_low":70,"ref_high":99}]}
 
