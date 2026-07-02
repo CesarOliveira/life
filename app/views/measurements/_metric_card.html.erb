@@ -23,8 +23,8 @@
     </div>
   </div>
 
-  <% if g[:chart].any? %>
-    <%= render "chart", chart: g[:chart], unit: g[:unit] %>
+  <% if g[:rows].any? %>
+    <%= render "shared/line_chart", points: g[:rows].reverse.map { |m| { date: m.measured_on, value: m.value } }, unit: g[:unit] %>
   <% end %>
 
   <details class="mt-3">

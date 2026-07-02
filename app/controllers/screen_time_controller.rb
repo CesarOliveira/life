@@ -59,7 +59,6 @@ class ScreenTimeController < ApplicationController
     @max_day = by_date.values.max || 0
     days_in_period = (@to - @from).to_i + 1
     @avg = days_in_period.positive? ? (@total / days_in_period) : 0
-    @chart = MetricChart.new(@daily.map { |d| { date: d[:date], value: (d[:seconds] / 3600.0).round(2) } })
   end
 
   def regenerate

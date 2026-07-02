@@ -49,7 +49,7 @@
         <%= render "bars_vertical", daily: @daily, max: @max_day %>
       </div>
       <div data-chart-toggle-target="chart" data-chart-type="line" class="hidden">
-        <%= render "measurements/chart", chart: @chart, unit: t("screen_time.hours_unit") %>
+        <%= render "shared/line_chart", points: @daily.map { |d| { date: d[:date], value: (d[:seconds] / 3600.0).round(2) } }, unit: t("screen_time.hours_unit") %>
       </div>
     <% end %>
   </section>

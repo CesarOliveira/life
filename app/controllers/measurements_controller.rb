@@ -81,8 +81,7 @@ class MeasurementsController < ApplicationController
           {
             type: type,
             latest: rows.last,
-            rows: rows.reverse,
-            chart: MetricChart.new(rows.map { |r| { date: r.measured_on, value: r.value } })
+            rows: rows.reverse
           }
         end
       }
@@ -127,7 +126,6 @@ class MeasurementsController < ApplicationController
   def load_weight
     @weight_entries = current_account.weight_entries.recent_first.to_a
     @weight_latest = @weight_entries.first
-    @weight_chart = WeightChart.new(current_account.weight_entries.chronological.to_a)
     @weight_entry = current_account.weight_entries.new(date: Date.current)
   end
 
@@ -140,8 +138,7 @@ class MeasurementsController < ApplicationController
         label: group.first.label,
         unit: group.first.unit,
         latest: group.last,
-        rows: group.reverse,
-        chart: MetricChart.new(group.map { |m| { date: m.measured_on, value: m.value } })
+        rows: group.reverse
       }
     end.sort_by { |g| g[:label] }
   end

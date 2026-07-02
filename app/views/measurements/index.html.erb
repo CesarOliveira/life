@@ -12,7 +12,7 @@
 
   <% if @category == "health" %>
     <%# Peso (mora dentro da Saúde) %>
-    <%= render "weights/panel", entry: @weight_entry, latest: @weight_latest, chart: @weight_chart, entries: @weight_entries %>
+    <%= render "weights/panel", entry: @weight_entry, latest: @weight_latest, entries: @weight_entries %>
 
     <%# Entrada manual de sinais %>
     <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -75,9 +75,9 @@
           <%# Modal: adicionar métrica %>
           <div data-controller="modal">
             <button type="button" data-action="modal#open"
-                    class="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">+ <%= t("measurements.add") %></button>
+                    class="cursor-pointer rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">+ <%= t("measurements.add") %></button>
             <dialog data-modal-target="dialog" data-action="click->modal#backdrop"
-                    class="w-full max-w-lg rounded-2xl p-0 shadow-xl backdrop:bg-slate-900/40">
+                    class="m-auto w-full max-w-lg rounded-2xl p-0 shadow-xl backdrop:bg-slate-900/40">
               <div class="p-5">
                 <div class="mb-4 flex items-center justify-between">
                   <h3 class="font-semibold text-slate-900"><%= t("measurements.add_exam_title") %></h3>
@@ -127,9 +127,9 @@
           <%# Modal: importar PDF %>
           <div data-controller="modal">
             <button type="button" data-action="modal#open"
-                    class="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700"><%= t("measurements.pdf.submit") %></button>
+                    class="cursor-pointer rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700"><%= t("measurements.pdf.submit") %></button>
             <dialog data-modal-target="dialog" data-action="click->modal#backdrop"
-                    class="w-full max-w-lg rounded-2xl p-0 shadow-xl backdrop:bg-slate-900/40">
+                    class="m-auto w-full max-w-lg rounded-2xl p-0 shadow-xl backdrop:bg-slate-900/40">
               <div class="p-5">
                 <div class="mb-2 flex items-center justify-between">
                   <h3 class="font-semibold text-slate-900"><%= t("measurements.pdf.title") %></h3>
@@ -193,9 +193,9 @@
 
         <%# Zona de perigo: apagar tudo com modal + digitar DELETE %>
         <div data-controller="modal" class="border-t border-slate-200 pt-4 text-center">
-          <button type="button" data-action="modal#open" class="text-xs font-medium text-rose-600 hover:underline"><%= t("measurements.clear_exams") %></button>
+          <button type="button" data-action="modal#open" class="cursor-pointer rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-medium text-rose-600 hover:bg-rose-50"><%= t("measurements.clear_exams") %></button>
           <dialog data-modal-target="dialog" data-action="click->modal#backdrop"
-                  class="w-full max-w-md rounded-2xl p-0 shadow-xl backdrop:bg-slate-900/40">
+                  class="m-auto w-full max-w-md rounded-2xl p-0 shadow-xl backdrop:bg-slate-900/40">
             <div class="p-5 text-left" data-controller="type-to-confirm">
               <h3 class="font-semibold text-rose-700"><%= t("measurements.clear_exams") %></h3>
               <p class="mt-2 text-sm text-slate-600"><%= t("measurements.clear_exams_confirm2") %></p>

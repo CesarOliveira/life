@@ -1,0 +1,6 @@
+<%# locals: points (array {date:, value:} em ordem cronológica), unit (String) %>
+<div class="relative h-44 w-full">
+  <canvas data-controller="line-chart"
+          data-line-chart-points-value="<%= points.map { |p| { d: p[:date].iso8601, v: p[:value].to_f } }.to_json %>"
+          data-line-chart-unit-value="<%= unit %>"></canvas>
+</div>

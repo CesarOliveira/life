@@ -1,4 +1,4 @@
-<%# locals: entry, latest, chart, entries — painel de Peso (dentro da Saúde). %>
+<%# locals: entry, latest, entries — painel de Peso (dentro da Saúde). %>
 <% bmi_colors = {
      underweight: "bg-amber-100 text-amber-700",
      normal: "bg-emerald-100 text-emerald-700",
@@ -46,10 +46,10 @@
     </div>
   </div>
 
-  <% if chart.any? %>
+  <% if entries.any? %>
     <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <h3 class="mb-3 font-semibold text-slate-900"><%= t("weights.evolution") %></h3>
-      <%= render "weights/chart", chart: chart %>
+      <%= render "shared/line_chart", points: entries.reverse.map { |e| { date: e.date, value: e.weight_kg } }, unit: "kg" %>
     </section>
   <% end %>
 

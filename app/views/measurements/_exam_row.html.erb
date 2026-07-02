@@ -33,9 +33,9 @@
       <% if item[:type].description.present? %>
         <p class="mb-3 text-xs text-slate-500"><%= item[:type].description %></p>
       <% end %>
-      <% if item[:chart].any? %>
+      <% if item[:rows].any? %>
         <div class="mb-4 rounded-xl border border-slate-200 bg-white p-3">
-          <%= render "chart", chart: item[:chart], unit: latest.unit %>
+          <%= render "shared/line_chart", points: item[:rows].reverse.map { |r| { date: r.measured_on, value: r.value } }, unit: latest.unit %>
         </div>
       <% end %>
       <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white">

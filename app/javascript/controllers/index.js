@@ -30,3 +30,6 @@ application.register("accordion", AccordionController)
 
 import TypeToConfirmController from "./type_to_confirm_controller"
 application.register("type-to-confirm", TypeToConfirmController)
+
+import LineChartController from "./line_chart_controller"
+application.register("line-chart", LineChartController)
