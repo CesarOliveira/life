@@ -131,8 +131,10 @@ class ExamPdfExtractor
       unit: item["unit"].to_s.strip.first(20).presence || meta[:unit],
       measured_on: parse_date(item["measured_on"]) || default_date,
       category: "exam",
-      ref_low: present_number(item["ref_low"]) || meta[:ref_low],
-      ref_high: present_number(item["ref_high"]) || meta[:ref_high],
+      # Faixas de referência vêm SÓ do laudo (o Life não fornece referência
+      # médica). Sem faixa no laudo, o exame fica sem selo Normal/Fora da faixa.
+      ref_low: present_number(item["ref_low"]),
+      ref_high: present_number(item["ref_high"]),
       source: "pdf"
     }
   end
@@ -202,8 +204,9 @@ class ExamPdfExtractor
       - "measured_on": data da coleta (ISO). Se houver datas diferentes por exame, use a mais comum.
       - Para o hemograma (série branca), use o valor em PORCENTAGEM (%) do diferencial
         (neutrofilos/segmentados, linfocitos, monocitos, eosinofilos, basofilos), não o absoluto.
-      - "value": número com ponto decimal. SEMPRE inclua "unit" e a faixa de referência
-        (ref_low/ref_high) EXATAMENTE como o laudo informa (preferir a do laudo à padrão).
+      - "value": número com ponto decimal. Inclua "unit" e a faixa de referência
+        (ref_low/ref_high) EXATAMENTE como o laudo informa. Se o laudo NÃO trouxer
+        faixa para um analito, OMITA ref_low/ref_high (não invente).
       - Se um analito NÃO estiver na lista acima, IGNORE (não invente chave).
       - Ignore textos, métodos, materiais, resultados anteriores e valores não numéricos.
     PROMPT

@@ -26,15 +26,17 @@ RSpec.describe "Measurements", type: :request do
   end
 
   describe "POST /measurements" do
-    it "creates an exam and fills the reference range from the catalog" do
+    it "creates an exam with unit from the catalog but WITHOUT auto reference range" do
       expect {
         post measurements_path, params: { measurement: { key: "glucose", value: "92", category: "exam", measured_on: Date.current.iso8601 } }
       }.to change(account.measurements, :count).by(1)
 
       m = account.measurements.last
       expect(m.category).to eq("exam")
-      expect(m.ref_high).to eq(99)
       expect(m.unit).to eq("mg/dL")
+      # Faixa de referência NÃO é fornecida pelo app (vem do laudo ou do usuário).
+      expect(m.ref_low).to be_nil
+      expect(m.ref_high).to be_nil
     end
 
     it "overwrites the same key/date instead of duplicating" do

@@ -71,13 +71,6 @@
       <% else %>
         <p class="rounded-lg border border-amber-200 bg-amber-50 p-2 text-xs text-amber-700"><%= t("measurements.pdf.errors.not_configured") %></p>
       <% end %>
-      <% if @groups.any? %>
-        <div class="mt-3 border-t border-slate-100 pt-3">
-          <%= button_to t("measurements.clear_exams"), destroy_exams_measurements_path, method: :delete,
-                class: "text-xs font-medium text-rose-600 hover:underline",
-                form: { data: { turbo_confirm: t("measurements.clear_exams_confirm") } } %>
-        </div>
-      <% end %>
     </section>
   <% end %>
 
@@ -86,6 +79,8 @@
       <%= t("measurements.empty") %>
     </div>
   <% elsif @category == "exam" %>
+    <p class="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-500"><%= t("measurements.ref_note") %></p>
+
     <%# Exames agrupados por painel (Hemograma, Lipidograma, ...) %>
     <% @panels.each do |panel| %>
       <section class="space-y-3">
@@ -102,6 +97,22 @@
       <% @groups.each do |g| %>
         <%= render "metric_card", g: g, category: @category %>
       <% end %>
+    </div>
+  <% end %>
+
+  <%# Zona de perigo (fim da página): apagar todos os exames, com dupla confirmação %>
+  <% if @category == "exam" && @groups.any? %>
+    <div class="border-t border-slate-200 pt-4 text-center">
+      <%= button_to t("measurements.clear_exams"), destroy_exams_measurements_path, method: :delete,
+            class: "text-xs font-medium text-rose-600 hover:underline",
+            form: {
+              data: {
+                controller: "double-confirm",
+                action: "submit->double-confirm#check",
+                double_confirm_first_value: t("measurements.clear_exams_confirm"),
+                double_confirm_second_value: t("measurements.clear_exams_confirm2")
+              }
+            } %>
     </div>
   <% end %>
 </div>

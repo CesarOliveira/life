@@ -110,16 +110,14 @@ class MeasurementsController < ApplicationController
     end.sort_by { |g| g[:label] }
   end
 
-  # Preenche categoria/unidade/faixa a partir do catálogo quando não informados.
+  # Preenche categoria/unidade a partir do catálogo quando não informados.
+  # Faixas de referência NÃO são preenchidas pelo app: vêm do laudo (import)
+  # ou do que o usuário digitar — o Life não fornece referência médica.
   def apply_catalog_defaults(measurement)
     meta = Measurement.meta(measurement.key)
     measurement.category = meta[:category] if measurement.category.blank? && meta[:category]
     measurement.category = "health" if measurement.category.blank?
     measurement.unit = meta[:unit] if measurement.unit.blank? && meta[:unit]
-    return unless measurement.category == "exam"
-
-    measurement.ref_low = meta[:ref_low] if measurement.ref_low.blank? && meta[:ref_low]
-    measurement.ref_high = meta[:ref_high] if measurement.ref_high.blank? && meta[:ref_high]
   end
 
   def redirect_with_pdf_alert(error)

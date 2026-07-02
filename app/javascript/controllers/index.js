@@ -18,3 +18,6 @@ application.register("checklist", ChecklistController)
 
 import ChartToggleController from "./chart_toggle_controller"
 application.register("chart-toggle", ChartToggleController)
+
+import DoubleConfirmController from "./double_confirm_controller"
+application.register("double-confirm", DoubleConfirmController)
