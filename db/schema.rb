@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_30_210231) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_02_113135) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -38,6 +38,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_30_210231) do
     t.datetime "updated_at", null: false
     t.index ["account_id", "device", "date", "bundle_id"], name: "idx_app_usages_unique", unique: true
     t.index ["account_id"], name: "index_app_usages_on_account_id"
+  end
+
+  create_table "exam_extractions", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.decimal "cost_usd", precision: 10, scale: 6, default: "0.0", null: false
+    t.datetime "created_at", null: false
+    t.integer "duration_ms", default: 0, null: false
+    t.string "error"
+    t.integer "file_bytes", default: 0, null: false
+    t.integer "input_tokens", default: 0, null: false
+    t.string "models_used", default: "", null: false
+    t.integer "output_tokens", default: 0, null: false
+    t.integer "rows_count", default: 0, null: false
+    t.string "status", default: "success", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_exam_extractions_on_account_id"
+    t.index ["created_at"], name: "index_exam_extractions_on_created_at"
   end
 
   create_table "goals", force: :cascade do |t|
@@ -156,6 +173,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_30_210231) do
 
   add_foreign_key "accounts", "users", column: "owner_id"
   add_foreign_key "app_usages", "accounts"
+  add_foreign_key "exam_extractions", "accounts"
   add_foreign_key "goals", "accounts"
   add_foreign_key "habit_checks", "habits"
   add_foreign_key "habits", "accounts"

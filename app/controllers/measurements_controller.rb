@@ -21,6 +21,7 @@ class MeasurementsController < ApplicationController
     return redirect_with_pdf_alert("no_file") unless file.respond_to?(:read)
 
     result = ExamPdfExtractor.new(file.read, today: Date.current).call
+    record_extraction(result)
     return redirect_with_pdf_alert(result.error) unless result.ok?
 
     rows = result.rows.map { |row| row.merge(account_id: current_account.id) }
@@ -66,6 +67,24 @@ class MeasurementsController < ApplicationController
 
   def current_category
     Measurement::CATEGORIES.include?(params[:category]) ? params[:category] : "health"
+  end
+
+  # Registra a extração (tokens/custo) para acompanhamento no /admin.
+  def record_extraction(result)
+    usage = result.usage || {}
+    current_account.exam_extractions.create!(
+      file_bytes: usage[:file_bytes].to_i,
+      models_used: usage[:models_used].to_s,
+      input_tokens: usage[:input_tokens].to_i,
+      output_tokens: usage[:output_tokens].to_i,
+      cost_usd: usage[:cost_usd] || 0,
+      rows_count: result.rows&.size.to_i,
+      status: result.ok? ? "success" : "failed",
+      error: result.error,
+      duration_ms: usage[:duration_ms].to_i
+    )
+  rescue StandardError => e
+    Rails.logger.error("record_extraction: #{e.class}: #{e.message}")
   end
 
   # Peso agora vive dentro da Saúde (não tem aba própria).

@@ -54,6 +54,7 @@ Rails.application.routes.draw do
     post "usage_raw", to: "usage#create_raw"
     post "metrics", to: "metrics#create"
     post "health_raw", to: "health_raw#create"
+    get "exams", to: "exams#index"
   end
 
   namespace :admin do
@@ -61,6 +62,7 @@ Rails.application.routes.draw do
     resources :memberships, only: [:update, :destroy]
     resources :users, only: [:index, :update]
     resources :accounts, only: [:index]
+    resources :exam_extractions, only: [:index]
   end
 
   require "sidekiq/web"

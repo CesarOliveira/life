@@ -13,7 +13,7 @@ require "pdf/reader"
 # (no texto) e, por fim, manda o PDF em imagem para o Sonnet (laudo escaneado).
 # O PDF é processado em memória — não é persistido.
 class ExamPdfExtractor
-  Result = Struct.new(:rows, :measured_on, :error, keyword_init: true) do
+  Result = Struct.new(:rows, :measured_on, :error, :usage, keyword_init: true) do
     def ok?
       error.nil?
     end
@@ -22,6 +22,12 @@ class ExamPdfExtractor
   API_URL = "https://api.anthropic.com/v1/messages"
   PRIMARY_MODEL = "claude-haiku-4-5-20251001".freeze # barato (texto)
   FALLBACK_MODEL = "claude-sonnet-4-6".freeze        # escala quando o Haiku falha
+
+  # Preço por 1M de tokens (USD): [entrada, saída]. Para estimar o custo por import.
+  PRICING = {
+    PRIMARY_MODEL => [1.0, 5.0],
+    FALLBACK_MODEL => [3.0, 15.0]
+  }.freeze
   MAX_BYTES = 15 * 1024 * 1024
   MAX_OUTPUT = 4096       # tokens de saída (hemograma completo tem ~45 linhas)
   MAX_TEXT = 30_000       # chars de texto enviados ao modelo
@@ -43,12 +49,16 @@ class ExamPdfExtractor
     return Result.new(error: "empty") if @data.blank?
     return Result.new(error: "too_large") if @data.bytesize > MAX_BYTES
 
+    @spent = [] # [model, input_tokens, output_tokens] por chamada à API
+    started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     last = nil
     attempts.each do |model, content|
       last = safe_attempt(model, content)
-      return last if last&.rows&.any?
+      break if last&.rows&.any?
     end
-    last || Result.new(error: "extraction_failed")
+    last ||= Result.new(error: "extraction_failed")
+    last.usage = usage_summary(started)
+    last
   end
 
   # Converte o JSON do modelo em linhas normalizadas (testável sem HTTP).
@@ -143,7 +153,31 @@ class ExamPdfExtractor
     response = http.request(request)
     raise "HTTP #{response.code}: #{response.body}" unless response.code.to_i == 200
 
-    extract_json(JSON.parse(response.body))
+    body = JSON.parse(response.body)
+    track_usage(model, body["usage"])
+    extract_json(body)
+  end
+
+  def track_usage(model, usage)
+    return unless usage.is_a?(Hash)
+
+    @spent << [model, usage["input_tokens"].to_i, usage["output_tokens"].to_i] if @spent
+  end
+
+  # Resumo do gasto do import: modelos, tokens somados e custo estimado (USD).
+  def usage_summary(started)
+    cost = @spent.sum do |model, inp, out|
+      inp_price, out_price = PRICING.fetch(model, [0, 0])
+      ((inp * inp_price) + (out * out_price)) / 1_000_000.0
+    end
+    {
+      file_bytes: @data.bytesize,
+      models_used: @spent.map { |m, _, _| m[/haiku|sonnet|opus/] || m }.uniq.join(","),
+      input_tokens: @spent.sum { |_, inp, _| inp },
+      output_tokens: @spent.sum { |_, _, out| out },
+      cost_usd: cost.round(6),
+      duration_ms: ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - started) * 1000).round
+    }
   end
 
   # Pega o texto da resposta do Claude e faz parse do JSON (tolera cercas ```json).

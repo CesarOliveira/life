@@ -1,0 +1,59 @@
+<h1 class="mb-6 text-2xl font-bold text-slate-900"><%= t("admin.extractions.title") %></h1>
+
+<div class="mb-8 grid grid-cols-3 gap-4">
+  <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div class="text-3xl font-bold text-slate-900"><%= @count %></div>
+    <div class="text-sm text-slate-500"><%= t("admin.extractions.total_imports") %></div>
+  </div>
+  <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div class="text-3xl font-bold text-emerald-600">$<%= format("%.4f", @month_cost) %></div>
+    <div class="text-sm text-slate-500"><%= t("admin.extractions.month_cost") %></div>
+  </div>
+  <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div class="text-3xl font-bold text-slate-900">$<%= format("%.4f", @total_cost) %></div>
+    <div class="text-sm text-slate-500"><%= t("admin.extractions.total_cost") %></div>
+  </div>
+</div>
+
+<% if @extractions.empty? %>
+  <p class="text-slate-500"><%= t("admin.extractions.empty") %></p>
+<% else %>
+  <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <table class="min-w-full divide-y divide-slate-200 text-sm">
+      <thead class="bg-slate-50 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
+        <tr>
+          <th class="px-4 py-3"><%= t("admin.extractions.when") %></th>
+          <th class="px-4 py-3"><%= t("admin.extractions.file") %></th>
+          <th class="px-4 py-3"><%= t("admin.extractions.models") %></th>
+          <th class="px-4 py-3 text-right"><%= t("admin.extractions.tokens_in") %></th>
+          <th class="px-4 py-3 text-right"><%= t("admin.extractions.tokens_out") %></th>
+          <th class="px-4 py-3 text-right"><%= t("admin.extractions.cost") %></th>
+          <th class="px-4 py-3 text-right"><%= t("admin.extractions.rows") %></th>
+          <th class="px-4 py-3"><%= t("admin.extractions.status") %></th>
+          <th class="px-4 py-3 text-right"><%= t("admin.extractions.duration") %></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        <% @extractions.each do |e| %>
+          <tr>
+            <td class="px-4 py-2 text-slate-500"><%= l(e.created_at, format: :short) %></td>
+            <td class="px-4 py-2"><%= number_to_human_size(e.file_bytes) %></td>
+            <td class="px-4 py-2 font-mono text-xs"><%= e.models_used %></td>
+            <td class="px-4 py-2 text-right"><%= number_with_delimiter(e.input_tokens) %></td>
+            <td class="px-4 py-2 text-right"><%= number_with_delimiter(e.output_tokens) %></td>
+            <td class="px-4 py-2 text-right font-medium"><%= e.cost_label %></td>
+            <td class="px-4 py-2 text-right"><%= e.rows_count %></td>
+            <td class="px-4 py-2">
+              <% if e.success? %>
+                <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700">ok</span>
+              <% else %>
+                <span class="rounded-full bg-rose-100 px-2 py-0.5 text-xs font-semibold text-rose-700" title="<%= e.error %>"><%= e.error %></span>
+              <% end %>
+            </td>
+            <td class="px-4 py-2 text-right text-slate-500"><%= (e.duration_ms / 1000.0).round(1) %>s</td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>
