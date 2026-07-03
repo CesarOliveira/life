@@ -209,6 +209,7 @@ pt-BR:
     filter_placeholder: "Buscar exame…"
     all_groups: "Todos os grupos"
     no_matches: "Nenhum exame corresponde ao filtro."
+    favorite_group: "Favoritar grupo (mostra no topo)"
     table:
       exam: "Exame"
       value: "Valor"

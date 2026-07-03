@@ -209,6 +209,7 @@ en:
     filter_placeholder: "Search exam…"
     all_groups: "All groups"
     no_matches: "No exam matches the filter."
+    favorite_group: "Favorite group (pins to top)"
     table:
       exam: "Exam"
       value: "Value"

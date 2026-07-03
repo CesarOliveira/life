@@ -73,7 +73,8 @@ class MeasurementsController < ApplicationController
     by_type = results.group_by(&:exam_type)
     @exam_result = current_account.exam_results.new(measured_on: Date.current)
     @exam_types = ExamType.ordered.includes(:exam_group).to_a
-    @exam_groups = by_type.keys.group_by(&:exam_group).sort_by { |g, _| [g.position, g.id] }.map do |group, types|
+    @exam_groups = by_type.keys.group_by(&:exam_group)
+                          .sort_by { |g, _| [g.favorite ? 0 : 1, g.position, g.id] }.map do |group, types|
       {
         group: group,
         items: types.sort_by { |t| [t.position, t.id] }.map do |type|

@@ -24,11 +24,11 @@ RSpec.describe "Insights", type: :request do
   it "renders the analysis when there is enough data" do
     habit = create(:habit, account: account, weekdays: (0..6).to_a)
     today = Date.current
-    [0, 1, 2].each do |i|
+    (0..4).each do |i|
       create(:measurement, account: account, key: "steps", value: 12_000, measured_on: today - i, category: "health")
       create(:habit_check, habit: habit, date: today - i)
     end
-    [3, 4, 5].each do |i|
+    (5..9).each do |i|
       create(:measurement, account: account, key: "steps", value: 3_000, measured_on: today - i, category: "health")
     end
     get insights_path(metric: "steps")

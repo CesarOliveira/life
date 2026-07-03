@@ -117,6 +117,23 @@ RSpec.describe "Measurements", type: :request do
     end
   end
 
+  describe "favoritar grupo" do
+    it "toggles the favorite and pins the group first" do
+      liver = liver_type
+      other_group = create(:exam_group, key: "aaa_grupo", name_pt: "AAA Grupo", name_en: "AAA Group", position: 0)
+      other_type = create(:exam_type, exam_group: other_group, key: "outro", name_pt: "Outro", name_en: "Other")
+      create(:exam_result, account: account, exam_type: liver, value: 23)
+      create(:exam_result, account: account, exam_type: other_type, value: 1)
+
+      post toggle_exam_group_favorite_path(liver.exam_group)
+      expect(liver.exam_group.reload.favorite).to be(true)
+
+      get measurements_path(category: "exam")
+      body = response.body
+      expect(body.index("Função hepática")).to be < body.index("AAA Grupo") # favorito vem antes
+    end
+  end
+
   describe "DELETE /measurements/destroy_exams" do
     it "clears all exam results (keeps health measurements)" do
       create(:exam_result, account: account, exam_type: liver_type)

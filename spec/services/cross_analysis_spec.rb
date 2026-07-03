@@ -12,11 +12,11 @@ RSpec.describe CrossAnalysis do
   end
 
   it "correlates sleep with habit adherence" do
-    [to, to - 1, to - 2].each { |d| log(d, 8 * 60, true) }       # bom sono → feito
-    [to - 3, to - 4, to - 5].each { |d| log(d, 5 * 60, false) }  # pouco sono → não feito
+    (0..4).each { |i| log(to - i, 8 * 60, true) }       # bom sono → feito
+    (5..9).each { |i| log(to - i, 5 * 60, false) }      # pouco sono → não feito
 
     result = described_class.new(account, "sleep_hours", from: from, to: to).call
-    expect(result.n).to eq(6)
+    expect(result.n).to eq(10)
     expect(result).to be_enough
     expect(result.above_avg).to eq(100)
     expect(result.below_avg).to eq(0)

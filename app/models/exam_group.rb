@@ -7,6 +7,7 @@
 #  id             :bigint           not null, primary key
 #  description_en :text
 #  description_pt :text
+#  favorite       :boolean          default(FALSE), not null
 #  key            :string           not null
 #  name_en        :string           not null
 #  name_pt        :string           not null
@@ -25,6 +26,8 @@ class ExamGroup < ApplicationRecord
   validates :name_pt, :name_en, presence: true
 
   scope :ordered, -> { order(:position, :id) }
+  # Favoritos primeiro (aba Exames), depois a ordem do catálogo.
+  scope :favorites_first, -> { order(favorite: :desc, position: :asc, id: :asc) }
 
   def name
     I18n.locale.to_s.start_with?("pt") ? name_pt : name_en.presence || name_pt

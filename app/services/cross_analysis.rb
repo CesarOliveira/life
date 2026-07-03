@@ -5,7 +5,9 @@
 # mediana da métrica. Ex.: "dias com mais sono → maior aderência".
 class CrossAnalysis
   METRICS = Habit::AUTO_METRICS.keys.freeze
-  MIN_DAYS = 5
+  # Mínimo de dias pareados (métrica + hábitos) para a análise valer algo:
+  # com menos que isso, correlação de Pearson é praticamente ruído.
+  MIN_DAYS = 10
 
   Result = Struct.new(
     :metric_key, :unit, :n, :correlation, :median, :above_avg, :below_avg,

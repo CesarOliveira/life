@@ -39,6 +39,7 @@ Rails.application.routes.draw do
     end
   end
   resources :exam_results, only: [:create, :destroy]
+  post "exam_groups/:id/favorite", to: "exam_group_favorites#toggle", as: :toggle_exam_group_favorite
   resources :goals, only: [:index, :create, :destroy]
   get "configurar", to: "setup#index", as: :setup
   get "screen-time", to: "screen_time#index", as: :screen_time
