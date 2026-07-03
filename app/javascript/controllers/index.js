@@ -39,3 +39,6 @@ application.register("tooltip", TooltipController)
 
 import RadarChartController from "./radar_chart_controller"
 application.register("radar-chart", RadarChartController)
+
+import ScrollEndController from "./scroll_end_controller"
+application.register("scroll-end", ScrollEndController)

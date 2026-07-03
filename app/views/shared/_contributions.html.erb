@@ -1,9 +1,11 @@
 <%# locals: graph (ContributionGraph) — célula 12px + gap 4px = coluna de 16px. %>
-<div class="overflow-x-auto" data-controller="tooltip">
-  <div class="relative mx-auto w-fit">
-    <%# balão do tooltip (posicionado pelo controller) %>
-    <div data-tooltip-target="bubble"
-         class="pointer-events-none absolute z-10 hidden max-w-56 -translate-x-1/2 -translate-y-full whitespace-pre-line rounded-lg bg-slate-900 px-2.5 py-1.5 text-center text-[11px] leading-snug text-white shadow-lg"></div>
+<%# O balão vive fora do container com scroll (não é cortado nas bordas). %>
+<div class="relative" data-controller="tooltip">
+  <div data-tooltip-target="bubble"
+       class="pointer-events-none absolute z-10 hidden max-w-56 whitespace-pre-line rounded-lg bg-slate-900 px-2.5 py-1.5 text-center text-[11px] leading-snug text-white shadow-lg"></div>
+  <%# scroll-end: abre já rolado até a semana atual (útil no celular) %>
+  <div class="overflow-x-auto" data-controller="scroll-end">
+    <div class="mx-auto w-fit">
 
     <%# rótulos de mês (largura = semanas * 16px; esconde rótulo de segmento estreito) %>
     <div class="mb-1 flex pl-8">
@@ -53,6 +55,7 @@
         <span class="h-3 w-3 rounded-sm <%= graph.cell_class(lvl) %>"></span>
       <% end %>
       <span><%= t("contributions.more") %></span>
+    </div>
     </div>
   </div>
 </div>

@@ -25,7 +25,8 @@ Rails.application.routes.draw do
   resources :join_requests, only: [:new, :create]
 
   # Domínio de tracking
-  get "/activity", to: "activity#index", as: :activity
+  # Atividade foi absorvida pelo Dashboard (raiz); mantém redirect do link antigo.
+  get "/activity", to: redirect { |_p, req| req.query_string.present? ? "/?#{req.query_string}" : "/" }
   get "/insights", to: "insights#index", as: :insights
   resources :habits
   resources :habit_categories, only: [:create, :update, :destroy]

@@ -18,7 +18,8 @@ class ContributionGraph
     @from = from || (week_start(@to) - (weeks - 1) * 7)
     @visible_to = [@to, @today].min
     @start = week_start(@from)
-    @weeks = ((@to - @start).to_i / 7) + 1
+    # A grade termina na semana de HOJE (sem colunas/meses futuros).
+    @weeks = ((@visible_to - @start).to_i / 7) + 1
     @counts = load_counts
     @names = load_names
     @max = @counts.values.max || 0
