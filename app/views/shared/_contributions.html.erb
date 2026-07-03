@@ -35,7 +35,6 @@
             <% col.each do |cell| %>
               <% if cell %>
                 <% content = t("contributions.cell", date: l(cell.date, format: :long), count: cell.count) %>
-                <% content += "\n#{cell.names.join(", ")}" if cell.names.any? %>
                 <span class="h-3 w-3 rounded-sm <%= graph.cell_class(cell.level) %>"
                       data-tooltip-content="<%= content %>"
                       data-action="mouseenter->tooltip#show mouseleave->tooltip#hide click->tooltip#show"></span>
