@@ -32,10 +32,17 @@ RSpec.describe "HabitCategories", type: :request do
     expect(account.habit_categories.count).to eq(10)
   end
 
-  it "assigns a category to a habit and nullifies on category removal" do
+  it "blocks removing a category that has habits (habit is always categorized)" do
     cat = account.habit_categories.first
     habit = create(:habit, account: account, habit_category: cat)
-    cat.destroy
-    expect(habit.reload.habit_category).to be_nil
+    delete habit_category_path(cat)
+    expect(account.habit_categories.exists?(cat.id)).to be(true)
+    expect(habit.reload.habit_category).to eq(cat)
+  end
+
+  it "seeds English defaults for an English account" do
+    en_account = create(:account, locale: "en")
+    expect(en_account.habit_categories.ordered.pluck(:name))
+      .to eq(%w[Health Performance Mind Relationships])
   end
 end

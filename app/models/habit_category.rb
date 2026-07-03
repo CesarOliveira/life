@@ -24,7 +24,7 @@ class HabitCategory < ApplicationRecord
   MAX_PER_ACCOUNT = 10
 
   belongs_to :account
-  has_many :habits, dependent: :nullify
+  has_many :habits, dependent: :restrict_with_error # hábito sempre categorizado
 
   validates :name, presence: true, length: { maximum: 40 },
                    uniqueness: { scope: :account_id }

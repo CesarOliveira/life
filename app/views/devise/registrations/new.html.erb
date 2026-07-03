@@ -26,6 +26,13 @@
 
         <div class="space-y-4">
           <div>
+            <%= label_tag :locale, t("accounts.locale_label"), class: "mb-1 block text-sm font-medium text-slate-700" %>
+            <%= select_tag :locale,
+                  options_for_select(Account::LOCALES.map { |l| [t("accounts.locales.#{l}"), l] }, I18n.locale.to_s),
+                  class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+            <p class="mt-1 text-xs text-slate-500"><%= t("accounts.locale_hint") %></p>
+          </div>
+          <div>
             <%= f.label :name, t("auth.name"), class: "mb-1 block text-sm font-medium text-slate-700" %>
             <%= f.text_field :name, autofocus: true, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
           </div>

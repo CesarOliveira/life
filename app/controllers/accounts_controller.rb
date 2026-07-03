@@ -30,6 +30,7 @@ class AccountsController < ApplicationController
       status = current_user.platform_admin? ? "active" : "pending"
       @account.memberships.create!(user: current_user, role: "owner", status: status)
 
+      session[:locale] = @account.locale # UI já no idioma escolhido no cadastro
       if status == "active"
         session[:account_id] = @account.id
         redirect_to authenticated_root_path, notice: t("flash.accounts.created")
@@ -63,6 +64,6 @@ class AccountsController < ApplicationController
   end
 
   def account_params
-    params.require(:account).permit(:name, :height_cm)
+    params.require(:account).permit(:name, :height_cm, :locale)
   end
 end

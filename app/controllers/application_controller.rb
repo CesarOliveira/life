@@ -11,12 +11,26 @@ class ApplicationController < ActionController::Base
 
   protected
 
-  # Define o idioma a partir de ?locale=, persistindo na sessão. Default: pt-BR.
+  # Define o idioma: ?locale= troca (persiste na sessão E na conta), senão usa
+  # a sessão, senão o idioma da conta (definido no cadastro). Default: pt-BR.
+  # NÃO usa o helper current_account aqui: o around_action roda antes de
+  # ensure_personal_account e memoizaria nil para o request inteiro.
   def switch_locale(&action)
     available = I18n.available_locales.map(&:to_s)
     requested = params[:locale].to_s
-    session[:locale] = requested if available.include?(requested)
-    locale = available.include?(session[:locale].to_s) ? session[:locale] : I18n.default_locale
+    if available.include?(requested)
+      session[:locale] = requested
+      current_user&.accounts&.update_all(locale: requested) if user_signed_in?
+    end
+    account_locale = user_signed_in? ? current_user&.accounts&.pick(:locale) : nil
+    locale =
+      if available.include?(session[:locale].to_s)
+        session[:locale]
+      elsif available.include?(account_locale.to_s)
+        account_locale
+      else
+        I18n.default_locale
+      end
     I18n.with_locale(locale, &action)
   end
 
@@ -54,7 +68,8 @@ class ApplicationController < ActionController::Base
   def ensure_personal_account
     return if current_user.accounts.exists?
 
-    account = current_user.owned_accounts.create!(name: current_user.name.presence || "Pessoal")
+    locale = Account::LOCALES.include?(session[:locale].to_s) ? session[:locale] : "pt-BR"
+    account = current_user.owned_accounts.create!(name: current_user.name.presence || "Pessoal", locale: locale)
     current_user.memberships.create!(account: account, role: "owner", status: "active")
     session[:account_id] = account.id
   end

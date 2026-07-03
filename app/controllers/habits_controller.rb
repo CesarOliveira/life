@@ -17,7 +17,8 @@ class HabitsController < ApplicationController
   end
 
   def new
-    @habit = current_account.habits.new(color: Habit::DEFAULT_COLOR, weekdays: Habit::WEEKDAYS)
+    @habit = current_account.habits.new(color: Habit::DEFAULT_COLOR, weekdays: Habit::WEEKDAYS,
+                                        habit_category: current_account.habit_categories.ordered.first)
   end
 
   def create
@@ -74,7 +75,8 @@ class HabitsController < ApplicationController
                       .permit(:name, :description, :color, :active, :position, :habit_category_id,
                               :frequency, :weekly_target, :auto, :metric_key, :comparator, :threshold_value,
                               weekdays: [], app_bundle_ids: [])
-    permitted[:habit_category_id] = current_account.habit_categories.find_by(id: permitted[:habit_category_id])&.id
+    permitted[:habit_category_id] = current_account.habit_categories.find_by(id: permitted[:habit_category_id])&.id ||
+                                    current_account.habit_categories.ordered.first&.id
     permitted[:auto] = ActiveModel::Type::Boolean.new.cast(permitted[:auto]) ? true : false
 
     if permitted[:auto]

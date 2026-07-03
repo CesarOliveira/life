@@ -6,6 +6,7 @@
 #  api_token  :string
 #  height_cm  :integer
 #  join_code  :string
+#  locale     :string           default("pt-BR"), not null
 #  name       :string           not null
 #  created_at :datetime         not null
 #  updated_at :datetime         not null

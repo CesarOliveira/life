@@ -6,6 +6,7 @@
 #  api_token  :string
 #  height_cm  :integer
 #  join_code  :string
+#  locale     :string           default("pt-BR"), not null
 #  name       :string           not null
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
@@ -33,6 +34,9 @@ class Account < ApplicationRecord
   has_many :exam_extractions, dependent: :destroy
   has_many :exam_results, dependent: :destroy
   has_many :habit_categories, dependent: :destroy
+
+  LOCALES = %w[pt-BR en].freeze
+  validates :locale, inclusion: { in: LOCALES }
 
   after_create :seed_default_habit_categories
 
@@ -62,11 +66,16 @@ class Account < ApplicationRecord
       break unless Account.exists?(join_code: join_code)
     end
   end
-  DEFAULT_HABIT_CATEGORIES = %w[Saúde Performance Mente Relacionamentos].freeze
+  # Categorias padrão POR IDIOMA (definidas na criação da conta, conforme o
+  # idioma escolhido no cadastro). Renomeáveis; até 10 no total.
+  DEFAULT_HABIT_CATEGORIES = {
+    "pt-BR" => %w[Saúde Performance Mente Relacionamentos],
+    "en" => %w[Health Performance Mind Relationships]
+  }.freeze
 
-  # Toda conta nasce com as 4 categorias padrão (renomeáveis; até 10 no total).
   def seed_default_habit_categories
-    DEFAULT_HABIT_CATEGORIES.each_with_index do |name, i|
+    names = DEFAULT_HABIT_CATEGORIES[locale] || DEFAULT_HABIT_CATEGORIES["pt-BR"]
+    names.each_with_index do |name, i|
       habit_categories.create!(name: name, position: i)
     end
   end

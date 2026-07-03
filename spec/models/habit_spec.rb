@@ -19,7 +19,7 @@
 #  created_at        :datetime         not null
 #  updated_at        :datetime         not null
 #  account_id        :bigint           not null
-#  habit_category_id :bigint
+#  habit_category_id :bigint           not null
 #
 # Indexes
 #

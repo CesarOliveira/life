@@ -22,8 +22,11 @@ class HabitCategoriesController < ApplicationController
 
   def destroy
     category = current_account.habit_categories.find(params[:id])
-    category.destroy
-    redirect_to edit_account_path(current_account), notice: t("categories.removed")
+    if category.destroy
+      redirect_to edit_account_path(current_account), notice: t("categories.removed")
+    else
+      redirect_to edit_account_path(current_account), alert: t("categories.has_habits")
+    end
   end
 
   private

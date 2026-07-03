@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_03_161020) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_03_162534) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -19,6 +19,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_03_161020) do
     t.datetime "created_at", null: false
     t.integer "height_cm"
     t.string "join_code"
+    t.string "locale", default: "pt-BR", null: false
     t.string "name", null: false
     t.bigint "owner_id"
     t.datetime "updated_at", null: false
@@ -143,7 +144,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_03_161020) do
     t.datetime "created_at", null: false
     t.text "description"
     t.string "frequency", default: "weekly_days", null: false
-    t.bigint "habit_category_id"
+    t.bigint "habit_category_id", null: false
     t.string "metric_key"
     t.string "name", null: false
     t.integer "position", default: 0, null: false

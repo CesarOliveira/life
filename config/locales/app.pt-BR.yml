@@ -132,7 +132,8 @@ pt-BR:
     add: "Adicionar"
     rename: "Salvar"
     new_placeholder: "Nova categoria (ex.: Finanças)"
-    remove_confirm: "Remover a categoria \"%{name}\"? Os hábitos dela ficam sem categoria."
+    remove_confirm: "Remover a categoria \"%{name}\"? (só é possível se nenhum hábito a usar)"
+    has_habits: "Esta categoria tem hábitos — mova-os para outra categoria antes de remover."
     saved: "Categorias atualizadas."
     removed: "Categoria removida."
 
@@ -392,6 +393,11 @@ pt-BR:
     join_other: "Entrar com outro código"
 
   accounts:
+    locale_label: "Idioma"
+    locale_hint: "Define o idioma do app e das categorias padrão (Saúde, Performance...)."
+    locales:
+      pt-BR: "Português (Brasil)"
+      en: "English"
     new_title: "Criar nova conta"
     create: "Criar conta"
     cancel: "Cancelar"

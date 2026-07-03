@@ -19,7 +19,7 @@
 #  created_at        :datetime         not null
 #  updated_at        :datetime         not null
 #  account_id        :bigint           not null
-#  habit_category_id :bigint
+#  habit_category_id :bigint           not null
 #
 # Indexes
 #
@@ -35,6 +35,7 @@
 FactoryBot.define do
   factory :habit do
     association :account
+    habit_category { account.habit_categories.ordered.first || association(:habit_category, account: account) }
     sequence(:name) { |n| "Hábito #{n}" }
     color { Habit::DEFAULT_COLOR }
     frequency { "weekly_days" }

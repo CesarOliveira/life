@@ -132,7 +132,8 @@ en:
     add: "Add"
     rename: "Save"
     new_placeholder: "New category (e.g. Finances)"
-    remove_confirm: "Remove the \"%{name}\" category? Its habits become uncategorized."
+    remove_confirm: "Remove the \"%{name}\" category? (only possible when no habit uses it)"
+    has_habits: "This category has habits — move them to another category before removing."
     saved: "Categories updated."
     removed: "Category removed."
 
@@ -392,6 +393,11 @@ en:
     join_other: "Join with another code"
 
   accounts:
+    locale_label: "Language"
+    locale_hint: "Sets the app language and the default categories (Health, Performance...)."
+    locales:
+      pt-BR: "Português (Brasil)"
+      en: "English"
     new_title: "Create new account"
     create: "Create account"
     cancel: "Cancel"
