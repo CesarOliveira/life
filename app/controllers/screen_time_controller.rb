@@ -1,5 +1,6 @@
 class ScreenTimeController < ApplicationController
-  # Períodos do índice (estilo iOS): últimos 7/15/30 dias ou uma data específica.
+  # Períodos do índice (estilo iOS): hoje, ontem (padrão — o atalho envia o dia
+  # anterior), últimos 7/15/30 dias ou uma data específica.
   INDEX_RANGES = { "7" => 7, "15" => 15, "30" => 30 }.freeze
 
   def index
@@ -11,10 +12,16 @@ class ScreenTimeController < ApplicationController
     if @date
       @from = @to = @date
       @range_key = "date"
-    else
-      @range_key = INDEX_RANGES.key?(params[:range]) ? params[:range] : "7"
+    elsif params[:range] == "today"
+      @from = @to = @today
+      @range_key = "today"
+    elsif INDEX_RANGES.key?(params[:range])
+      @range_key = params[:range]
       @to = @today
       @from = @today - (INDEX_RANGES[@range_key] - 1)
+    else
+      @from = @to = @today - 1
+      @range_key = "yesterday"
     end
 
     usages = current_account.app_usages.where(date: @from..@to)

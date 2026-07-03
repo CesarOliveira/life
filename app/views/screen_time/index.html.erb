@@ -3,7 +3,8 @@
 
   <%# Filtros: 7d / 15d / 1 mês / data específica %>
   <div class="flex flex-wrap items-center gap-2">
-    <% { "7" => t("screen_time.range_7"), "15" => t("screen_time.range_15"), "30" => t("screen_time.range_month") }.each do |k, label| %>
+    <% { "today" => t("screen_time.today"), "yesterday" => t("screen_time.yesterday"),
+         "7" => t("screen_time.range_7"), "15" => t("screen_time.range_15"), "30" => t("screen_time.range_month") }.each do |k, label| %>
       <%= link_to label, screen_time_path(range: k),
             class: "rounded-lg border px-3 py-1.5 text-xs font-medium #{@range_key == k ? 'border-emerald-500 bg-emerald-600 text-white' : 'border-slate-300 text-slate-600 hover:bg-slate-50'}" %>
     <% end %>
@@ -17,16 +18,23 @@
   <% if @apps.any? || @total.positive? %>
     <%# Card principal: total grande + barras com linha da média (estilo iOS) %>
     <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <p class="text-xs font-medium uppercase tracking-wide text-slate-400">
-        <%= @range_key == "date" ? l(@date, format: :long) : t("screen_time.period_last_days", days: (@to - @from).to_i + 1) %>
-      </p>
+      <% period_label =
+           case @range_key
+           when "today" then "#{t('screen_time.today')}, #{l(@to, format: :long)}"
+           when "yesterday" then "#{t('screen_time.yesterday')}, #{l(@to, format: :long)}"
+           when "date" then l(@date, format: :long)
+           else t("screen_time.period_last_days", days: (@to - @from).to_i + 1)
+           end %>
+      <p class="text-xs font-medium uppercase tracking-wide text-slate-400"><%= period_label %></p>
       <p class="mt-1 text-3xl font-bold text-slate-900"><%= humanize_duration(@total) %></p>
-      <% if @range_key != "date" && @avg.positive? %>
+      <% if @from != @to && @avg.positive? %>
         <p class="text-xs text-slate-400"><%= t("screen_time.avg_day") %>: <%= humanize_duration(@avg) %></p>
       <% end %>
 
-      <% if @range_key != "date" && @max_day.positive? %>
-        <div class="relative mt-4">
+      <% if @from != @to && @max_day.positive? %>
+        <div class="relative mt-4" data-controller="tooltip">
+          <div data-tooltip-target="bubble"
+               class="pointer-events-none absolute z-20 hidden whitespace-nowrap rounded-lg bg-slate-900 px-2.5 py-1.5 text-center text-[11px] leading-snug text-white shadow-lg"></div>
           <%# linha tracejada da média %>
           <% avg_pct = @max_day.zero? ? 0 : (@avg * 100.0 / @max_day).clamp(0, 100) %>
           <div class="pointer-events-none absolute inset-x-0 z-10 border-t-2 border-dashed border-slate-300"
@@ -38,7 +46,8 @@
             <% @daily.each do |d| %>
               <% pct = @max_day.zero? ? 0 : (d[:seconds] * 100 / @max_day) %>
               <div class="flex min-w-0 flex-1 flex-col items-center justify-end gap-1 self-stretch"
-                   title="<%= l(d[:date], format: :day_month) %> — <%= humanize_duration(d[:seconds]) %>">
+                   data-tooltip-content="<%= l(d[:date], format: :day_month) %> — <%= humanize_duration(d[:seconds]) %>"
+                   data-action="mouseenter->tooltip#show mouseleave->tooltip#hide click->tooltip#show">
                 <div class="flex w-full flex-1 items-end">
                   <div class="w-full rounded-t <%= d[:seconds].positive? ? 'bg-emerald-500' : 'bg-slate-100' %>"
                        style="height: <%= d[:seconds].positive? ? [pct, 2].max : 2 %>%"></div>

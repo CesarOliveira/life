@@ -9,12 +9,24 @@ RSpec.describe "Screen time", type: :request do
     sign_in user
   end
 
-  it "renders, shows per-app usage and exposes a token" do
-    create(:app_usage, account: account, name: "Instagram", seconds: 7200)
+  it "defaults to yesterday and shows that day's apps" do
+    create(:app_usage, account: account, name: "Instagram", date: Date.current - 1, seconds: 7200)
+    create(:app_usage, account: account, bundle_id: "Hoje App", name: "Hoje App", date: Date.current, seconds: 600)
     get screen_time_path
     expect(response).to have_http_status(:ok)
+    expect(response.body).to include(I18n.t("screen_time.yesterday"))
     expect(response.body).to include("Instagram")
+    expect(response.body).not_to include("Hoje App") # hoje não entra no padrão (ontem)
     expect(account.reload.api_token).to be_present
+  end
+
+  it "filters by today and by multi-day ranges (apps list follows)" do
+    create(:app_usage, account: account, bundle_id: "Hoje App", name: "Hoje App", date: Date.current, seconds: 600)
+    get screen_time_path(range: "today")
+    expect(response.body).to include("Hoje App")
+
+    get screen_time_path(range: "7")
+    expect(response.body).to include("Hoje App")
   end
 
   it "regenerates the token and returns to the caller (fallback: setup)" do
