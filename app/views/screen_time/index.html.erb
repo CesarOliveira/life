@@ -1,35 +1,86 @@
 <div class="space-y-6">
   <h1 class="text-2xl font-bold text-slate-900"><%= t("screen_time.title") %></h1>
 
-  <% if @apps.any? %>
-    <div class="grid grid-cols-2 gap-3 sm:gap-4">
-      <%= link_to screen_time_history_path(range: 7), class: "rounded-2xl border border-slate-200 bg-white p-4 shadow-sm hover:border-emerald-300" do %>
-        <p class="text-xs font-medium uppercase tracking-wide text-slate-400"><%= t("screen_time.yesterday") %> ›</p>
-        <p class="mt-1 text-2xl font-bold text-slate-900"><%= humanize_duration(@total_yesterday) %></p>
-      <% end %>
-      <%= link_to screen_time_history_path(range: 7), class: "rounded-2xl border border-slate-200 bg-white p-4 shadow-sm hover:border-emerald-300" do %>
-        <p class="text-xs font-medium uppercase tracking-wide text-slate-400"><%= t("screen_time.this_week") %> ›</p>
-        <p class="mt-1 text-2xl font-bold text-slate-900"><%= humanize_duration(@total_week) %></p>
-      <% end %>
-    </div>
+  <%# Filtros: 7d / 15d / 1 mês / data específica %>
+  <div class="flex flex-wrap items-center gap-2">
+    <% { "7" => t("screen_time.range_7"), "15" => t("screen_time.range_15"), "30" => t("screen_time.range_month") }.each do |k, label| %>
+      <%= link_to label, screen_time_path(range: k),
+            class: "rounded-lg border px-3 py-1.5 text-xs font-medium #{@range_key == k ? 'border-emerald-500 bg-emerald-600 text-white' : 'border-slate-300 text-slate-600 hover:bg-slate-50'}" %>
+    <% end %>
+    <%= form_with url: screen_time_path, method: :get, class: "flex items-center gap-1" do %>
+      <input type="date" name="date" value="<%= @date&.iso8601 %>" max="<%= @today.iso8601 %>"
+             class="rounded-lg border px-2 py-1 text-xs <%= @range_key == 'date' ? 'border-emerald-500 text-emerald-700' : 'border-slate-300 text-slate-700' %>">
+      <button class="rounded-lg border border-slate-300 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50"><%= t("screen_time.apply") %></button>
+    <% end %>
+  </div>
 
+  <% if @apps.any? || @total.positive? %>
+    <%# Card principal: total grande + barras com linha da média (estilo iOS) %>
     <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <h2 class="mb-4 font-semibold text-slate-900"><%= t("screen_time.by_app") %></h2>
-      <ul class="space-y-3">
-        <% @apps.each do |a| %>
-          <li>
-            <%= link_to screen_time_app_path(bundle_id: a[:bundle_id]), class: "block rounded-lg -mx-2 px-2 py-1 hover:bg-slate-50" do %>
-              <div class="mb-1 flex items-center justify-between gap-3 text-sm">
-                <span class="truncate font-medium text-slate-700"><%= a[:name] %></span>
-                <span class="shrink-0 text-slate-500"><%= humanize_duration(a[:seconds]) %> ›</span>
-              </div>
-              <div class="h-2 w-full rounded-full bg-slate-100">
-                <div class="h-2 rounded-full bg-emerald-500" style="width: <%= @max_app.zero? ? 0 : (a[:seconds] * 100 / @max_app) %>%"></div>
+      <p class="text-xs font-medium uppercase tracking-wide text-slate-400">
+        <%= @range_key == "date" ? l(@date, format: :long) : t("screen_time.period_last_days", days: (@to - @from).to_i + 1) %>
+      </p>
+      <p class="mt-1 text-3xl font-bold text-slate-900"><%= humanize_duration(@total) %></p>
+      <% if @range_key != "date" && @avg.positive? %>
+        <p class="text-xs text-slate-400"><%= t("screen_time.avg_day") %>: <%= humanize_duration(@avg) %></p>
+      <% end %>
+
+      <% if @range_key != "date" && @max_day.positive? %>
+        <div class="relative mt-4">
+          <%# linha tracejada da média %>
+          <% avg_pct = @max_day.zero? ? 0 : (@avg * 100.0 / @max_day).clamp(0, 100) %>
+          <div class="pointer-events-none absolute inset-x-0 z-10 border-t-2 border-dashed border-slate-300"
+               style="bottom: calc(<%= avg_pct.round(1) %>% * 0.86 + 22px)">
+            <span class="absolute -top-2.5 right-0 bg-white pl-1 text-[10px] text-slate-400"><%= t("screen_time.avg_label") %></span>
+          </div>
+
+          <div class="flex h-44 items-end gap-1">
+            <% @daily.each do |d| %>
+              <% pct = @max_day.zero? ? 0 : (d[:seconds] * 100 / @max_day) %>
+              <div class="flex min-w-0 flex-1 flex-col items-center justify-end gap-1 self-stretch"
+                   title="<%= d[:date].strftime('%d/%m') %> — <%= humanize_duration(d[:seconds]) %>">
+                <div class="flex w-full flex-1 items-end">
+                  <div class="w-full rounded-t <%= d[:seconds].positive? ? 'bg-emerald-500' : 'bg-slate-100' %>"
+                       style="height: <%= d[:seconds].positive? ? [pct, 2].max : 2 %>%"></div>
+                </div>
+                <span class="h-4 truncate text-[9px] font-medium uppercase text-slate-400">
+                  <% if @daily.size <= 7 %>
+                    <%= t("date.abbr_day_names")[d[:date].wday].first(1).upcase %>
+                  <% elsif @daily.size <= 16 %>
+                    <%= d[:date].day %>
+                  <% else %>
+                    <%= d[:date].day if (d[:date].day % 5).zero? %>
+                  <% end %>
+                </span>
               </div>
             <% end %>
-          </li>
-        <% end %>
-      </ul>
+          </div>
+        </div>
+      <% end %>
+    </section>
+
+    <%# Mais usados (no período) %>
+    <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 class="mb-4 font-semibold text-slate-900"><%= t("screen_time.most_used") %></h2>
+      <% if @apps.empty? %>
+        <p class="text-sm text-slate-500"><%= t("screen_time.app_empty") %></p>
+      <% else %>
+        <ul class="space-y-3">
+          <% @apps.each do |a| %>
+            <li>
+              <%= link_to screen_time_app_path(bundle_id: a[:bundle_id]), class: "block rounded-lg -mx-2 px-2 py-1 hover:bg-slate-50" do %>
+                <div class="mb-1 flex items-center justify-between gap-3 text-sm">
+                  <span class="truncate font-medium text-slate-700"><%= a[:name] %></span>
+                  <span class="shrink-0 text-slate-500"><%= humanize_duration(a[:seconds]) %> ›</span>
+                </div>
+                <div class="h-2 w-full rounded-full bg-slate-100">
+                  <div class="h-2 rounded-full bg-emerald-500" style="width: <%= @max_app.zero? ? 0 : (a[:seconds] * 100 / @max_app) %>%"></div>
+                </div>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
     </section>
   <% else %>
     <div class="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">

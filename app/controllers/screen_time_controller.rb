@@ -1,15 +1,30 @@
 class ScreenTimeController < ApplicationController
+  # Períodos do índice (estilo iOS): últimos 7/15/30 dias ou uma data específica.
+  INDEX_RANGES = { "7" => 7, "15" => 15, "30" => 30 }.freeze
+
   def index
     current_account.regenerate_api_token if current_account.api_token.blank?
     @token = current_account.api_token
 
     @today = Date.current
-    @range = (@today - 6.days)..@today
-    usages = current_account.app_usages.in_range(@range)
+    @date = parse_date(params[:date])
+    if @date
+      @from = @to = @date
+      @range_key = "date"
+    else
+      @range_key = INDEX_RANGES.key?(params[:range]) ? params[:range] : "7"
+      @to = @today
+      @from = @today - (INDEX_RANGES[@range_key] - 1)
+    end
 
-    @total_week = usages.sum(:seconds)
-    # "Hoje" é sempre 0 (o atalho envia o dia anterior); mostramos "Ontem".
-    @total_yesterday = current_account.app_usages.where(date: @today - 1).sum(:seconds)
+    usages = current_account.app_usages.where(date: @from..@to)
+    @total = usages.sum(:seconds)
+    by_date = usages.group(:date).sum(:seconds)
+    # Todos os dias do período (dias sem dado = barra vazia, como no iPhone).
+    @daily = (@from..@to).map { |d| { date: d, seconds: by_date[d] || 0 } }
+    @max_day = @daily.map { |d| d[:seconds] }.max || 0
+    days_with_data = by_date.size
+    @avg = days_with_data.positive? ? (by_date.values.sum / days_with_data) : 0
 
     names = usages.where.not(name: nil).group(:bundle_id).maximum(:name)
     @apps = usages.group(:bundle_id).sum(:seconds)
