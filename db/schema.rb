@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_02_130122) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_03_152304) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -113,6 +113,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_02_130122) do
     t.index ["account_id"], name: "index_goals_on_account_id"
   end
 
+  create_table "habit_categories", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "name"], name: "index_habit_categories_on_account_id_and_name", unique: true
+    t.index ["account_id"], name: "index_habit_categories_on_account_id"
+  end
+
   create_table "habit_checks", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.date "date", null: false
@@ -132,6 +142,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_02_130122) do
     t.datetime "created_at", null: false
     t.text "description"
     t.string "frequency", default: "weekly_days", null: false
+    t.bigint "habit_category_id"
     t.string "metric_key"
     t.string "name", null: false
     t.integer "position", default: 0, null: false
@@ -141,6 +152,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_02_130122) do
     t.integer "weekly_target"
     t.index ["account_id", "active"], name: "index_habits_on_account_id_and_active"
     t.index ["account_id"], name: "index_habits_on_account_id"
+    t.index ["habit_category_id"], name: "index_habits_on_habit_category_id"
   end
 
   create_table "measurements", force: :cascade do |t|
@@ -221,8 +233,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_02_130122) do
   add_foreign_key "exam_results", "exam_types"
   add_foreign_key "exam_types", "exam_groups"
   add_foreign_key "goals", "accounts"
+  add_foreign_key "habit_categories", "accounts"
   add_foreign_key "habit_checks", "habits"
   add_foreign_key "habits", "accounts"
+  add_foreign_key "habits", "habit_categories"
   add_foreign_key "measurements", "accounts"
   add_foreign_key "memberships", "accounts"
   add_foreign_key "memberships", "users"

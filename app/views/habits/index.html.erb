@@ -83,6 +83,9 @@
               <%= link_to h.name, habit_path(h), class: "block truncate font-semibold text-slate-900 hover:text-emerald-700" %>
               <p class="flex flex-wrap items-center gap-2 text-xs text-slate-500">
                 <span><%= cadence_label(h) %></span>
+                <% if h.habit_category %>
+                  <span class="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500"><%= h.habit_category.name %></span>
+                <% end %>
                 <span class="rounded-full px-1.5 py-0.5 text-[10px] font-medium <%= strength_badge_class(s.strength) %>"><%= strength_label(s.strength) %></span>
               </p>
             </div>

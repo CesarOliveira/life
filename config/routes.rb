@@ -28,6 +28,7 @@ Rails.application.routes.draw do
   get "/activity", to: "activity#index", as: :activity
   get "/insights", to: "insights#index", as: :insights
   resources :habits
+  resources :habit_categories, only: [:create, :update, :destroy]
   post "habits/:id/toggle", to: "habit_checks#toggle", as: :toggle_habit
   resources :weights, only: [:create, :destroy]
   resources :measurements, only: [:index, :create, :destroy] do

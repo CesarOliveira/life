@@ -31,6 +31,9 @@ pt-BR:
     period_year: "em %{year}"
     months: "%{count} meses"
     by_year: "Por ano"
+    overview: "Visão geral do ano"
+    overview_hint: "Conclusões de hábitos por categoria. Defina a categoria de cada hábito ao editá-lo."
+    overview_empty: "Sem conclusões neste ano ainda."
 
   dashboard:
     greeting: "Olá, %{name} 👋"
@@ -119,6 +122,19 @@ pt-BR:
       created: "Hábito criado."
       updated: "Hábito atualizado."
       removed: "Hábito removido."
+
+  categories:
+    title: "Categorias de hábitos"
+    hint: "Classifique seus hábitos (até %{max} categorias). Elas alimentam o radar da página Atividade."
+    habit_label: "Categoria"
+    habit_hint: "Usada no radar de atividade (Saúde, Performance, Mente...)."
+    none: "Sem categoria"
+    add: "Adicionar"
+    rename: "Salvar"
+    new_placeholder: "Nova categoria (ex.: Finanças)"
+    remove_confirm: "Remover a categoria \"%{name}\"? Os hábitos dela ficam sem categoria."
+    saved: "Categorias atualizadas."
+    removed: "Categoria removida."
 
   insights:
     title: "Análises"

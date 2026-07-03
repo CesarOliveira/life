@@ -32,6 +32,9 @@ class Account < ApplicationRecord
   has_many :goals, dependent: :destroy
   has_many :exam_extractions, dependent: :destroy
   has_many :exam_results, dependent: :destroy
+  has_many :habit_categories, dependent: :destroy
+
+  after_create :seed_default_habit_categories
 
   # Token pessoal para a API de ingestão (ex.: script do Mac enviando uso por app).
   has_secure_token :api_token
@@ -57,6 +60,14 @@ class Account < ApplicationRecord
     loop do
       self.join_code = SecureRandom.hex(5)
       break unless Account.exists?(join_code: join_code)
+    end
+  end
+  DEFAULT_HABIT_CATEGORIES = %w[Saúde Performance Mente Relacionamentos].freeze
+
+  # Toda conta nasce com as 4 categorias padrão (renomeáveis; até 10 no total).
+  def seed_default_habit_categories
+    DEFAULT_HABIT_CATEGORIES.each_with_index do |name, i|
+      habit_categories.create!(name: name, position: i)
     end
   end
 end

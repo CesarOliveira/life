@@ -36,3 +36,6 @@ application.register("line-chart", LineChartController)
 
 import TooltipController from "./tooltip_controller"
 application.register("tooltip", TooltipController)
+
+import RadarChartController from "./radar_chart_controller"
+application.register("radar-chart", RadarChartController)

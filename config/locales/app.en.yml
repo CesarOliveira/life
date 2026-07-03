@@ -31,6 +31,9 @@ en:
     period_year: "in %{year}"
     months: "%{count} months"
     by_year: "By year"
+    overview: "Year overview"
+    overview_hint: "Habit completions by category. Set each habit's category when editing it."
+    overview_empty: "No completions this year yet."
 
   dashboard:
     greeting: "Hi, %{name} 👋"
@@ -119,6 +122,19 @@ en:
       created: "Habit created."
       updated: "Habit updated."
       removed: "Habit deleted."
+
+  categories:
+    title: "Habit categories"
+    hint: "Classify your habits (up to %{max} categories). They feed the radar on the Activity page."
+    habit_label: "Category"
+    habit_hint: "Used in the activity radar (Health, Performance, Mind...)."
+    none: "Uncategorized"
+    add: "Add"
+    rename: "Save"
+    new_placeholder: "New category (e.g. Finances)"
+    remove_confirm: "Remove the \"%{name}\" category? Its habits become uncategorized."
+    saved: "Categories updated."
+    removed: "Category removed."
 
   insights:
     title: "Insights"
