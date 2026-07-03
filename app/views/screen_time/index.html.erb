@@ -38,7 +38,7 @@
             <% @daily.each do |d| %>
               <% pct = @max_day.zero? ? 0 : (d[:seconds] * 100 / @max_day) %>
               <div class="flex min-w-0 flex-1 flex-col items-center justify-end gap-1 self-stretch"
-                   title="<%= d[:date].strftime('%d/%m') %> — <%= humanize_duration(d[:seconds]) %>">
+                   title="<%= l(d[:date], format: :day_month) %> — <%= humanize_duration(d[:seconds]) %>">
                 <div class="flex w-full flex-1 items-end">
                   <div class="w-full rounded-t <%= d[:seconds].positive? ? 'bg-emerald-500' : 'bg-slate-100' %>"
                        style="height: <%= d[:seconds].positive? ? [pct, 2].max : 2 %>%"></div>

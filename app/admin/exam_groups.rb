@@ -10,7 +10,7 @@ ActiveAdmin.register ExamGroup do
     column :name_pt
     column :name_en
     column :position
-    column("Tipos") { |g| g.exam_types.size }
+    column(proc { I18n.t("admin.catalog.types_count") }) { |g| g.exam_types.size }
     actions
   end
 

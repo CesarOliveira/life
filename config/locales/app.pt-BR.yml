@@ -211,6 +211,10 @@ pt-BR:
     all_groups: "Todos os grupos"
     no_matches: "Nenhum exame corresponde ao filtro."
     favorite_group: "Favoritar grupo (mostra no topo)"
+    sources:
+      manual: "manual"
+      pdf: "PDF"
+      api: "API"
     table:
       exam: "Exame"
       value: "Valor"
@@ -393,6 +397,7 @@ pt-BR:
     join_other: "Entrar com outro código"
 
   accounts:
+    personal_name: "Pessoal"
     locale_label: "Idioma"
     locale_hint: "Define o idioma do app e das categorias padrão (Saúde, Performance...)."
     locales:
@@ -416,6 +421,13 @@ pt-BR:
     back: "Voltar"
 
   memberships:
+    roles:
+      owner: "dono"
+      admin: "admin"
+      member: "membro"
+    statuses:
+      pending: "pendente"
+      active: "ativo"
     title: "Membros — %{account}"
     code_label: "Código de convite:"
     code_share: "— compartilhe para que outros solicitem entrada."
@@ -458,6 +470,14 @@ pt-BR:
       removed: "Removido."
       key_hint: "Identificador técnico (snake_case), usado pela extração. Não mude se já houver resultados."
       aliases: "Apelidos"
+      aliases_csv: "Apelidos (separados por vírgula)"
+      key: "Chave"
+      name_pt: "Nome (PT)"
+      name_en: "Nome (EN)"
+      description_pt: "Descrição (PT)"
+      description_en: "Descrição (EN)"
+      position: "Posição"
+      types_count: "Tipos"
       aliases_hint: "Termos que o laudo pode usar, separados por vírgula (ex.: tgo, ast, transaminase glutamica oxalacetica)."
     extractions:
       title: "Extrações de exames (custo de IA)"
@@ -474,6 +494,7 @@ pt-BR:
       rows: "Resultados"
       status: "Status"
       duration: "Duração"
+      status_ok: "ok"
     dashboard:
       title: "Painel administrativo"
       pending_approvals: "Aprovações pendentes"
@@ -584,3 +605,29 @@ pt-BR:
         target_value: "Alvo"
         start_value: "Início"
         deadline: "Prazo"
+
+  date:
+    formats:
+      numeric: "%d/%m/%Y"
+      day_month: "%d/%m"
+
+  units:
+    passos: "passos"
+
+  roles:
+    admin: "Admin"
+    super_admin: "Super Admin"
+    member: "Membro"
+
+  activerecord:
+    errors:
+      models:
+        habit:
+          attributes:
+            weekdays:
+              empty_selection: "selecione ao menos um dia da semana"
+              invalid_day: "contém um dia inválido"
+        habit_category:
+          attributes:
+            base:
+              limit_reached: "Limite de categorias atingido (máx. 10 por conta)."

@@ -22,7 +22,7 @@
       <ul class="space-y-2">
         <% @daily.each do |d| %>
           <li class="flex items-center gap-3 text-sm">
-            <span class="w-12 shrink-0 text-slate-500"><%= d[:date].strftime("%d/%m") %></span>
+            <span class="w-12 shrink-0 text-slate-500"><%= l(d[:date], format: :day_month) %></span>
             <div class="h-3 flex-1 rounded-full bg-slate-100">
               <div class="h-3 rounded-full bg-emerald-500" style="width: <%= @max_day.zero? ? 0 : (d[:seconds] * 100 / @max_day) %>%"></div>
             </div>

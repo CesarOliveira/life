@@ -41,7 +41,7 @@ module HabitsHelper
       else
         v = habit.threshold_value
         v = v.to_i if v && v.to_i == v
-        "#{v} #{meta[:unit]}".strip
+        "#{v} #{display_unit(meta[:unit])}".strip
       end
 
     label = "#{metric} #{operator} #{value}".strip

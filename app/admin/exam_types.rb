@@ -10,7 +10,7 @@ ActiveAdmin.register ExamType do
     column :key
     column :name_pt
     column :name_en
-    column("Apelidos") { |t| t.aliases.join(", ").truncate(50) }
+    column(proc { I18n.t("admin.catalog.aliases") }) { |t| t.aliases.join(", ").truncate(50) }
     column :position
     actions
   end
@@ -24,7 +24,7 @@ ActiveAdmin.register ExamType do
       f.input :description_pt
       f.input :description_en
       # Apelidos como texto separado por vírgula (array no banco).
-      f.input :aliases_text, label: "Aliases (separados por vírgula)",
+      f.input :aliases_text, label: I18n.t("admin.catalog.aliases_csv"),
                              input_html: { value: f.object.aliases.join(", "), name: "exam_type[aliases_text]" },
                              as: :string
       f.input :position

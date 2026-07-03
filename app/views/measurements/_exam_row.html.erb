@@ -26,7 +26,7 @@
     <td class="px-4 py-2.5 text-xs text-slate-500">
       <%= latest.reference? ? "#{latest.ref_low&.to_f || '—'}–#{latest.ref_high&.to_f || '—'}" : "—" %>
     </td>
-    <td class="px-4 py-2.5 text-xs text-slate-500"><%= latest.measured_on.strftime("%d/%m/%Y") %></td>
+    <td class="px-4 py-2.5 text-xs text-slate-500"><%= l(latest.measured_on, format: :numeric) %></td>
   </tr>
   <tr data-accordion-target="panel" class="hidden">
     <td colspan="5" class="bg-slate-50/60 px-4 py-4">
@@ -52,12 +52,12 @@
           <tbody class="divide-y divide-slate-100">
             <% item[:rows].each do |r| %>
               <tr>
-                <td class="px-3 py-1.5 text-slate-500"><%= r.measured_on.strftime("%d/%m/%Y") %></td>
+                <td class="px-3 py-1.5 text-slate-500"><%= l(r.measured_on, format: :numeric) %></td>
                 <td class="px-3 py-1.5 text-right font-medium <%= "text-rose-600" if r.out_of_range? %>">
                   <%= number_with_delimiter(r.display_value) %> <span class="font-normal text-slate-400"><%= r.unit %></span>
                 </td>
                 <td class="px-3 py-1.5 text-xs text-slate-500"><%= r.reference? ? "#{r.ref_low&.to_f || '—'}–#{r.ref_high&.to_f || '—'}" : "—" %></td>
-                <td class="px-3 py-1.5 text-xs text-slate-400"><%= r.source %></td>
+                <td class="px-3 py-1.5 text-xs text-slate-400"><%= t("measurements.sources.#{r.source}", default: r.source) %></td>
                 <td class="px-3 py-1.5 text-right">
                   <%= button_to t("memberships.remove"), exam_result_path(r), method: :delete,
                         class: "text-xs text-rose-600 hover:underline",

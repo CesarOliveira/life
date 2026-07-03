@@ -21,7 +21,7 @@
           <td class="space-x-1 px-4 py-2">
             <% u.memberships.each do |m| %>
               <span class="inline-block rounded px-2 py-0.5 text-xs <%= m.active? ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700" %>">
-                <%= m.account.name %>: <%= m.status %>
+                <%= m.account.name %>: <%= t("memberships.statuses.#{m.status}", default: m.status) %>
               </span>
             <% end %>
           </td>
@@ -31,7 +31,7 @@
                 <% has = u.role?(role) %>
                 <%= button_to admin_user_path(u, role: role, grant: has ? "0" : "1"), method: :patch,
                       class: "rounded px-2 py-0.5 text-xs font-medium #{has ? "bg-emerald-600 text-white hover:bg-emerald-700" : "bg-slate-100 text-slate-500 hover:bg-slate-200"}" do %>
-                  <%= has ? "✓ #{role}" : role %>
+                  <%= has ? "✓ #{t("roles.#{role}", default: role)}" : t("roles.#{role}", default: role) %>
                 <% end %>
               <% end %>
             </div>

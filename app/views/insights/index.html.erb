@@ -48,7 +48,7 @@
       </div>
       <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <p class="text-xs text-slate-500"><%= t("insights.median") %></p>
-        <p class="mt-1 text-2xl font-bold text-slate-900"><%= number_with_delimiter(@analysis.median.round(1)) %> <span class="text-base font-medium text-slate-400"><%= @analysis.unit %></span></p>
+        <p class="mt-1 text-2xl font-bold text-slate-900"><%= number_with_delimiter(@analysis.median.round(1)) %> <span class="text-base font-medium text-slate-400"><%= display_unit(@analysis.unit) %></span></p>
       </div>
     </div>
 

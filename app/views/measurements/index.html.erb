@@ -87,7 +87,7 @@
                   <div>
                     <%= f.label :exam_type_id, t("measurements.metric"), class: "mb-1 block text-xs font-medium text-slate-600" %>
                     <%= f.select :exam_type_id,
-                          options_for_select(@exam_types.map { |type| [type.name, type.id] }, @exam_result.exam_type_id),
+                          grouped_options_for_select(@exam_type_options, @exam_result.exam_type_id),
                           {},
                           class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
                   </div>

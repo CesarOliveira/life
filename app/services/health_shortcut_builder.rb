@@ -130,7 +130,7 @@ class HealthShortcutBuilder
           <key>ActionIndex</key>
           <integer>#{TOKEN_ACTION_INDEX}</integer>
           <key>Text</key>
-          <string>Cole seu token do Life (página Tempo de tela)</string>
+          <string>Cole seu token do Life / Paste your Life token</string>
           <key>DefaultValue</key>
           <string></string>
         </dict>

@@ -58,7 +58,7 @@ export default class extends Controller {
     }
     if (!this.hasButtonTarget) return
     const original = this.labelValue || this.buttonTarget.textContent
-    this.buttonTarget.textContent = this.copiedValue || "Copiado!"
+    this.buttonTarget.textContent = this.copiedValue || (document.documentElement.lang.startsWith("pt") ? "Copiado!" : "Copied!")
     clearTimeout(this.resetTimer)
     this.resetTimer = setTimeout(() => {
       this.buttonTarget.textContent = original

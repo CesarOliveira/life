@@ -34,7 +34,6 @@
 #
 class Habit < ApplicationRecord
   WEEKDAYS = (0..6).to_a.freeze                            # 0=domingo ... 6=sábado
-  WEEKDAY_NAMES = %w[Dom Seg Ter Qua Qui Sex Sáb].freeze
   DEFAULT_COLOR = "#6366f1".freeze
 
   # Cadência do hábito:
@@ -133,9 +132,9 @@ class Habit < ApplicationRecord
   def weekdays_within_range
     days = Array(weekdays)
     if days.empty?
-      errors.add(:weekdays, "selecione ao menos um dia da semana")
+      errors.add(:weekdays, :empty_selection)
     elsif days.any? { |d| !WEEKDAYS.include?(d.to_i) }
-      errors.add(:weekdays, "contém um dia inválido")
+      errors.add(:weekdays, :invalid_day)
     end
   end
 

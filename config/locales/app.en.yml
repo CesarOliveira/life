@@ -211,6 +211,10 @@ en:
     all_groups: "All groups"
     no_matches: "No exam matches the filter."
     favorite_group: "Favorite group (pins to top)"
+    sources:
+      manual: "manual"
+      pdf: "PDF"
+      api: "API"
     table:
       exam: "Exam"
       value: "Value"
@@ -393,6 +397,7 @@ en:
     join_other: "Join with another code"
 
   accounts:
+    personal_name: "Personal"
     locale_label: "Language"
     locale_hint: "Sets the app language and the default categories (Health, Performance...)."
     locales:
@@ -416,6 +421,13 @@ en:
     back: "Back"
 
   memberships:
+    roles:
+      owner: "owner"
+      admin: "admin"
+      member: "member"
+    statuses:
+      pending: "pending"
+      active: "active"
     title: "Members — %{account}"
     code_label: "Invite code:"
     code_share: "— share it so others can request access."
@@ -458,6 +470,14 @@ en:
       removed: "Removed."
       key_hint: "Technical identifier (snake_case) used by extraction. Don't change it once results exist."
       aliases: "Aliases"
+      aliases_csv: "Aliases (comma-separated)"
+      key: "Key"
+      name_pt: "Name (PT)"
+      name_en: "Name (EN)"
+      description_pt: "Description (PT)"
+      description_en: "Description (EN)"
+      position: "Position"
+      types_count: "Types"
       aliases_hint: "Terms the report may use, comma-separated (e.g. tgo, ast)."
     extractions:
       title: "Exam extractions (AI cost)"
@@ -474,6 +494,7 @@ en:
       rows: "Results"
       status: "Status"
       duration: "Duration"
+      status_ok: "ok"
     dashboard:
       title: "Admin panel"
       pending_approvals: "Pending approvals"
@@ -584,3 +605,29 @@ en:
         target_value: "Target"
         start_value: "Start"
         deadline: "Deadline"
+
+  date:
+    formats:
+      numeric: "%m/%d/%Y"
+      day_month: "%m/%d"
+
+  units:
+    passos: "steps"
+
+  roles:
+    admin: "Admin"
+    super_admin: "Super Admin"
+    member: "Member"
+
+  activerecord:
+    errors:
+      models:
+        habit:
+          attributes:
+            weekdays:
+              empty_selection: "select at least one weekday"
+              invalid_day: "contains an invalid day"
+        habit_category:
+          attributes:
+            base:
+              limit_reached: "Category limit reached (max 10 per account)."

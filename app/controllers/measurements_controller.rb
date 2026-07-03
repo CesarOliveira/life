@@ -72,7 +72,13 @@ class MeasurementsController < ApplicationController
     results = current_account.exam_results.includes(exam_type: :exam_group).chronological.to_a
     by_type = results.group_by(&:exam_type)
     @exam_result = current_account.exam_results.new(measured_on: Date.current)
-    @exam_types = ExamType.ordered.includes(:exam_group).to_a
+    # Select agrupado: [ [nome do grupo, [[nome do exame, id], ...]], ... ],
+    # grupos e exames em ordem alfabética.
+    @exam_type_options = ExamType.includes(:exam_group).group_by(&:exam_group)
+                                 .sort_by { |group, _| group.name.downcase }
+                                 .map do |group, types|
+      [group.name, types.sort_by { |t| t.name.downcase }.map { |t| [t.name, t.id] }]
+    end
     @exam_groups = by_type.keys.group_by(&:exam_group)
                           .sort_by { |g, _| [g.favorite ? 0 : 1, g.position, g.id] }.map do |group, types|
       {

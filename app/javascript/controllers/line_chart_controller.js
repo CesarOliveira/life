@@ -65,10 +65,10 @@ export default class extends Controller {
 
   formatDate(iso) {
     const [y, m, d] = iso.split("-")
-    return `${d}/${m}/${y}`
+    return document.documentElement.lang.startsWith("pt") ? `${d}/${m}/${y}` : `${m}/${d}/${y}`
   }
 
   formatNumber(value) {
-    return new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 2 }).format(value)
+    return new Intl.NumberFormat(document.documentElement.lang || "pt-BR", { maximumFractionDigits: 2 }).format(value)
   }
 }

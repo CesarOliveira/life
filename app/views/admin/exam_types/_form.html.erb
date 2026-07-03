@@ -8,27 +8,27 @@
           {}, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
   </div>
   <div>
-    <%= f.label :key, "Key", class: "mb-1 block text-sm font-medium text-slate-700" %>
+    <%= f.label :key, t("admin.catalog.key"), class: "mb-1 block text-sm font-medium text-slate-700" %>
     <%= f.text_field :key, required: true, class: "w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-sm" %>
     <p class="mt-1 text-xs text-slate-500"><%= t("admin.catalog.key_hint") %></p>
   </div>
   <div class="grid grid-cols-2 gap-3">
     <div>
-      <%= f.label :name_pt, "Nome (PT)", class: "mb-1 block text-sm font-medium text-slate-700" %>
+      <%= f.label :name_pt, t("admin.catalog.name_pt"), class: "mb-1 block text-sm font-medium text-slate-700" %>
       <%= f.text_field :name_pt, required: true, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
     </div>
     <div>
-      <%= f.label :name_en, "Name (EN)", class: "mb-1 block text-sm font-medium text-slate-700" %>
+      <%= f.label :name_en, t("admin.catalog.name_en"), class: "mb-1 block text-sm font-medium text-slate-700" %>
       <%= f.text_field :name_en, required: true, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
     </div>
   </div>
   <div class="grid grid-cols-2 gap-3">
     <div>
-      <%= f.label :description_pt, "Descrição (PT)", class: "mb-1 block text-sm font-medium text-slate-700" %>
+      <%= f.label :description_pt, t("admin.catalog.description_pt"), class: "mb-1 block text-sm font-medium text-slate-700" %>
       <%= f.text_area :description_pt, rows: 2, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
     </div>
     <div>
-      <%= f.label :description_en, "Description (EN)", class: "mb-1 block text-sm font-medium text-slate-700" %>
+      <%= f.label :description_en, t("admin.catalog.description_en"), class: "mb-1 block text-sm font-medium text-slate-700" %>
       <%= f.text_area :description_en, rows: 2, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
     </div>
   </div>
@@ -39,7 +39,7 @@
     <p class="mt-1 text-xs text-slate-500"><%= t("admin.catalog.aliases_hint") %></p>
   </div>
   <div>
-    <%= f.label :position, class: "mb-1 block text-sm font-medium text-slate-700" %>
+    <%= f.label :position, t("admin.catalog.position"), class: "mb-1 block text-sm font-medium text-slate-700" %>
     <%= f.number_field :position, class: "w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
   </div>
   <div class="flex items-center gap-3 pt-2">

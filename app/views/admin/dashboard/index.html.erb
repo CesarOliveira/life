@@ -42,7 +42,7 @@
               <div class="text-slate-500"><%= m.user.email %></div>
             </td>
             <td class="px-4 py-2"><%= m.account.name %></td>
-            <td class="px-4 py-2"><%= m.role %></td>
+            <td class="px-4 py-2"><%= t("memberships.roles.#{m.role}", default: m.role) %></td>
             <td class="px-4 py-2 text-slate-500"><%= l(m.created_at, format: :long) %></td>
             <td class="space-x-2 whitespace-nowrap px-4 py-2 text-right">
               <%= button_to t("admin.dashboard.approve"), admin_membership_path(m), method: :patch,

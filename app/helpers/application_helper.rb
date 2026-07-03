@@ -25,6 +25,13 @@ module ApplicationHelper
     hours.positive? ? "#{hours}h #{minutes}m" : "#{minutes}m"
   end
 
+  # Unidade exibível: traduz unidades que variam por idioma (ex.: "passos"/"steps").
+  def display_unit(unit)
+    return unit if unit.blank?
+
+    t("units.#{unit}", default: unit)
+  end
+
   # Duração em horas/min a partir de minutos: "6h 32m", "45m".
   def humanize_minutes(minutes)
     humanize_duration(minutes.to_i * 60)
