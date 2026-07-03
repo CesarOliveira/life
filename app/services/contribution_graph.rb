@@ -4,7 +4,7 @@ class ContributionGraph
   # Classes Tailwind por nível de intensidade (0 = vazio ... 4 = máximo).
   CELL_CLASSES = %w[bg-slate-100 bg-emerald-200 bg-emerald-400 bg-emerald-600 bg-emerald-800].freeze
 
-  Cell = Struct.new(:date, :count, :level, keyword_init: true)
+  Cell = Struct.new(:date, :count, :level, :names, keyword_init: true)
 
   # Aceita um intervalo explícito (from:/to:) — usado pela página de Atividade — ou,
   # por compatibilidade, today:/weeks: (janela rolante terminando em `today`, usada
@@ -20,6 +20,7 @@ class ContributionGraph
     @start = week_start(@from)
     @weeks = ((@to - @start).to_i / 7) + 1
     @counts = load_counts
+    @names = load_names
     @max = @counts.values.max || 0
   end
 
@@ -33,7 +34,7 @@ class ContributionGraph
         next nil if date < @from || date > @visible_to
 
         count = @counts[date] || 0
-        Cell.new(date: date, count: count, level: level_for(count))
+        Cell.new(date: date, count: count, level: level_for(count), names: @names[date] || [])
       end
     end
   end
@@ -67,9 +68,19 @@ class ContributionGraph
   end
 
   def load_counts
+    checks_scope.group(:date).count
+  end
+
+  # Nomes dos hábitos concluídos por dia (para o tooltip da célula).
+  def load_names
+    checks_scope.order("habits.name").pluck(:date, "habits.name")
+                .group_by(&:first).transform_values { |rows| rows.map(&:last) }
+  end
+
+  def checks_scope
     scope = HabitCheck.joins(:habit).where(habits: { account_id: @account.id })
     scope = scope.where(habit_id: @habit.id) if @habit
-    scope.where(date: @from..@visible_to).group(:date).count
+    scope.where(date: @from..@visible_to)
   end
 
   def level_for(count)

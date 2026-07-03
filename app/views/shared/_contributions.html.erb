@@ -1,25 +1,29 @@
-<%# locals: graph (ContributionGraph) %>
-<div class="overflow-x-auto">
-  <div class="inline-block">
-    <%# rótulos de mês %>
-    <div class="flex pl-7 mb-1">
+<%# locals: graph (ContributionGraph) — célula 12px + gap 4px = coluna de 16px. %>
+<div class="overflow-x-auto" data-controller="tooltip">
+  <div class="relative mx-auto w-fit">
+    <%# balão do tooltip (posicionado pelo controller) %>
+    <div data-tooltip-target="bubble"
+         class="pointer-events-none absolute z-10 hidden max-w-56 -translate-x-1/2 -translate-y-full whitespace-pre-line rounded-lg bg-slate-900 px-2.5 py-1.5 text-center text-[11px] leading-snug text-white shadow-lg"></div>
+
+    <%# rótulos de mês (largura = semanas * 16px; esconde rótulo de segmento estreito) %>
+    <div class="mb-1 flex pl-8">
       <% graph.month_segments.each do |seg| %>
-        <div class="text-[10px] text-slate-400 whitespace-nowrap shrink-0" style="width: <%= seg[:weeks] * 14 %>px">
-          <%= seg[:label] %>
+        <div class="shrink-0 overflow-hidden whitespace-nowrap text-[10px] text-slate-400" style="width: <%= seg[:weeks] * 16 %>px">
+          <%= seg[:label] if seg[:weeks] >= 3 %>
         </div>
       <% end %>
     </div>
 
     <div class="flex">
       <%# rótulos de dia da semana (seg, qua, sex) %>
-      <div class="flex flex-col gap-1 pr-1 w-7 shrink-0 text-[9px] leading-[10px] text-slate-400">
-        <span class="h-2.5"></span>
-        <span class="h-2.5"><%= t("date.abbr_day_names")[1].capitalize %></span>
-        <span class="h-2.5"></span>
-        <span class="h-2.5"><%= t("date.abbr_day_names")[3].capitalize %></span>
-        <span class="h-2.5"></span>
-        <span class="h-2.5"><%= t("date.abbr_day_names")[5].capitalize %></span>
-        <span class="h-2.5"></span>
+      <div class="flex w-8 shrink-0 flex-col gap-1 pr-1 text-[9px] leading-3 text-slate-400">
+        <span class="h-3"></span>
+        <span class="h-3"><%= t("date.abbr_day_names")[1].capitalize %></span>
+        <span class="h-3"></span>
+        <span class="h-3"><%= t("date.abbr_day_names")[3].capitalize %></span>
+        <span class="h-3"></span>
+        <span class="h-3"><%= t("date.abbr_day_names")[5].capitalize %></span>
+        <span class="h-3"></span>
       </div>
 
       <%# colunas (semanas) %>
@@ -28,10 +32,13 @@
           <div class="flex flex-col gap-1">
             <% col.each do |cell| %>
               <% if cell %>
-                <span class="w-2.5 h-2.5 rounded-sm <%= graph.cell_class(cell.level) %>"
-                      title="<%= t("contributions.cell", date: l(cell.date, format: :long), count: cell.count) %>"></span>
+                <% content = t("contributions.cell", date: l(cell.date, format: :long), count: cell.count) %>
+                <% content += "\n#{cell.names.join(", ")}" if cell.names.any? %>
+                <span class="h-3 w-3 rounded-sm <%= graph.cell_class(cell.level) %>"
+                      data-tooltip-content="<%= content %>"
+                      data-action="mouseenter->tooltip#show mouseleave->tooltip#hide click->tooltip#show"></span>
               <% else %>
-                <span class="w-2.5 h-2.5"></span>
+                <span class="h-3 w-3"></span>
               <% end %>
             <% end %>
           </div>
@@ -43,7 +50,7 @@
     <div class="flex items-center justify-end gap-1 pt-2 text-[10px] text-slate-400">
       <span><%= t("contributions.less") %></span>
       <% (0..4).each do |lvl| %>
-        <span class="w-2.5 h-2.5 rounded-sm <%= graph.cell_class(lvl) %>"></span>
+        <span class="h-3 w-3 rounded-sm <%= graph.cell_class(lvl) %>"></span>
       <% end %>
       <span><%= t("contributions.more") %></span>
     </div>

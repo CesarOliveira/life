@@ -33,3 +33,6 @@ application.register("type-to-confirm", TypeToConfirmController)
 
 import LineChartController from "./line_chart_controller"
 application.register("line-chart", LineChartController)
+
+import TooltipController from "./tooltip_controller"
+application.register("tooltip", TooltipController)
