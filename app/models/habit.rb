@@ -54,6 +54,7 @@ class Habit < ApplicationRecord
     "sleep_hours"       => { source: :measurement, measurement_key: "sleep_minutes", unit: "h", scale: (1.0 / 60) },
     "sleep_bedtime"     => { source: :measurement, measurement_key: "sleep_bedtime", unit: "hh:mm", time_of_day: true },
     "steps"             => { source: :measurement, measurement_key: "steps", unit: "passos" },
+    "github_contributions" => { source: :measurement, measurement_key: "github_contributions", unit: "contributions" },
     "resting_hr"        => { source: :measurement, measurement_key: "resting_hr", unit: "bpm" }
   }.freeze
 

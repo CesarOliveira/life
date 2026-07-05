@@ -36,6 +36,7 @@ en:
     overview_empty: "No completions this year yet."
 
   dashboard:
+    github_yesterday: "GitHub yesterday"
     greeting: "Hi, %{name} 👋"
     today: "Today"
     streak: "Streak"
@@ -118,6 +119,7 @@ en:
       sleep_bedtime: "Bedtime"
       steps: "Steps"
       resting_hr: "Resting HR"
+      github_contributions: "GitHub contributions"
     flash:
       created: "Habit created."
       updated: "Habit updated."
@@ -249,6 +251,7 @@ en:
       steps: "Steps"
       resting_hr: "Resting HR"
       active_energy: "Active energy"
+      github_contributions: "GitHub contributions"
       glucose: "Glucose"
       cholesterol_total: "Total cholesterol"
       hdl: "HDL"
@@ -613,6 +616,7 @@ en:
 
   units:
     passos: "steps"
+    contributions: "contributions"
 
   roles:
     admin: "Admin"
@@ -631,3 +635,25 @@ en:
           attributes:
             base:
               limit_reached: "Category limit reached (max 10 per account)."
+
+  connectors:
+    title: "Connectors"
+    hint: "Integrations that pull data on their own — nothing to check off manually. Synced hourly."
+    github_desc: "Daily contributions (the green graph) become a metric: automatic habit, goals and insights."
+    connect_github: "Connect with GitHub"
+    sync_now: "Sync now"
+    disconnect: "Disconnect"
+    disconnect_confirm: "Disconnect GitHub? Imported data is kept."
+    connected: "GitHub connected (@%{login}). Importing history in the background…"
+    connect_failed: "Connection failed: %{error}"
+    syncing: "Sync started."
+    removed: "Connector removed."
+    not_configured: "Set GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET in the environment."
+    state_mismatch: "Invalid authorization session. Try again."
+    last_sync: "synced %{time}"
+    never_synced: "waiting for first sync"
+    points: "%{count} days imported"
+    statuses:
+      active: "active"
+      paused: "paused"
+      error: "error"

@@ -28,7 +28,9 @@
 class Measurement < ApplicationRecord
   belongs_to :account
 
-  CATEGORIES = %w[health exam].freeze
+  CATEGORIES = %w[health exam productivity].freeze
+  # Abas da página Saúde (produtividade vive no dashboard/hábitos, não ali).
+  TABS = %w[health exam].freeze
 
   # Catálogo de métricas de SAÚDE (sinais). Exames vivem em ExamType/ExamResult.
   CATALOG = {
@@ -37,7 +39,8 @@ class Measurement < ApplicationRecord
     "sleep_wake"    => { category: "health", unit: "hh:mm" },
     "steps"         => { category: "health", unit: "passos" },
     "resting_hr"    => { category: "health", unit: "bpm" },
-    "active_energy" => { category: "health", unit: "kcal" }
+    "active_energy" => { category: "health", unit: "kcal" },
+    "github_contributions" => { category: "productivity", unit: "contributions" }
   }.freeze
 
   validates :key, presence: true

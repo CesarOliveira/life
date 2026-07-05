@@ -36,6 +36,7 @@ pt-BR:
     overview_empty: "Sem conclusões neste ano ainda."
 
   dashboard:
+    github_yesterday: "GitHub ontem"
     greeting: "Olá, %{name} 👋"
     today: "Hoje"
     streak: "Sequência"
@@ -118,6 +119,7 @@ pt-BR:
       sleep_bedtime: "Hora de dormir"
       steps: "Passos"
       resting_hr: "FC de repouso"
+      github_contributions: "Contribuições no GitHub"
     flash:
       created: "Hábito criado."
       updated: "Hábito atualizado."
@@ -249,6 +251,7 @@ pt-BR:
       steps: "Passos"
       resting_hr: "FC de repouso"
       active_energy: "Energia ativa"
+      github_contributions: "Contribuições no GitHub"
       glucose: "Glicemia"
       cholesterol_total: "Colesterol total"
       hdl: "HDL"
@@ -613,6 +616,7 @@ pt-BR:
 
   units:
     passos: "passos"
+    contributions: "contribuições"
 
   roles:
     admin: "Admin"
@@ -631,3 +635,25 @@ pt-BR:
           attributes:
             base:
               limit_reached: "Limite de categorias atingido (máx. 10 por conta)."
+
+  connectors:
+    title: "Conectores"
+    hint: "Integrações que puxam dados sozinhas — sem marcar nada na mão. Sincronizam de hora em hora."
+    github_desc: "Contribuições diárias (o gráfico verde) viram uma métrica: hábito automático, metas e insights."
+    connect_github: "Conectar com GitHub"
+    sync_now: "Sincronizar agora"
+    disconnect: "Desconectar"
+    disconnect_confirm: "Desconectar o GitHub? Os dados já importados são mantidos."
+    connected: "GitHub conectado (@%{login}). Importando o histórico em segundo plano…"
+    connect_failed: "Falha ao conectar: %{error}"
+    syncing: "Sincronização iniciada."
+    removed: "Conector removido."
+    not_configured: "Defina GITHUB_CLIENT_ID e GITHUB_CLIENT_SECRET no ambiente."
+    state_mismatch: "Sessão de autorização inválida. Tente de novo."
+    last_sync: "sincronizado %{time}"
+    never_synced: "aguardando primeira sincronização"
+    points: "%{count} dias importados"
+    statuses:
+      active: "ativo"
+      paused: "pausado"
+      error: "erro"

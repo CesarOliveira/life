@@ -42,6 +42,15 @@ Rails.application.routes.draw do
   post "exam_groups/:id/favorite", to: "exam_group_favorites#toggle", as: :toggle_exam_group_favorite
   resources :goals, only: [:index, :create, :destroy]
   get "configurar", to: "setup#index", as: :setup
+
+  # Conectores (integrações que puxam dados sozinhas)
+  resources :connectors, only: [:destroy] do
+    member { post :sync }
+    collection do
+      post "github", action: :github_connect, as: :github_connect
+      get "github/callback", action: :github_callback, as: :github_callback
+    end
+  end
   get "screen-time", to: "screen_time#index", as: :screen_time
   get "screen-time/token", to: "screen_time#token", as: :screen_time_token
   get "screen-time/app", to: "screen_time#app", as: :screen_time_app

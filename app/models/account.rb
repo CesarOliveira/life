@@ -34,6 +34,7 @@ class Account < ApplicationRecord
   has_many :exam_extractions, dependent: :destroy
   has_many :exam_results, dependent: :destroy
   has_many :habit_categories, dependent: :destroy
+  has_many :connectors, dependent: :destroy
 
   LOCALES = %w[pt-BR en].freeze
   validates :locale, inclusion: { in: LOCALES }

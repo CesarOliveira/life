@@ -64,7 +64,7 @@ class MeasurementsController < ApplicationController
   private
 
   def current_category
-    Measurement::CATEGORIES.include?(params[:category]) ? params[:category] : "health"
+    Measurement::TABS.include?(params[:category]) ? params[:category] : "health"
   end
 
   # Exames agrupados: grupos do catálogo -> tipos com resultados -> série.

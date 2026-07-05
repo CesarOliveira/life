@@ -7,5 +7,6 @@ class SetupController < ApplicationController
     @token = current_account.api_token
     @endpoint = api_usage_url
     @health_version = HealthShortcutBuilder::VERSION
+    @github_connector = current_account.connectors.find_by(kind: "github")
   end
 end

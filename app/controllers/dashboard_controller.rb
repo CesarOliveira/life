@@ -9,6 +9,10 @@ class DashboardController < ApplicationController
     @today_habits = @habits.select { |h| @stats[h].scheduled_today? }
     @today_done = @today_habits.count { |h| @stats[h].done_today? }
     @best_streak = @stats.values.map(&:current_streak).max || 0
+    if current_account.connectors.active.exists?(kind: "github")
+      @github_yesterday = current_account.measurements
+                                         .find_by(key: "github_contributions", measured_on: @today - 1)&.value&.to_i
+    end
 
     @years = activity_years
     @year = params[:year].to_i

@@ -4,7 +4,7 @@
     <p class="text-sm text-slate-500"><%= l(@today, format: :long) %></p>
   </header>
 
-  <div class="grid grid-cols-3 gap-3 sm:gap-4">
+  <div class="grid gap-3 sm:gap-4 <%= @github_yesterday ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3" %>">
     <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
       <p class="text-xs font-medium uppercase tracking-wide text-slate-400"><%= t("dashboard.today") %></p>
       <p class="mt-1 text-2xl font-bold text-slate-900">
@@ -19,6 +19,12 @@
       <p class="text-xs font-medium uppercase tracking-wide text-slate-400"><%= t("dashboard.completions") %></p>
       <p class="mt-1 text-2xl font-bold text-slate-900"><%= @graph.total %></p>
     </div>
+    <% if @github_yesterday %>
+      <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <p class="text-xs font-medium uppercase tracking-wide text-slate-400"><%= t("dashboard.github_yesterday") %></p>
+        <p class="mt-1 text-2xl font-bold text-slate-900"><%= @github_yesterday %></p>
+      </div>
+    <% end %>
   </div>
 
   <%# Atividade do ano (grade estilo GitHub) com seletor de ano %>

@@ -1,0 +1,5 @@
+connectors_sync:
+  cron: "17 * * * *" # de hora em hora
+  class: "ConnectorsSyncAllJob"
+  queue: default
+  description: "Sincroniza conectores ativos (GitHub etc.)"

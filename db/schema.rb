@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_03_201940) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_05_171921) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -39,6 +39,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_03_201940) do
     t.datetime "updated_at", null: false
     t.index ["account_id", "device", "date", "bundle_id"], name: "idx_app_usages_unique", unique: true
     t.index ["account_id"], name: "index_app_usages_on_account_id"
+  end
+
+  create_table "connectors", force: :cascade do |t|
+    t.text "access_token"
+    t.bigint "account_id", null: false
+    t.datetime "created_at", null: false
+    t.string "kind", null: false
+    t.string "last_error"
+    t.integer "last_points", default: 0, null: false
+    t.datetime "last_synced_at"
+    t.jsonb "settings", default: {}, null: false
+    t.string "status", default: "active", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "kind"], name: "index_connectors_on_account_id_and_kind", unique: true
+    t.index ["account_id"], name: "index_connectors_on_account_id"
   end
 
   create_table "exam_extractions", force: :cascade do |t|
@@ -230,6 +245,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_03_201940) do
 
   add_foreign_key "accounts", "users", column: "owner_id"
   add_foreign_key "app_usages", "accounts"
+  add_foreign_key "connectors", "accounts"
   add_foreign_key "exam_extractions", "accounts"
   add_foreign_key "exam_results", "accounts"
   add_foreign_key "exam_results", "exam_types"
