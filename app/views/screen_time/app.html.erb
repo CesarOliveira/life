@@ -2,8 +2,13 @@
   <div>
     <%= link_to "‹ #{t('screen_time.app_back')}", screen_time_path, class: "text-sm text-slate-500 hover:text-slate-900" %>
     <h1 class="mt-1 text-2xl font-bold text-slate-900"><%= @name %></h1>
-    <p class="text-sm text-slate-500"><%= t("screen_time.app_period", days: 30) %></p>
+    <p class="text-sm text-slate-500"><%= screen_time_period_label(range_key: @range_key, from: @from, to: @to, months: @months) %></p>
   </div>
+
+  <%# Filtros: dias rápidos / meses / intervalo livre (bundle_id preservado) %>
+  <%= render "filters", link_proc: ->(p) { screen_time_app_path(p.merge(bundle_id: @bundle_id)) },
+        hidden_params: { bundle_id: @bundle_id },
+        range_key: @range_key, months: @months, from: @from, to: @to, today: @today %>
 
   <% if @daily.any? %>
     <div class="grid grid-cols-2 gap-3 sm:gap-4">

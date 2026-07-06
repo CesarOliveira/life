@@ -7,6 +7,9 @@ import { application } from "./application"
 import PwaInstallController from "./pwa_install_controller"
 application.register("pwa-install", PwaInstallController)
 
+import AutoSubmitController from "./auto_submit_controller"
+application.register("auto-submit", AutoSubmitController)
+
 import HabitFormController from "./habit_form_controller"
 application.register("habit-form", HabitFormController)
 

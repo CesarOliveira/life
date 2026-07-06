@@ -297,6 +297,11 @@ pt-BR:
     range_7: "7 dias"
     range_15: "15 dias"
     range_month: "1 mês"
+    months_prompt: "Meses…"
+    one_year: "1 ano"
+    n_months:
+      one: "%{count} mês"
+      other: "%{count} meses"
     period_last_days: "Últimos %{days} dias"
     avg_label: "méd."
     most_used: "Mais usados"

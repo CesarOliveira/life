@@ -297,6 +297,11 @@ en:
     range_7: "7 days"
     range_15: "15 days"
     range_month: "1 month"
+    months_prompt: "Months…"
+    one_year: "1 year"
+    n_months:
+      one: "%{count} month"
+      other: "%{count} months"
     period_last_days: "Last %{days} days"
     avg_label: "avg."
     most_used: "Most used"

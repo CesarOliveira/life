@@ -1,31 +1,16 @@
 <div class="space-y-6">
   <h1 class="text-2xl font-bold text-slate-900"><%= t("screen_time.title") %></h1>
 
-  <%# Filtros: 7d / 15d / 1 mês / data específica %>
-  <div class="flex flex-wrap items-center gap-2">
-    <% { "today" => t("screen_time.today"), "yesterday" => t("screen_time.yesterday"),
-         "7" => t("screen_time.range_7"), "15" => t("screen_time.range_15"), "30" => t("screen_time.range_month") }.each do |k, label| %>
-      <%= link_to label, screen_time_path(range: k),
-            class: "rounded-lg border px-3 py-1.5 text-xs font-medium #{@range_key == k ? 'border-emerald-500 bg-emerald-600 text-white' : 'border-slate-300 text-slate-600 hover:bg-slate-50'}" %>
-    <% end %>
-    <%= form_with url: screen_time_path, method: :get, class: "flex items-center gap-1" do %>
-      <input type="date" name="date" value="<%= @date&.iso8601 %>" max="<%= @today.iso8601 %>"
-             class="rounded-lg border px-2 py-1 text-xs <%= @range_key == 'date' ? 'border-emerald-500 text-emerald-700' : 'border-slate-300 text-slate-700' %>">
-      <button class="rounded-lg border border-slate-300 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50"><%= t("screen_time.apply") %></button>
-    <% end %>
-  </div>
+  <%# Filtros: dias rápidos / meses / intervalo livre %>
+  <%= render "filters", link_proc: ->(p) { screen_time_path(p) }, hidden_params: {},
+        range_key: @range_key, months: @months, from: @from, to: @to, today: @today %>
 
   <% if @apps.any? || @total.positive? %>
     <%# Card principal: total grande + barras com linha da média (estilo iOS) %>
     <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <% period_label =
-           case @range_key
-           when "today" then "#{t('screen_time.today')}, #{l(@to, format: :long)}"
-           when "yesterday" then "#{t('screen_time.yesterday')}, #{l(@to, format: :long)}"
-           when "date" then l(@date, format: :long)
-           else t("screen_time.period_last_days", days: (@to - @from).to_i + 1)
-           end %>
-      <p class="text-xs font-medium uppercase tracking-wide text-slate-400"><%= period_label %></p>
+      <p class="text-xs font-medium uppercase tracking-wide text-slate-400">
+        <%= screen_time_period_label(range_key: @range_key, from: @from, to: @to, months: @months) %>
+      </p>
       <p class="mt-1 text-3xl font-bold text-slate-900"><%= humanize_duration(@total) %></p>
       <% if @from != @to && @avg.positive? %>
         <p class="text-xs text-slate-400"><%= t("screen_time.avg_day") %>: <%= humanize_duration(@avg) %></p>

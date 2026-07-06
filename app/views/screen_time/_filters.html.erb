@@ -1,0 +1,33 @@
+<%# locals: link_proc (->(params){url}), hidden_params (hash), range_key, months, from, to, today %>
+<div class="flex flex-wrap items-center gap-2">
+  <% { "today" => t("screen_time.today"), "yesterday" => t("screen_time.yesterday"),
+       "7" => t("screen_time.range_7"), "15" => t("screen_time.range_15"), "30" => t("screen_time.range_month") }.each do |k, label| %>
+    <%= link_to label, link_proc.call(range: k),
+          class: "rounded-lg border px-3 py-1.5 text-xs font-medium #{range_key == k ? 'border-emerald-500 bg-emerald-600 text-white' : 'border-slate-300 text-slate-600 hover:bg-slate-50'}" %>
+  <% end %>
+
+  <%# Select de meses (2 a 12 = 1 ano) — auto-submete ao mudar %>
+  <%= form_with url: link_proc.call({}), method: :get, data: { controller: "auto-submit" }, class: "contents" do %>
+    <% hidden_params.each { |k, v| %><%= hidden_field_tag k, v %><% } %>
+    <select name="months" data-action="change->auto-submit#submit"
+            class="cursor-pointer rounded-lg border px-2 py-1.5 text-xs font-medium <%= range_key == 'months' ? 'border-emerald-500 text-emerald-700' : 'border-slate-300 text-slate-600' %>">
+      <option value=""><%= t("screen_time.months_prompt") %></option>
+      <% (2..12).each do |m| %>
+        <option value="<%= m %>" <%= "selected" if range_key == "months" && months == m %>>
+          <%= m == 12 ? t("screen_time.one_year") : t("screen_time.n_months", count: m) %>
+        </option>
+      <% end %>
+    </select>
+  <% end %>
+
+  <%# Intervalo livre: data início → data fim %>
+  <%= form_with url: link_proc.call({}), method: :get, class: "flex items-center gap-1" do %>
+    <% hidden_params.each { |k, v| %><%= hidden_field_tag k, v %><% } %>
+    <input type="date" name="from" value="<%= from.iso8601 if range_key == 'custom' %>" max="<%= today.iso8601 %>"
+           class="rounded-lg border px-2 py-1 text-xs <%= range_key == 'custom' ? 'border-emerald-500 text-emerald-700' : 'border-slate-300 text-slate-700' %>">
+    <span class="text-xs text-slate-400">→</span>
+    <input type="date" name="to" value="<%= to.iso8601 if range_key == 'custom' %>" max="<%= today.iso8601 %>"
+           class="rounded-lg border px-2 py-1 text-xs <%= range_key == 'custom' ? 'border-emerald-500 text-emerald-700' : 'border-slate-300 text-slate-700' %>">
+    <button class="rounded-lg border border-slate-300 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50"><%= t("screen_time.apply") %></button>
+  <% end %>
+</div>

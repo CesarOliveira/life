@@ -1,28 +1,15 @@
 class ScreenTimeController < ApplicationController
-  # Períodos do índice (estilo iOS): hoje, ontem (padrão — o atalho envia o dia
-  # anterior), últimos 7/15/30 dias ou uma data específica.
-  INDEX_RANGES = { "7" => 7, "15" => 15, "30" => 30 }.freeze
+  # Períodos rápidos (estilo iOS): hoje, ontem (padrão — o atalho envia o dia
+  # anterior), últimos 7/15/30 dias. Além disso: select de 2..12 meses e
+  # intervalo livre (data início + fim).
+  DAY_RANGES = { "7" => 7, "15" => 15, "30" => 30 }.freeze
+  MONTHS_OPTIONS = (2..12).to_a.freeze
 
   def index
     current_account.regenerate_api_token if current_account.api_token.blank?
     @token = current_account.api_token
 
-    @today = Date.current
-    @date = parse_date(params[:date])
-    if @date
-      @from = @to = @date
-      @range_key = "date"
-    elsif params[:range] == "today"
-      @from = @to = @today
-      @range_key = "today"
-    elsif INDEX_RANGES.key?(params[:range])
-      @range_key = params[:range]
-      @to = @today
-      @from = @today - (INDEX_RANGES[@range_key] - 1)
-    else
-      @from = @to = @today - 1
-      @range_key = "yesterday"
-    end
+    resolve_period(default_range: "yesterday")
 
     usages = current_account.app_usages.where(date: @from..@to)
     @total = usages.sum(:seconds)
@@ -46,20 +33,20 @@ class ScreenTimeController < ApplicationController
     render plain: current_account.api_token.to_s
   end
 
-  # Histórico diário de um app específico (gráfico).
+  # Histórico diário de um app específico (gráfico de linha) — mesmo filtro de
+  # período do índice.
   def app
     @bundle_id = params[:bundle_id].to_s
     return redirect_to(screen_time_path) if @bundle_id.blank?
 
-    @today = Date.current
-    @range = (@today - 29.days)..@today
-    rows = current_account.app_usages.where(bundle_id: @bundle_id, date: @range)
+    resolve_period(default_range: "30")
+    rows = current_account.app_usages.where(bundle_id: @bundle_id, date: @from..@to)
     @name = rows.where.not(name: nil).maximum(:name).presence || @bundle_id
 
     by_date = rows.group(:date).sum(:seconds)
     @total = by_date.values.sum
     @days = by_date.size
-    # Barras horizontais, um dia por linha (mais legível no celular que linha).
+    # Só dias COM registro: o gráfico de linha não cai a zero em dias sem dado.
     @daily = by_date.sort_by { |date, _| date }.reverse.map { |date, seconds| { date: date, seconds: seconds } }
     @max_day = by_date.values.max || 0
   end
@@ -89,6 +76,42 @@ class ScreenTimeController < ApplicationController
   end
 
   private
+
+  # Define @from/@to/@range_key/@months a partir dos params (intervalo livre,
+  # meses, dias rápidos ou o padrão da tela). @today também.
+  def resolve_period(default_range:)
+    @today = Date.current
+    @months = params[:months].to_i
+
+    from = parse_date(params[:from])
+    to = parse_date(params[:to])
+    if from && to && from <= to
+      @from = from
+      @to = [to, @today].min
+      @range_key = "custom"
+    elsif MONTHS_OPTIONS.include?(@months)
+      @from = @today - @months.months
+      @to = @today
+      @range_key = "months"
+    elsif params[:range] == "today"
+      @from = @to = @today
+      @range_key = "today"
+    elsif params[:range] == "yesterday"
+      @from = @to = @today - 1
+      @range_key = "yesterday"
+    elsif DAY_RANGES.key?(params[:range])
+      @range_key = params[:range]
+      @to = @today
+      @from = @today - (DAY_RANGES[@range_key] - 1)
+    elsif default_range == "yesterday"
+      @from = @to = @today - 1
+      @range_key = "yesterday"
+    else
+      @range_key = default_range
+      @to = @today
+      @from = @today - (DAY_RANGES[default_range] - 1)
+    end
+  end
 
   # Resolve o intervalo: from/to específicos, ou range predefinido (dias).
   def resolve_range

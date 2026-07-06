@@ -20,13 +20,29 @@ RSpec.describe "Screen time", type: :request do
     expect(account.reload.api_token).to be_present
   end
 
-  it "filters by today and by multi-day ranges (apps list follows)" do
+  it "filters by today, multi-day, months and custom range (apps list follows)" do
     create(:app_usage, account: account, bundle_id: "Hoje App", name: "Hoje App", date: Date.current, seconds: 600)
     get screen_time_path(range: "today")
     expect(response.body).to include("Hoje App")
 
     get screen_time_path(range: "7")
     expect(response.body).to include("Hoje App")
+
+    get screen_time_path(months: "3")
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include(I18n.t("screen_time.n_months", count: 3))
+
+    get screen_time_path(from: (Date.current - 40).iso8601, to: Date.current.iso8601)
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Hoje App")
+  end
+
+  it "shows the per-app page with the same filters (range applies)" do
+    create(:app_usage, account: account, bundle_id: "com.foo", name: "Foo", date: Date.current - 2, seconds: 3600)
+    get screen_time_app_path(bundle_id: "com.foo", months: "3")
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Foo")
+    expect(response.body).to include(I18n.t("screen_time.n_months", count: 3))
   end
 
   it "regenerates the token and returns to the caller (fallback: setup)" do
