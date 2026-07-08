@@ -4,17 +4,24 @@ require "rexml/document"
 RSpec.describe HealthShortcutBuilder do
   subject(:xml) { described_class.new(endpoint: "https://x.test/api/health_raw").plist }
 
-  it "posts to the raw endpoint without any in-shortcut calculation" do
+  it "posts to the raw endpoint and labels the batch as yesterday" do
     expect(xml).to include("https://x.test/api/health_raw")
     expect(xml).to include("is.workflow.actions.downloadurl")
-    expect(xml).not_to include("is.workflow.actions.statistics")
+    expect(xml).to include("period=yesterday")
   end
 
-  it "extracts each sample's Value in a loop to dodge the iOS Health-share block" do
+  it "aggregates numeric metrics natively (Sum/Average) instead of looping per sample" do
     expect(xml).to include("is.workflow.actions.filter.health.quantity")
+    expect(xml).to include("is.workflow.actions.statistics")
+    expect(xml).to include("<string>Sum</string>")     # steps
+    expect(xml).to include("<string>Average</string>")  # resting_hr
+  end
+
+  it "still extracts sleep start/end per sample (needs min/max of times)" do
     expect(xml).to include("is.workflow.actions.repeat.each")
     expect(xml).to include("is.workflow.actions.properties.health.quantity")
-    expect(xml).to include("<string>Value</string>")
+    expect(xml).to include("<string>Start Date</string>")
+    expect(xml).to include("<string>End Date</string>")
     expect(xml).to include("is.workflow.actions.text.combine")
   end
 

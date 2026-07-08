@@ -9,47 +9,65 @@ RSpec.describe "API::HealthRaw", type: :request do
     expect(response).to have_http_status(:unauthorized)
   end
 
-  it "sums raw step samples (no calc in client) and echoes a preview" do
+  let(:yesterday) { (Date.current - 1).iso8601 }
+
+  it "stores yesterday's step total (single pre-aggregated number) and echoes a preview" do
     account
-    post "/api/health_raw?key=steps&period=today&client_version=v5",
-         params: "3.021\n2.500\n2.500", headers: headers
+    post "/api/health_raw?key=steps&period=yesterday&client_version=v12",
+         params: "8.021", headers: headers
 
     expect(response).to have_http_status(:ok)
     body = response.parsed_body
     expect(body["ok"]).to be(true)
     expect(body["key"]).to eq("steps")
-    expect(body["samples"]).to eq(3)
-    expect(body["value"]).to eq(8021.0)
-    expect(body["upserted"]).to eq(1)
-    expect(body["client_version"]).to eq("v5")
-    expect(body["raw_preview"]).to include("3.021")
+    expect(body["days"]).to eq(1)
+    expect(body["stored"][yesterday]["value"]).to eq(8021.0)
+    expect(body["client_version"]).to eq("v12")
+    expect(body["raw_preview"]).to include("8.021")
 
-    m = account.measurements.find_by(key: "steps")
+    m = account.measurements.find_by(key: "steps", measured_on: Date.current - 1)
     expect(m.value).to eq(8021)
     expect(m.unit).to eq("passos")
   end
 
-  it "averages resting heart-rate samples" do
+  it "buckets 'value|date' sample lines by calendar day (sum per day)" do
     account
-    post "/api/health_raw?key=resting_hr&period=today",
-         params: "60\n62\n64", headers: headers
+    two_days_ago = (Date.current - 2)
+    post "/api/health_raw?key=steps&period=yesterday",
+         params: "100|#{yesterday}, 08:00\n50|#{yesterday}, 09:00\n7|#{two_days_ago.iso8601}, 22:00",
+         headers: headers
 
-    expect(response.parsed_body["value"]).to eq(62.0)
+    expect(account.measurements.find_by(key: "steps", measured_on: Date.current - 1).value).to eq(150)
+    expect(account.measurements.find_by(key: "steps", measured_on: two_days_ago).value).to eq(7)
+  end
+
+  it "never stores today (partial day is dropped)" do
+    account
+    post "/api/health_raw?key=steps&period=today", params: "1234", headers: headers
+    expect(response.parsed_body["days"]).to eq(0)
+    expect(account.measurements.where(key: "steps")).to be_empty
+  end
+
+  it "averages resting heart-rate for the day" do
+    account
+    post "/api/health_raw?key=resting_hr&period=yesterday",
+         params: "62", headers: headers
+    expect(account.measurements.find_by(key: "resting_hr", measured_on: Date.current - 1).value).to eq(62.0)
   end
 
   it "is idempotent for the same key and day" do
     account
     2.times do
-      post "/api/health_raw?key=steps&period=today", params: "100\n200", headers: headers
+      post "/api/health_raw?key=steps&period=yesterday", params: "300", headers: headers
     end
     expect(account.measurements.where(key: "steps").count).to eq(1)
   end
 
-  it "ignores units/text and parses one number per line" do
+  it "ignores units/text around the number" do
     account
-    post "/api/health_raw?key=steps&period=today",
-         params: "5.000 contagem\n3.021 contagem", headers: headers
-    expect(response.parsed_body["value"]).to eq(8021.0)
+    post "/api/health_raw?key=steps&period=yesterday",
+         params: "8.021 contagem", headers: headers
+    expect(account.measurements.find_by(key: "steps", measured_on: Date.current - 1).value).to eq(8021.0)
   end
 
   describe "sleep (times -> bedtime/wake/duration)" do

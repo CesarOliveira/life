@@ -51,10 +51,42 @@ module Api
 
     private
 
-    def handle_numeric(key, raw, date)
-      values = parse_values(raw)
-      value = aggregate(key, values)
-      { samples: values.size, value: value, upserted: store(key, value, date) }
+    # Numérico: cada linha é "valor" OU "valor|data" (Start Date da amostra).
+    # Agrupa por DIA do calendário (fuso do app) e agrega por dia. Grava só dias
+    # COMPLETOS (< hoje) — nunca o dia de hoje, parcial. `default_date` (do
+    # `period`) cobre linhas sem data (formato antigo / valor já somado).
+    def handle_numeric(key, raw, default_date)
+      by_day = Hash.new { |h, d| h[d] = [] }
+      raw.split(/[\r\n]+/).each do |line|
+        value, day = parse_numeric_line(line, default_date)
+        by_day[day] << value if value && day
+      end
+
+      today = Date.current
+      stored = {}
+      by_day.each do |day, values|
+        next if day >= today || !date_in_window?(day)
+
+        agg = aggregate(key, values)
+        next if agg.nil?
+
+        store(key, agg, day)
+        stored[day.iso8601] = { value: agg, samples: values.size }
+      end
+      { days: stored.size, stored: stored }
+    end
+
+    # "6833" -> [6833, default]; "437|8 de jul. de 2026, 08:05" -> [437, 2026-07-08].
+    def parse_numeric_line(line, default_date)
+      line = line.to_s.strip
+      return [nil, nil] if line.empty?
+
+      value_part, date_part = line.split("|", 2)
+      token = value_part.to_s[/-?\d[\d.,]*/]
+      return [nil, nil] unless token
+
+      day = date_part.present? ? parse_time(date_part.strip)&.to_date : default_date
+      [numeric(token), day || default_date]
     end
 
     # Sono: linhas são horários. Reduz por min/max, grava o horário (minutos
@@ -98,14 +130,6 @@ module Api
       Measurement.upsert_all([row], unique_by: :idx_measurements_unique, record_timestamps: true)
       HabitRuleEvaluator.new(current_account).evaluate([date])
       1
-    end
-
-    # Extrai um número por linha (ignora unidades/texto). Entende pt-BR.
-    def parse_values(raw)
-      raw.split(/[\r\n]+/).filter_map do |line|
-        token = line[/-?\d[\d.,]*/]
-        numeric(token) if token
-      end
     end
 
     # Abreviações de mês em pt-BR (o iPhone serializa datas no idioma do aparelho).

@@ -21,7 +21,7 @@
 class HealthShortcutBuilder
   # Marcador de versão: vai na query ("client_version"); o servidor devolve na
   # resposta. Bumpe a cada build p/ confirmar que NÃO baixou arquivo cacheado.
-  VERSION = "v11".freeze
+  VERSION = "v12".freeze
 
   TOKEN_UUID = "11111111-1111-1111-1111-111111111111".freeze
   REPEAT_ITEM_VAR = "Repeat Item".freeze # nome interno (inglês) do item do laço
@@ -37,13 +37,17 @@ class HealthShortcutBuilder
   SCOMB_UUID = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb".freeze
 
   # Métricas coletadas. `type` é o rótulo do tipo no seletor da Saúde.
-  # `property` é o detalhe extraído de cada amostra ("Value", "Start Date"...).
   # `suffix` torna os UUIDs únicos por bloco (precisa ser 1 hex).
-  # Sono: enviamos início e fim de cada amostra; o Rails calcula dormiu (menor
-  # início), acordou (maior fim) e horas dormidas (acordou - dormiu).
+  #
+  # Numéricas (steps/resting_hr): `stat` = agregação nativa "Calcular
+  # Estatísticas" (Sum/Average) — colapsa CENTENAS de amostras em UM número (sem
+  # laço por amostra: rápido). A janela "últimas 24h" ≈ ontem quando a automação
+  # roda logo após a meia-noite; o servidor grava sob `period=yesterday`.
+  # Sono: `property` extraída de cada amostra (Start/End Date); o Rails calcula
+  # dormiu (menor início), acordou (maior fim) e horas dormidas.
   METRICS = [
-    { key: "steps", type: "Steps", property: "Value", suffix: "a" },
-    { key: "resting_hr", type: "Resting Heart Rate", property: "Value", suffix: "b" },
+    { key: "steps", type: "Steps", stat: "Sum", suffix: "a" },
+    { key: "resting_hr", type: "Resting Heart Rate", stat: "Average", suffix: "b" },
     { key: "sleep_start", type: "Sleep", property: "Start Date", suffix: "c" },
     { key: "sleep_end", type: "Sleep", property: "End Date", suffix: "d" }
   ].freeze
@@ -58,7 +62,7 @@ class HealthShortcutBuilder
   end
 
   def post_url(key)
-    "#{@endpoint}?key=#{key}&period=today&client_version=#{VERSION}"
+    "#{@endpoint}?key=#{key}&period=yesterday&client_version=#{VERSION}"
   end
 
   def usage_url
@@ -142,9 +146,24 @@ class HealthShortcutBuilder
     text_action(TOKEN_UUID, "")
   end
 
-  # Bloco completo de uma métrica: Localizar -> Repetir(Obter Valor) ->
-  # Combinar(Repeat Results) -> POST.
   def metric_block(metric)
+    metric[:stat] ? statistics_block(metric) : sleep_loop_block(metric)
+  end
+
+  # Numérica (RÁPIDO): Localizar -> Calcular Estatísticas (Soma/Média) ->
+  # Texto(número) -> POST. UM número só, sem laço por amostra.
+  def statistics_block(metric)
+    u = uuids(metric[:suffix])
+    [
+      health_find_action(u[:find], type_label: metric[:type]),
+      statistics_action(u[:detail], u[:find], metric[:stat]),
+      value_text_action(u[:combine], u[:detail]),
+      post_action(metric[:key], u[:combine])
+    ]
+  end
+
+  # Sono: Localizar -> Repetir(Obter Start/End Date) -> Combinar -> POST.
+  def sleep_loop_block(metric)
     u = uuids(metric[:suffix])
     [
       health_find_action(u[:find], type_label: metric[:type]),
@@ -154,6 +173,43 @@ class HealthShortcutBuilder
       combine_text_action(u[:combine], u[:repeat_end]),
       post_action(metric[:key], u[:combine])
     ]
+  end
+
+  # Calcular Estatísticas sobre as amostras encontradas (iOS 26: chave de
+  # entrada é "Input", não "WFInput").
+  def statistics_action(uuid, input_uuid, operation)
+    <<~XML
+      <dict>
+        <key>WFWorkflowActionIdentifier</key>
+        <string>is.workflow.actions.statistics</string>
+        <key>WFWorkflowActionParameters</key>
+        <dict>
+          <key>UUID</key>
+          <string>#{uuid}</string>
+          <key>WFStatisticsOperation</key>
+          <string>#{operation}</string>
+          <key>Input</key>
+          #{output_variable(input_uuid, "Health Samples")}
+        </dict>
+      </dict>
+    XML
+  end
+
+  # Coage o resultado da estatística a texto (corpo do POST).
+  def value_text_action(uuid, source_uuid)
+    <<~XML
+      <dict>
+        <key>WFWorkflowActionIdentifier</key>
+        <string>is.workflow.actions.gettext</string>
+        <key>WFWorkflowActionParameters</key>
+        <dict>
+          <key>UUID</key>
+          <string>#{uuid}</string>
+          <key>WFTextActionText</key>
+          #{attachment_token(OBJ.dup, source_uuid, "Statistics Result")}
+        </dict>
+      </dict>
+    XML
   end
 
   def repeat_start_action(group_uuid, input_uuid)
