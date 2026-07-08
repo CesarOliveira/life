@@ -460,6 +460,7 @@ en:
       users: "Users"
       accounts: "Accounts"
       extractions: "Extractions (AI)"
+      ingestion: "Ingestion"
       exam_catalog: "Exam catalog"
       back_to_app: "← Back to app"
       logout: "Sign out"
@@ -487,6 +488,14 @@ en:
       position: "Position"
       types_count: "Types"
       aliases_hint: "Terms the report may use, comma-separated (e.g. tgo, ast)."
+    ingestion:
+      title: "Ingestion logs"
+      hint: "Everything received from the iPhone shortcut (/api/health_raw and /api/usage_raw): raw body, query and what was stored. Diagnostics only."
+      count: "%{count} records"
+      empty: "No ingestion recorded yet."
+      account: "Account"
+      result: "Result"
+      raw_body: "Raw body received"
     extractions:
       title: "Exam extractions (AI cost)"
       total_imports: "Imports"

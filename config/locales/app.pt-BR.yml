@@ -460,6 +460,7 @@ pt-BR:
       users: "Usuários"
       accounts: "Contas"
       extractions: "Extrações (IA)"
+      ingestion: "Ingestão"
       exam_catalog: "Catálogo de exames"
       back_to_app: "← Voltar ao app"
       logout: "Sair"
@@ -487,6 +488,14 @@ pt-BR:
       position: "Posição"
       types_count: "Tipos"
       aliases_hint: "Termos que o laudo pode usar, separados por vírgula (ex.: tgo, ast, transaminase glutamica oxalacetica)."
+    ingestion:
+      title: "Logs de ingestão"
+      hint: "Tudo que chega do atalho do iPhone (/api/health_raw e /api/usage_raw): corpo cru, query e o que foi gravado. Só diagnóstico."
+      count: "%{count} registros"
+      empty: "Nenhuma ingestão registrada ainda."
+      account: "Conta"
+      result: "Resultado"
+      raw_body: "Corpo cru recebido"
     extractions:
       title: "Extrações de exames (custo de IA)"
       total_imports: "Imports"

@@ -76,6 +76,7 @@ Rails.application.routes.draw do
     resources :users, only: [:index, :update]
     resources :accounts, only: [:index]
     resources :exam_extractions, only: [:index]
+    resources :ingestion_logs, only: [:index]
     resources :exam_groups, only: [:index, :new, :create, :edit, :update]
     resources :exam_types, only: [:new, :create, :edit, :update, :destroy]
   end

@@ -13,6 +13,8 @@ module Api
   # A resposta inclui `raw_preview` (trecho do corpo) para diagnosticar o formato
   # vindo do iPhone, `value` (agregado) e `client_version` (confirma a versão).
   class HealthRawController < BaseController
+    after_action(only: :create) { record_ingestion("health_raw") }
+
     # Como agregar cada métrica numérica.
     AGG = {
       "steps" => :sum,
@@ -36,6 +38,7 @@ module Api
 
       raw = request.raw_post.to_s.dup.force_encoding("UTF-8").scrub
       result = SLEEP_TIME.key?(key) ? handle_sleep_time(key, raw, date) : handle_numeric(key, raw, date)
+      @ingestion_result = { key: key, measured_on: date.iso8601, **result }
 
       render json: {
         ok: true,

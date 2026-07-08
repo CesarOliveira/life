@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_05_171921) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_08_111224) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -172,6 +172,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_05_171921) do
     t.index ["habit_category_id"], name: "index_habits_on_habit_category_id"
   end
 
+  create_table "ingestion_logs", force: :cascade do |t|
+    t.bigint "account_id"
+    t.integer "byte_size", default: 0, null: false
+    t.string "client_version"
+    t.datetime "created_at", null: false
+    t.string "endpoint", null: false
+    t.string "ip"
+    t.jsonb "query", default: {}, null: false
+    t.text "raw_body"
+    t.jsonb "result", default: {}, null: false
+    t.integer "status"
+    t.index ["account_id"], name: "index_ingestion_logs_on_account_id"
+    t.index ["created_at"], name: "index_ingestion_logs_on_created_at"
+    t.index ["endpoint", "created_at"], name: "index_ingestion_logs_on_endpoint_and_created_at"
+  end
+
   create_table "measurements", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.string "category", default: "health", null: false
@@ -255,6 +271,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_05_171921) do
   add_foreign_key "habit_checks", "habits"
   add_foreign_key "habits", "accounts"
   add_foreign_key "habits", "habit_categories"
+  add_foreign_key "ingestion_logs", "accounts"
   add_foreign_key "measurements", "accounts"
   add_foreign_key "memberships", "accounts"
   add_foreign_key "memberships", "users"

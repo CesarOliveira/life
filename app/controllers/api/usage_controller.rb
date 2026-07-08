@@ -13,6 +13,8 @@ module Api
   # (account, device, date, bundle_id): reenviar o dia sobrescreve em vez de
   # duplicar. O tempo é um snapshot do dia.
   class UsageController < BaseController
+    after_action(only: [:create, :create_raw]) { record_ingestion(action_name == "create_raw" ? "usage_raw" : "usage") }
+
     MAX_ENTRIES = 1000
     MAX_SECONDS = 7 * 24 * 60 * 60 # sanidade: ~1 semana por linha
     DATE_WINDOW_PAST = 90 # dias
@@ -41,6 +43,7 @@ module Api
         HabitRuleEvaluator.new(current_account).evaluate(rows.map { |r| r[:date] })
       end
 
+      @ingestion_result = { upserted: rows.size, skipped: skipped }
       render json: { ok: true, upserted: rows.size, skipped: skipped }
     end
 
@@ -65,6 +68,7 @@ module Api
         HabitRuleEvaluator.new(current_account).evaluate(rows.map { |r| r[:date] })
       end
 
+      @ingestion_result = { upserted: rows.size, apps: apps.size, measured_on: date.iso8601 }
       render json: {
         ok: true, upserted: rows.size, apps: apps.size,
         client_version: params[:client_version].to_s.first(40).presence,

@@ -1,3 +1,28 @@
+# == Schema Information
+#
+# Table name: connectors
+#
+#  id             :bigint           not null, primary key
+#  access_token   :text
+#  kind           :string           not null
+#  last_error     :string
+#  last_points    :integer          default(0), not null
+#  last_synced_at :datetime
+#  settings       :jsonb            not null
+#  status         :string           default("active"), not null
+#  created_at     :datetime         not null
+#  updated_at     :datetime         not null
+#  account_id     :bigint           not null
+#
+# Indexes
+#
+#  index_connectors_on_account_id           (account_id)
+#  index_connectors_on_account_id_and_kind  (account_id,kind) UNIQUE
+#
+# Foreign Keys
+#
+#  fk_rails_...  (account_id => accounts.id)
+#
 require "rails_helper"
 
 RSpec.describe Connector do

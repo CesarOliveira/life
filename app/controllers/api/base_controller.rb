@@ -74,6 +74,25 @@ module Api
       render json: { error: code, **extra }, status: :unprocessable_entity
     end
 
+    # Registra a requisição de ingestão (diagnóstico). Chamado via after_action
+    # nas rotas de ingestão; @ingestion_result é o resumo montado na action.
+    def record_ingestion(endpoint)
+      raw = request.raw_post.to_s.dup.force_encoding("UTF-8").scrub
+      IngestionLog.create!(
+        account: current_account,
+        endpoint: endpoint,
+        client_version: params[:client_version].to_s.first(40).presence,
+        byte_size: raw.bytesize,
+        status: response.status,
+        query: request.query_parameters.slice("key", "period", "device", "client_version"),
+        result: @ingestion_result || {},
+        raw_body: raw.first(IngestionLog::RAW_LIMIT),
+        ip: request.remote_ip
+      )
+    rescue StandardError => e
+      Rails.logger.error("IngestionLog falhou: #{e.class}: #{e.message}")
+    end
+
     # Normaliza um valor que deveria ser uma lista de hashes: aceita Array, string
     # JSON (array ou hash único) ou hashes separados por quebra de linha — que é
     # como o app Atalhos às vezes serializa listas. Retorna Array ou nil.
