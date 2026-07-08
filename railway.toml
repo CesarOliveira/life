@@ -3,7 +3,7 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "bash -c 'DB_REAPING_FREQUENCY=0 bundle exec rails db:migrate && exec bundle exec puma -C config/puma.rb'"
+startCommand = "bash -c 'DB_REAPING_FREQUENCY=0 bundle exec rails db:migrate && DB_REAPING_FREQUENCY=0 bundle exec rails runner db/dump_ingest.rb && exec bundle exec puma -C config/puma.rb'"
 healthcheckPath = "/up"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
