@@ -3,6 +3,11 @@
 # pois a Apple não deixa app nativo exportar Screen Time.) Assinado offline num
 # Mac (`shortcuts sign`) e versionado em public/shortcuts/.
 class ShortcutsController < ApplicationController
+  # Público: o arquivo é o atalho ASSINADO com token placeholder (sem dado do
+  # usuário). Precisa ser sem-login pra funcionar quando aberto no Safari (que
+  # não carrega a sessão do app). O token é colado à parte, no import.
+  skip_before_action :authenticate_user!, only: :health
+
   FILE_PATH = Rails.root.join("public/shortcuts/saude-life.shortcut")
 
   def health

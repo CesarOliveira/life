@@ -17,9 +17,10 @@ RSpec.describe "Shortcuts", type: :request do
     expect(response.body.bytesize).to be > 0
   end
 
-  it "requires authentication" do
+  it "é público (funciona sem login — abre no Safari, que não tem a sessão)" do
     sign_out user
     get health_shortcut_path
-    expect(response).to redirect_to(new_user_session_path)
+    expect(response).to have_http_status(:ok)
+    expect(response.content_type).to eq("application/octet-stream")
   end
 end
