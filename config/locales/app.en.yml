@@ -345,8 +345,6 @@ en:
       copy_token: "Copied my token"
       install: "Installed the Screen time shortcut"
       install_help: "Tap Download — the token is copied to your clipboard. Open the file → Import and paste the token when asked. On the first run, tap Allow and grant Screen Time access."
-      install_app: "Install shortcut (token included)"
-      install_help_app: "Tap Install — the app builds the shortcut with your token and opens it in Shortcuts to add. Requires enabling Settings → Shortcuts → Advanced → \"Allow Untrusted Shortcuts\". On the first run, grant Screen Time access."
       download: "Download Screen time shortcut (copies the token)"
       automation: "Created the daily automation"
     automation_title: "How to create the daily automation"

@@ -38,12 +38,9 @@ class HealthShortcutBuilder
   ST_END_UUID = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa".freeze
   SCOMB_UUID = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb".freeze
 
-  def initialize(endpoint:, token: nil)
+  def initialize(endpoint:)
     # Aceita a URL de health_raw (legado) ou usage_raw; só o usage_raw é usado.
     @usage_endpoint = endpoint.sub("health_raw", "usage_raw")
-    # token embutido: gera um atalho já com o token (não assinado, servido só
-    # pro app via API). Sem token: placeholder + pergunta no import (assinado).
-    @token = token
   end
 
   def filename
@@ -99,10 +96,7 @@ class HealthShortcutBuilder
   private
 
   # Pergunta o token na importação e preenche a ação Texto do token (índice 0).
-  # Com o token já embutido, não pergunta nada.
   def import_questions
-    return "<array/>" unless @token.to_s.empty?
-
     <<~XML
       <array>
         <dict>
@@ -122,7 +116,7 @@ class HealthShortcutBuilder
   end
 
   def token_action
-    text_action(TOKEN_UUID, @token.to_s)
+    text_action(TOKEN_UUID, "")
   end
 
   def repeat_start_action(group_uuid, input_uuid)

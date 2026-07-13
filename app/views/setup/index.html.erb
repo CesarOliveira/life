@@ -31,39 +31,25 @@
     <p class="mb-4 text-xs text-slate-500"><%= t("setup.shortcut_hint") %></p>
 
     <ul class="space-y-4">
-      <%# "Copiar token" só no navegador; no app o token já vai embutido. %>
-      <% unless cookies[:life_app].present? %>
-        <li class="flex gap-3" data-checklist-row>
-          <input type="checkbox" data-checklist-target="item" data-key="copy_token" data-action="change->checklist#toggle"
-                 class="mt-1 h-5 w-5 shrink-0 rounded border-slate-300 text-emerald-600">
-          <p class="flex-1 text-sm font-medium text-slate-800"><%= t("setup.steps.copy_token") %></p>
-        </li>
-      <% end %>
+      <li class="flex gap-3" data-checklist-row>
+        <input type="checkbox" data-checklist-target="item" data-key="copy_token" data-action="change->checklist#toggle"
+               class="mt-1 h-5 w-5 shrink-0 rounded border-slate-300 text-emerald-600">
+        <p class="flex-1 text-sm font-medium text-slate-800"><%= t("setup.steps.copy_token") %></p>
+      </li>
 
       <li class="flex gap-3" data-checklist-row>
         <input type="checkbox" data-checklist-target="item" data-key="install" data-action="change->checklist#toggle"
                class="mt-1 h-5 w-5 shrink-0 rounded border-slate-300 text-emerald-600">
-        <% if cookies[:life_app].present? %>
-          <%# No app: instala com o token JÁ embutido (lifeapp://install-shortcut
-              é interceptado pelo app, que busca /api/shortcut via Bearer e abre). %>
-          <div class="flex-1">
-            <p class="text-sm font-medium text-slate-800"><%= t("setup.steps.install") %></p>
-            <p class="mt-0.5 text-xs text-slate-500"><%= t("setup.steps.install_help_app") %></p>
-            <%= link_to t("setup.steps.install_app"), "lifeapp://install-shortcut",
-                  class: "mt-2 inline-block rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700" %>
+        <div class="flex-1" data-controller="clipboard" data-clipboard-fetch-url-value="<%= screen_time_token_path %>">
+          <p class="text-sm font-medium text-slate-800"><%= t("setup.steps.install") %></p>
+          <p class="mt-0.5 text-xs text-slate-500"><%= t("setup.steps.install_help") %></p>
+          <div class="mt-2 flex items-center gap-2">
+            <%= link_to t("setup.steps.download"), health_shortcut_path(v: @health_version),
+                  data: { action: "clipboard#copy" },
+                  class: "inline-block rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700" %>
+            <span data-clipboard-target="feedback" class="hidden text-xs font-medium text-emerald-700"><%= t("setup.token_copied") %></span>
           </div>
-        <% else %>
-          <div class="flex-1" data-controller="clipboard" data-clipboard-fetch-url-value="<%= screen_time_token_path %>">
-            <p class="text-sm font-medium text-slate-800"><%= t("setup.steps.install") %></p>
-            <p class="mt-0.5 text-xs text-slate-500"><%= t("setup.steps.install_help") %></p>
-            <div class="mt-2 flex items-center gap-2">
-              <%= link_to t("setup.steps.download"), health_shortcut_path(v: @health_version),
-                    data: { action: "clipboard#copy" },
-                    class: "inline-block rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700" %>
-              <span data-clipboard-target="feedback" class="hidden text-xs font-medium text-emerald-700"><%= t("setup.token_copied") %></span>
-            </div>
-          </div>
-        <% end %>
+        </div>
       </li>
 
       <li class="flex gap-3" data-checklist-row>
