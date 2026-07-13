@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><title>Life</title></head>
+<body>
+  <% url = "lifeapp://auth?token=#{CGI.escape(@token.to_s)}" %>
+  <p style="font-family: -apple-system, sans-serif; text-align:center; margin-top:40px; color:#475569">
+    Autenticado. Voltando ao app…<br>
+    <a href="<%= url %>">Abrir o Life</a>
+  </p>
+  <script>window.location.replace("<%= j url %>");</script>
+</body>
+</html>

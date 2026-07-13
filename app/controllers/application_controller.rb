@@ -68,9 +68,7 @@ class ApplicationController < ActionController::Base
   def ensure_personal_account
     return if current_user.accounts.exists?
 
-    locale = Account::LOCALES.include?(session[:locale].to_s) ? session[:locale] : "pt-BR"
-    account = current_user.owned_accounts.create!(name: current_user.name.presence || I18n.t("accounts.personal_name"), locale: locale)
-    current_user.memberships.create!(account: account, role: "owner", status: "active")
+    account = Account.ensure_personal_for(current_user, locale: session[:locale].to_s)
     session[:account_id] = account.id
   end
 

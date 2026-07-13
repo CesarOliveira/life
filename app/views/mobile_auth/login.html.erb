@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><title>Life</title></head>
+<body>
+  <%= form_tag "/users/auth/google_oauth2", id: "go", method: :post do %><% end %>
+  <p style="font-family: -apple-system, sans-serif; text-align:center; margin-top:40px; color:#475569">
+    Redirecionando para o Google…
+  </p>
+  <script>document.getElementById("go").submit();</script>
+</body>
+</html>

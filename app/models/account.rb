@@ -49,6 +49,21 @@ class Account < ApplicationRecord
 
   before_create :ensure_join_code
 
+  # Garante a conta pessoal do usuário (modelo single-user), com token gerado.
+  # Reusado pelo 1º acesso web (ensure_personal_account) e pelo login do app.
+  def self.ensure_personal_for(user, locale: "pt-BR")
+    existing = user.accounts.first
+    return existing if existing
+
+    loc = LOCALES.include?(locale.to_s) ? locale.to_s : "pt-BR"
+    account = user.owned_accounts.create!(
+      name: user.name.presence || I18n.t("accounts.personal_name"),
+      locale: loc
+    )
+    user.memberships.create!(account: account, role: "owner", status: "active")
+    account
+  end
+
   def admin_memberships
     memberships.where(role: %w[owner admin], status: "active")
   end

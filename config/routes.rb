@@ -2,6 +2,10 @@ Rails.application.routes.draw do
   ActiveAdmin.routes(self)
   devise_for :users, controllers: { omniauth_callbacks: "users/omniauth_callbacks" }
 
+  # Login do app nativo (Caminho B): reusa o OAuth Google web via navegador
+  # embutido; o callback devolve o token por deep link lifeapp://.
+  get "mobile/login", to: "mobile_auth#login"
+
   authenticated :user do
     root to: "dashboard#index", as: :authenticated_root
   end
