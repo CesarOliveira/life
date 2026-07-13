@@ -31,11 +31,14 @@
     <p class="mb-4 text-xs text-slate-500"><%= t("setup.shortcut_hint") %></p>
 
     <ul class="space-y-4">
-      <li class="flex gap-3" data-checklist-row>
-        <input type="checkbox" data-checklist-target="item" data-key="copy_token" data-action="change->checklist#toggle"
-               class="mt-1 h-5 w-5 shrink-0 rounded border-slate-300 text-emerald-600">
-        <p class="flex-1 text-sm font-medium text-slate-800"><%= t("setup.steps.copy_token") %></p>
-      </li>
+      <%# "Copiar token" só no navegador; no app o token já vai embutido. %>
+      <% unless cookies[:life_app].present? %>
+        <li class="flex gap-3" data-checklist-row>
+          <input type="checkbox" data-checklist-target="item" data-key="copy_token" data-action="change->checklist#toggle"
+                 class="mt-1 h-5 w-5 shrink-0 rounded border-slate-300 text-emerald-600">
+          <p class="flex-1 text-sm font-medium text-slate-800"><%= t("setup.steps.copy_token") %></p>
+        </li>
+      <% end %>
 
       <li class="flex gap-3" data-checklist-row>
         <input type="checkbox" data-checklist-target="item" data-key="install" data-action="change->checklist#toggle"
