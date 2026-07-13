@@ -72,6 +72,7 @@ Rails.application.routes.draw do
     post "usage_raw", to: "usage#create_raw"
     post "metrics", to: "metrics#create"
     post "health_raw", to: "health_raw#create"
+    get "shortcut", to: "shortcut#show" # atalho não assinado c/ token embutido (só app)
     get "exams", to: "exams#index"
   end
 

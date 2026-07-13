@@ -345,6 +345,8 @@ pt-BR:
       copy_token: "Copiei meu token"
       install: "Instalei o atalho de Tempo de tela"
       install_help: "Toque em Baixar — o token já vai para a área de transferência. Abra o arquivo → Importar e cole o token quando pedir. Na 1ª execução, toque em Permitir e libere o acesso ao Tempo de uso."
+      install_app: "Instalar atalho (token já incluso)"
+      install_help_app: "Toque em Instalar — o app monta o atalho já com seu token e abre no Atalhos pra você adicionar. Exige ligar Ajustes → Atalhos → Avançado → \"Permitir Atalhos Não Confiáveis\". Na 1ª execução, libere o acesso ao Tempo de uso."
       download: "Baixar atalho de Tempo de tela (copia o token)"
       automation: "Criei a automação diária"
     automation_title: "Como criar a automação diária"

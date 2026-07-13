@@ -14,6 +14,9 @@ class MobileAuthController < ApplicationController
     return redirect_to(new_user_session_path, alert: t("flash.omniauth.failure")) unless user
 
     sign_in(user)
+    # Marca a sessão como "app nativo" (some no navegador). A tela Configurar usa
+    # isso pra oferecer o atalho com token embutido em vez do assinado+colar.
+    cookies[:life_app] = { value: "1", expires: 1.year.from_now, httponly: true }
     redirect_to root_path
   end
 
