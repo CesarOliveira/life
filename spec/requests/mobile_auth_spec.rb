@@ -35,4 +35,22 @@ RSpec.describe "Mobile auth (Caminho B)", type: :request do
     expect(response).to have_http_status(:redirect)
     expect(response.body).not_to include("lifeapp://")
   end
+
+  describe "GET /mobile/enter (ponte token->sessão do WebView)" do
+    it "loga a sessão a partir do api_token e abre o app" do
+      user = create(:user)
+      account = Account.ensure_personal_for(user)
+
+      get "/mobile/enter", params: { token: account.api_token }
+      expect(response).to redirect_to(root_path)
+
+      get root_path # já autenticado: não volta pro login
+      expect(response).not_to redirect_to(new_user_session_path)
+    end
+
+    it "rejeita token inválido" do
+      get "/mobile/enter", params: { token: "nao-existe" }
+      expect(response).to redirect_to(new_user_session_path)
+    end
+  end
 end

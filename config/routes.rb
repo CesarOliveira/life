@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   # Login do app nativo (Caminho B): reusa o OAuth Google web via navegador
   # embutido; o callback devolve o token por deep link lifeapp://.
   get "mobile/login", to: "mobile_auth#login"
+  get "mobile/enter", to: "mobile_auth#enter" # ponte token->sessão (WebView do app)
 
   authenticated :user do
     root to: "dashboard#index", as: :authenticated_root
