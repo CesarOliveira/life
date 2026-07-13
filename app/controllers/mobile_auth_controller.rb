@@ -6,7 +6,17 @@ class MobileAuthController < ApplicationController
   skip_before_action :authenticate_user!, only: :login
 
   def login
+    # A sessão não sobrevive à volta do Google no navegador embutido, então
+    # marcamos o fluxo num cookie CROSS-SITE (SameSite=None) que sobrevive.
+    # session[:mobile_auth] fica como reforço (fluxos same-site / testes).
     session[:mobile_auth] = true
+    cookies[:mobile_flow] = {
+      value: "1",
+      expires: 10.minutes.from_now,
+      httponly: true,
+      secure: Rails.env.production?,
+      same_site: :none
+    }
     render :login, layout: false
   end
 end

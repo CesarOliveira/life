@@ -5,7 +5,7 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
     @user = User.from_omniauth(request.env["omniauth.auth"])
 
     if @user&.persisted?
-      return deliver_token_to_app(@user) if session.delete(:mobile_auth)
+      return deliver_token_to_app(@user) if mobile_flow?
 
       flash[:notice] = t("flash.omniauth.success")
       sign_in_and_redirect @user, event: :authentication
@@ -22,6 +22,12 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
   end
 
   private
+
+  # É o login do app? O cookie cross-site (SameSite=None) sobrevive à volta do
+  # Google; a sessão é o reforço para fluxos same-site/testes.
+  def mobile_flow?
+    cookies.delete(:mobile_flow).present? || session.delete(:mobile_auth).present?
+  end
 
   # Login do app nativo (Caminho B): garante a conta pessoal + token e entrega
   # ao app por deep link (lifeapp://). NÃO abre sessão web.
