@@ -13,7 +13,7 @@ RSpec.describe "Shortcuts", type: :request do
     get health_shortcut_path
     expect(response).to have_http_status(:ok)
     expect(response.content_type).to eq("application/octet-stream")
-    expect(response.headers["Content-Disposition"]).to include("Saude-Life.shortcut")
+    expect(response.headers["Content-Disposition"]).to include("Tempo-Tela-Life.shortcut")
     expect(response.body.bytesize).to be > 0
   end
 

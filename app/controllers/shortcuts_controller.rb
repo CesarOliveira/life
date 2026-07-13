@@ -1,7 +1,7 @@
-# Serve o atalho de Saúde (.shortcut) ASSINADO para o iPhone importar.
-# O arquivo é assinado offline (num Mac, via `shortcuts sign`) e versionado em
-# public/shortcuts/. Tem token placeholder (sem segredo) — o usuário cola o token
-# uma vez após instalar.
+# Serve o atalho de TEMPO DE TELA (.shortcut) ASSINADO para o iPhone importar.
+# (A Saúde migrou pro app nativo; só o tempo de tela ainda depende do Atalho,
+# pois a Apple não deixa app nativo exportar Screen Time.) Assinado offline num
+# Mac (`shortcuts sign`) e versionado em public/shortcuts/.
 class ShortcutsController < ApplicationController
   FILE_PATH = Rails.root.join("public/shortcuts/saude-life.shortcut")
 
@@ -12,7 +12,7 @@ class ShortcutsController < ApplicationController
     # (evita arquivo cacheado no Safari/Files/Cloudflare).
     response.set_header("Cache-Control", "no-store, no-cache, must-revalidate")
     send_file FILE_PATH,
-              filename: "Saude-Life.shortcut",
+              filename: "Tempo-Tela-Life.shortcut",
               type: "application/octet-stream",
               disposition: "attachment"
   end

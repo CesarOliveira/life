@@ -326,8 +326,8 @@ pt-BR:
     keep_secret: "Trate o token como senha — quem tiver ele pode enviar dados pra sua conta."
 
   setup:
-    title: "Configurar coleta"
-    intro: "Um único atalho envia Saúde (passos, sono, FC) e Tempo de tela por app, todo dia. Três passos: copiar o token, instalar e criar a automação."
+    title: "Configurar Tempo de tela"
+    intro: "A Saúde (passos, sono, FC) agora vem automaticamente pelo app. O Tempo de tela por app, no iPhone, só o Atalho consegue exportar — configure-o aqui: copiar o token, instalar e criar a automação."
     token_label: "Seu token pessoal"
     copy: "Copiar token"
     copied: "Copiado!"
@@ -337,16 +337,16 @@ pt-BR:
     regenerate: "Gerar novo token"
     regenerate_confirm: "Gerar um novo token invalida o atual. Você vai precisar reinstalar o atalho (ou atualizar o token nele). Continuar?"
     regenerate_hint: "Use se o token vazou. Depois, baixe o atalho de novo (já copia o token novo)."
-    shortcut_section: "Atalho Life (faz tudo)"
-    shortcut_hint: "Um só atalho coleta Saúde e Tempo de tela — uma instalação, uma automação."
+    shortcut_section: "Atalho de Tempo de tela"
+    shortcut_hint: "Coleta o tempo de uso por app e envia todo dia. (A Saúde vem pelo app — não precisa mexer aqui.)"
     steps:
       copy_token: "Copiei meu token"
-      install: "Instalei o atalho Life"
-      install_help: "Toque em Baixar — o token já vai para a área de transferência. Abra o arquivo → Importar e cole o token quando pedir. Na 1ª execução, toque em Permitir e libere o acesso à Saúde (Passos, FC em Repouso e Sono) e ao Tempo de uso."
-      download: "Baixar atalho Life (copia o token)"
+      install: "Instalei o atalho de Tempo de tela"
+      install_help: "Toque em Baixar — o token já vai para a área de transferência. Abra o arquivo → Importar e cole o token quando pedir. Na 1ª execução, toque em Permitir e libere o acesso ao Tempo de uso."
+      download: "Baixar atalho de Tempo de tela (copia o token)"
       automation: "Criei a automação diária"
     automation_title: "Como criar a automação diária"
-    automation_help: "App Atalhos → aba Automação → + (Nova) → Hora do Dia → escolha um horário (ex.: 9h) e Diariamente → Avançar → Executar Atalho → escolha \"Saude-Life\" → ative \"Executar Imediatamente\" e desative \"Perguntar Antes de Executar\"."
+    automation_help: "App Atalhos → aba Automação → + (Nova) → Hora do Dia → escolha um horário (ex.: 9h) e Diariamente → Avançar → Executar Atalho → escolha \"Tempo-Tela-Life\" → ative \"Executar Imediatamente\" e desative \"Perguntar Antes de Executar\"."
 
   auth:
     tagline: "Seu progresso, todo dia."

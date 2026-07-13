@@ -326,8 +326,8 @@ en:
     keep_secret: "Treat the token like a password — anyone with it can post data to your account."
 
   setup:
-    title: "Set up collection"
-    intro: "A single shortcut sends Health (steps, sleep, HR) and per-app Screen time every day. Three steps: copy the token, install, and create the automation."
+    title: "Set up Screen time"
+    intro: "Health (steps, sleep, HR) now comes automatically from the app. Per-app Screen time, on iPhone, can only be exported by the Shortcut — set it up here: copy the token, install, and create the automation."
     token_label: "Your personal token"
     copy: "Copy token"
     copied: "Copied!"
@@ -337,16 +337,16 @@ en:
     regenerate: "Generate new token"
     regenerate_confirm: "Generating a new token invalidates the current one. You'll need to reinstall the shortcut (or update its token). Continue?"
     regenerate_hint: "Use this if the token leaked. Then download the shortcut again (it copies the new token)."
-    shortcut_section: "Life shortcut (does everything)"
-    shortcut_hint: "One shortcut collects Health and Screen time — one install, one automation."
+    shortcut_section: "Screen time shortcut"
+    shortcut_hint: "Collects per-app usage and sends it daily. (Health comes from the app — nothing to do here.)"
     steps:
       copy_token: "Copied my token"
-      install: "Installed the Life shortcut"
-      install_help: "Tap Download — the token is copied to your clipboard. Open the file → Import and paste the token when asked. On the first run, tap Allow and grant Health access (Steps, Resting HR and Sleep) and Screen Time."
-      download: "Download Life shortcut (copies the token)"
+      install: "Installed the Screen time shortcut"
+      install_help: "Tap Download — the token is copied to your clipboard. Open the file → Import and paste the token when asked. On the first run, tap Allow and grant Screen Time access."
+      download: "Download Screen time shortcut (copies the token)"
       automation: "Created the daily automation"
     automation_title: "How to create the daily automation"
-    automation_help: "Shortcuts app → Automation tab → + (New) → Time of Day → pick a time (e.g. 9am) and Daily → Next → Run Shortcut → choose \"Saude-Life\" → enable \"Run Immediately\" and disable \"Ask Before Running\"."
+    automation_help: "Shortcuts app → Automation tab → + (New) → Time of Day → pick a time (e.g. 9am) and Daily → Next → Run Shortcut → choose \"Tempo-Tela-Life\" → enable \"Run Immediately\" and disable \"Ask Before Running\"."
 
   auth:
     tagline: "Your progress, every day."
