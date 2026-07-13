@@ -20,6 +20,11 @@ class HealthShortcutBuilder
   # resposta. Bumpe a cada build p/ confirmar que NÃO baixou arquivo cacheado.
   VERSION = "v13".freeze
 
+  # Nome fixo do atalho na biblioteca (WFWorkflowName no plist). Deixa o URL
+  # scheme "shortcuts://run-shortcut?name=..." achar o atalho de forma confiável
+  # (o botão "atualizar agora"). Renomear o atalho no iPhone quebra o botão.
+  SHORTCUT_NAME = "Life Tempo de Tela".freeze
+
   TOKEN_UUID = "11111111-1111-1111-1111-111111111111".freeze
   REPEAT_ITEM_VAR = "Repeat Item".freeze # nome interno (inglês) do item do laço
   OBJ = "\u{FFFC}".freeze # placeholder de anexo (object replacement char)
@@ -53,6 +58,8 @@ class HealthShortcutBuilder
       <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
       <plist version="1.0">
       <dict>
+        <key>WFWorkflowName</key>
+        <string>#{xml_escape(SHORTCUT_NAME)}</string>
         <key>WFWorkflowClientVersion</key>
         <string>900</string>
         <key>WFWorkflowMinimumClientVersion</key>

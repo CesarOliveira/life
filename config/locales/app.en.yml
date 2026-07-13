@@ -339,6 +339,8 @@ en:
     regenerate_hint: "Use this if the token leaked. Then download the shortcut again (it copies the new token)."
     shortcut_section: "Screen time shortcut"
     shortcut_hint: "Collects per-app usage and sends it daily. (Health comes from the app — nothing to do here.)"
+    run_now: "Update screen time now"
+    run_now_hint: "Runs the shortcut right now (briefly opens the Shortcuts app). Handy if today's automation failed. The daily automation keeps running on its own."
     steps:
       copy_token: "Copied my token"
       install: "Installed the Screen time shortcut"

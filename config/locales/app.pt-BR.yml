@@ -339,6 +339,8 @@ pt-BR:
     regenerate_hint: "Use se o token vazou. Depois, baixe o atalho de novo (já copia o token novo)."
     shortcut_section: "Atalho de Tempo de tela"
     shortcut_hint: "Coleta o tempo de uso por app e envia todo dia. (A Saúde vem pelo app — não precisa mexer aqui.)"
+    run_now: "Atualizar tempo de tela agora"
+    run_now_hint: "Roda o atalho na hora (abre o app Atalhos por um instante). Útil se a automação de hoje falhou. A automação diária continua rodando sozinha."
     steps:
       copy_token: "Copiei meu token"
       install: "Instalei o atalho de Tempo de tela"
