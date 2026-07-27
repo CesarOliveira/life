@@ -65,6 +65,8 @@ Rails.application.routes.draw do
   # Atalho de Saúde (.shortcut) gerado com o token da conta, para o iPhone enviar
   # sono/passos para /api/metrics. Download autenticado (token só vai pro dono).
   get "saude-shortcut", to: "shortcuts#health", as: :health_shortcut
+  # Variante "Hoje" (alertas intradiários de tempo de tela).
+  get "tempo-tela-hoje-shortcut", to: "shortcuts#today", as: :today_shortcut
 
   # API de ingestão (token pessoal) — ex.: Atalho do iPhone enviando uso/saúde.
   namespace :api do

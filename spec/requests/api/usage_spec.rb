@@ -155,6 +155,51 @@ RSpec.describe "API::Usage", type: :request do
     expect(response).to have_http_status(:unprocessable_entity)
   end
 
+  describe "alertas intradiários (period=today)" do
+    let!(:habit) do
+      create(:habit, account: account, name: "Menos redes", auto: true, metric_key: "social_apps",
+                     comparator: "lte", threshold_value: 2, app_bundle_ids: %w[Instagram])
+    end
+
+    def post_today(minutes)
+      post "/api/usage",
+           params: { device: "iphone", period: "today",
+                     apps: [{ name: "Instagram", minutes: minutes }] }.to_json,
+           headers: headers
+    end
+
+    it "alerts once, on the sync that crosses the threshold" do
+      post_today(90)
+      expect(response.parsed_body).not_to have_key("alert_text")
+
+      post_today(150) # cruzou as 2h
+      expect(response.parsed_body["alert_text"]).to eq("Menos redes: 2h 30m hoje (limite 2h)")
+      expect(response.parsed_body["alerts"]).to eq(["Menos redes: 2h 30m hoje (limite 2h)"])
+
+      post_today(160) # já estourado: não repete
+      expect(response.parsed_body).not_to have_key("alert_text")
+    end
+
+    it "does not check today's lte habit (a marcação sai com o dia fechado)" do
+      post_today(30)
+      expect(habit.habit_checks.where(date: Date.current)).not_to exist
+    end
+
+    it "does not alert on yesterday syncs (o dia fechado só marca o hábito)" do
+      post "/api/usage",
+           params: { device: "iphone", period: "yesterday",
+                     apps: [{ name: "Instagram", minutes: 200 }] }.to_json,
+           headers: headers
+      expect(response.parsed_body).not_to have_key("alert_text")
+    end
+
+    it "create_raw also alerts (o Atalho Hoje usa o cano burro)" do
+      post "/api/usage_raw?period=today&device=iphone", params: "Instagram (2h 30min)",
+           headers: { "Authorization" => "Bearer #{account.api_token}", "CONTENT_TYPE" => "text/plain" }
+      expect(response.parsed_body["alert_text"]).to eq("Menos redes: 2h 30m hoje (limite 2h)")
+    end
+  end
+
   describe "create_raw (cano burro: texto cru + eco)" do
     let(:raw_headers) { { "Authorization" => "Bearer #{account.api_token}", "CONTENT_TYPE" => "text/plain" } }
 

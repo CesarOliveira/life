@@ -23,4 +23,12 @@ RSpec.describe "Shortcuts", type: :request do
     expect(response).to have_http_status(:ok)
     expect(response.content_type).to eq("application/octet-stream")
   end
+
+  it "serves the Today (alerts) variant, também pública" do
+    sign_out user
+    get today_shortcut_path
+    expect(response).to have_http_status(:ok)
+    expect(response.headers["Content-Disposition"]).to include("Tempo-Tela-Hoje-Life.shortcut")
+    expect(response.body.bytesize).to be > 0
+  end
 end

@@ -29,6 +29,8 @@ class HabitRuleEvaluator
   private
 
   def evaluate_habit(habit, date)
+    return if intraday_pending?(habit, date)
+
     value = metric_value(habit, date)
     return if value.nil? # sem dados: não mexe na marcação
 
@@ -40,6 +42,15 @@ class HabitRuleEvaluator
     end
   rescue ActiveRecord::RecordNotUnique
     # corrida rara: já existe a marcação do dia — ok.
+  end
+
+  # Tempo de tela de HOJE ainda cresce ao longo do dia: um hábito "no máximo X"
+  # (lte) só é definitivo quando o dia acaba — o sync intradiário não marca nem
+  # desmarca (senão o streak "pisca"); a marcação oficial sai no sync seguinte,
+  # com o dia fechado. Métricas de medição (sono, peso...) não entram aqui: o
+  # valor já chega final. E "pelo menos X" (gte) pode marcar cedo: uso só cresce.
+  def intraday_pending?(habit, date)
+    habit.comparator == "lte" && habit.auto_metric[:source] == :app_usage && date >= Date.current
   end
 
   def satisfied?(habit, value)

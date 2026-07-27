@@ -37,4 +37,38 @@ RSpec.describe HealthShortcutBuilder do
   it "produz XML bem-formado" do
     expect { REXML::Document.new(xml) }.not_to raise_error
   end
+
+  it "variante diária segue sem bloco de alerta (nada de notificação)" do
+    expect(xml).to include("period=yesterday")
+    expect(xml).not_to include("is.workflow.actions.getvalueforkey")
+    expect(xml).not_to include("is.workflow.actions.notification")
+  end
+
+  describe "variante :today (alertas intradiários)" do
+    subject(:today_xml) { described_class.new(endpoint: "https://x.test/api/usage_raw", variant: :today).plist }
+
+    it "coleta o dia corrente e posta com period=today" do
+      expect(today_xml).to include("period=today")
+      expect(today_xml).to include("client_version=#{described_class::TODAY_VERSION}")
+      expect(today_xml).to include(described_class::TODAY_SHORTCUT_NAME)
+      expect(today_xml).to include("<string>today</string>") # during da ação de atividade
+    end
+
+    it "lê alert_text da resposta e notifica só quando tem valor" do
+      expect(today_xml).to include("is.workflow.actions.getvalueforkey")
+      expect(today_xml).to include("alert_text")
+      expect(today_xml).to include("is.workflow.actions.conditional")
+      expect(today_xml).to include("<integer>100</integer>") # Has Any Value
+      expect(today_xml).to include("is.workflow.actions.notification")
+    end
+
+    it "pede o token na importação, como a diária" do
+      expect(today_xml).to include("WFWorkflowImportQuestions")
+      expect(today_xml).to include("Cole seu token")
+    end
+
+    it "produz XML bem-formado" do
+      expect { REXML::Document.new(today_xml) }.not_to raise_error
+    end
+  end
 end

@@ -7,6 +7,8 @@ class SetupController < ApplicationController
     @token = current_account.api_token
     @endpoint = api_usage_url
     @health_version = HealthShortcutBuilder::VERSION
+    @today_version = HealthShortcutBuilder::TODAY_VERSION
+    @today_shortcut_name = HealthShortcutBuilder::TODAY_SHORTCUT_NAME
     # "Atualizar agora": dispara o atalho pelo nome fixo (WFWorkflowName).
     @shortcut_run_url = "shortcuts://run-shortcut?name=#{ERB::Util.url_encode(HealthShortcutBuilder::SHORTCUT_NAME)}"
     @github_connector = current_account.connectors.find_by(kind: "github")

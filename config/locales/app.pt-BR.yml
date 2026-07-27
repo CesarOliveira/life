@@ -349,6 +349,18 @@ pt-BR:
       automation: "Criei a automação diária"
     automation_title: "Como criar a automação diária"
     automation_help: "App Atalhos → aba Automação → + (Nova) → Hora do Dia → escolha um horário (ex.: 9h) e Diariamente → Avançar → Executar Atalho → escolha \"Tempo-Tela-Life\" → ative \"Executar Imediatamente\" e desative \"Perguntar Antes de Executar\"."
+    today:
+      section: "Alertas durante o dia (opcional)"
+      hint: "Um segundo atalho envia o tempo de HOJE e mostra uma notificação na hora em que um hábito \"no máximo X\" estoura o limite. A marcação oficial do hábito continua saindo com o dia fechado (sync diário) — este atalho é só o aviso em tempo quase real."
+      steps:
+        habit: "Tenho um hábito automático de tempo de tela"
+        habit_help: "O alerta vem das regras \"no máximo X h\" (tela total ou apps escolhidos)."
+        habit_link: "Criar/editar hábitos →"
+        install: "Instalei o atalho de alertas (Hoje)"
+        install_help: "Toque em Baixar — o token já vai para a área de transferência. Abra o arquivo → Importar e cole o MESMO token quando pedir."
+        download: "Baixar atalho de alertas (copia o token)"
+        automation: "Criei a automação \"ao fechar\" os apps"
+        automation_help: "App Atalhos → Automação → + (Nova) → App → escolha os apps do hábito (ex.: Instagram, TikTok) → \"É Fechado\" → Executar Imediatamente → ação Executar Atalho → \"%{name}\". Assim o alerta chega logo depois de você largar o app. Se quiser, crie também 2–3 automações de Hora do Dia (ex.: 12h, 18h, 21h) rodando o mesmo atalho."
 
   auth:
     tagline: "Seu progresso, todo dia."

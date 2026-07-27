@@ -349,6 +349,18 @@ en:
       automation: "Created the daily automation"
     automation_title: "How to create the daily automation"
     automation_help: "Shortcuts app → Automation tab → + (New) → Time of Day → pick a time (e.g. 9am) and Daily → Next → Run Shortcut → choose \"Tempo-Tela-Life\" → enable \"Run Immediately\" and disable \"Ask Before Running\"."
+    today:
+      section: "Alerts during the day (optional)"
+      hint: "A second shortcut sends TODAY's usage and shows a notification the moment an \"at most X\" habit goes over its limit. The official habit check still comes once the day is closed (daily sync) — this shortcut is just the near-real-time warning."
+      steps:
+        habit: "I have an automatic screen-time habit"
+        habit_help: "Alerts come from the \"at most X h\" rules (total screen or chosen apps)."
+        habit_link: "Create/edit habits →"
+        install: "Installed the alerts shortcut (Today)"
+        install_help: "Tap Download — the token is copied to your clipboard. Open the file → Import and paste the SAME token when asked."
+        download: "Download alerts shortcut (copies the token)"
+        automation: "Created the \"when closed\" automation"
+        automation_help: "Shortcuts app → Automation → + (New) → App → pick the habit's apps (e.g. Instagram, TikTok) → \"Is Closed\" → Run Immediately → Run Shortcut action → \"%{name}\". The alert lands right after you put the app down. Optionally add 2–3 Time of Day automations (e.g. 12pm, 6pm, 9pm) running the same shortcut."
 
   auth:
     tagline: "Your progress, every day."

@@ -38,13 +38,11 @@ module Api
 
       # upsert_all não aceita duplicatas na mesma chamada: mantém a última ocorrência.
       rows = rows.reverse.uniq { |r| [r[:device], r[:date], r[:bundle_id]] }.reverse
-      if rows.any?
-        AppUsage.upsert_all(rows, unique_by: :idx_app_usages_unique, record_timestamps: true)
-        HabitRuleEvaluator.new(current_account).evaluate(rows.map { |r| r[:date] })
-      end
+      alerts = persist_rows(rows)
 
-      @ingestion_result = { upserted: rows.size, skipped: skipped }
-      render json: { ok: true, upserted: rows.size, skipped: skipped }
+      @ingestion_result = { upserted: rows.size, skipped: skipped, alerts: alerts.size }
+      render json: { ok: true, upserted: rows.size, skipped: skipped,
+                     alerts: alerts, alert_text: alerts.join("\n").presence }.compact
     end
 
     # POST /api/usage_raw?period=yesterday&device=iphone&client_version=v11
@@ -63,20 +61,32 @@ module Api
       apps = parse_raw_apps(raw)
       rows = apps.filter_map { |entry| build_row(entry, device, date.iso8601) }
       rows = rows.reverse.uniq { |r| [r[:device], r[:date], r[:bundle_id]] }.reverse
-      if rows.any?
-        AppUsage.upsert_all(rows, unique_by: :idx_app_usages_unique, record_timestamps: true)
-        HabitRuleEvaluator.new(current_account).evaluate(rows.map { |r| r[:date] })
-      end
+      alerts = persist_rows(rows)
 
-      @ingestion_result = { upserted: rows.size, apps: apps.size, measured_on: date.iso8601 }
+      @ingestion_result = { upserted: rows.size, apps: apps.size, measured_on: date.iso8601, alerts: alerts.size }
       render json: {
         ok: true, upserted: rows.size, apps: apps.size,
         client_version: params[:client_version].to_s.first(40).presence,
-        raw_preview: raw[0, 400]
-      }
+        raw_preview: raw[0, 400],
+        alerts: alerts, alert_text: alerts.join("\n").presence
+      }.compact
     end
 
     private
+
+    # Upsert idempotente + reavaliação dos hábitos. Se o lote toca HOJE, compara
+    # o valor dos hábitos de tela antes/depois e devolve as mensagens de limiar
+    # cruzado — o Atalho "Hoje" as exibe como notificação local no iPhone.
+    def persist_rows(rows)
+      return [] if rows.empty?
+
+      alerts = ScreenTimeAlerts.new(current_account)
+      dates = rows.map { |r| r[:date] }
+      before = dates.include?(Date.current) ? alerts.snapshot(Date.current) : nil
+      AppUsage.upsert_all(rows, unique_by: :idx_app_usages_unique, record_timestamps: true)
+      HabitRuleEvaluator.new(current_account).evaluate(dates)
+      before ? alerts.messages(Date.current, previous: before) : []
+    end
 
     DURATION_TOKEN = /((?:\d[\d.,]*\s*(?:horas?|hr|h|min|m|seg|sec|s)\b[\s,]*)+)/i
 

@@ -68,13 +68,17 @@ RSpec.describe "Habits", type: :request do
 
   describe "automatic habits" do
     it "creates an auto habit and backfills from existing usage" do
-      create(:app_usage, account: account, date: Date.current, seconds: 1 * 3600) # 1h ≤ 3h
+      create(:app_usage, account: account, date: Date.current - 1, seconds: 1 * 3600) # 1h ≤ 3h
+      create(:app_usage, account: account, date: Date.current, seconds: 1 * 3600)
       post habits_path, params: { habit: { name: "Tela", color: "#000000", auto: "1", metric_key: "screen_time_total", comparator: "lte", threshold_value: "3" } }
       expect(response).to redirect_to(habits_path)
 
       habit = account.habits.last
       expect(habit.auto).to be(true)
-      expect(habit.habit_checks.where(date: Date.current)).to exist
+      expect(habit.habit_checks.where(date: Date.current - 1)).to exist
+      # HOJE fica pendente: a tela do dia ainda cresce — lte só fecha com o dia
+      # (ver HabitRuleEvaluator#intraday_pending?).
+      expect(habit.habit_checks.where(date: Date.current)).not_to exist
     end
 
     it "blocks manual toggle on auto habits" do

@@ -104,6 +104,40 @@ RSpec.describe HabitRuleEvaluator do
     end
   end
 
+  describe "sync intradiário (hoje): tela ainda cresce, lte não é definitivo" do
+    let!(:habit) { create(:habit, :auto_screen_time, account: account, threshold_value: 3) }
+
+    it "does not create today's check even when under the threshold" do
+      create(:app_usage, account: account, date: Date.current, seconds: 3600)
+      described_class.new(account).evaluate([Date.current])
+      expect(habit.habit_checks.where(date: Date.current)).not_to exist
+    end
+
+    it "does not remove today's existing check even when over" do
+      create(:habit_check, habit: habit, date: Date.current)
+      create(:app_usage, account: account, date: Date.current, seconds: 9 * 3600)
+      described_class.new(account).evaluate([Date.current])
+      expect(habit.habit_checks.where(date: Date.current)).to exist
+    end
+
+    it "still evaluates today for gte screen habits (uso só cresce: pode fechar cedo)" do
+      gte = create(:habit, account: account, auto: true, metric_key: "screen_time_total",
+                           comparator: "gte", threshold_value: 1)
+      create(:app_usage, account: account, date: Date.current, seconds: 2 * 3600)
+      described_class.new(account).evaluate([Date.current])
+      expect(gte.habit_checks.where(date: Date.current)).to exist
+    end
+
+    it "still evaluates today for measurement lte habits (o valor já chega final)" do
+      bed = create(:habit, account: account, auto: true, metric_key: "sleep_bedtime",
+                           comparator: "lte", threshold_value: 30)
+      create(:measurement, account: account, key: "sleep_bedtime", value: (23 * 60) + 30,
+                           measured_on: Date.current, category: "health")
+      described_class.new(account).evaluate([Date.current])
+      expect(bed.habit_checks.where(date: Date.current)).to exist
+    end
+  end
+
   describe "#backfill" do
     let(:habit) { create(:habit, :auto_screen_time, account: account, threshold_value: 3) }
 

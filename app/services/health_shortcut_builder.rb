@@ -11,10 +11,18 @@
 #     print HealthShortcutBuilder.new(endpoint: "https://life.cesaroliveira.online/api/usage_raw").plist' \
 #     > /tmp/sc.shortcut
 #   shortcuts sign --mode anyone --input /tmp/sc.shortcut --output public/shortcuts/saude-life.shortcut
+# Variante "Hoje" (alertas intradiários): mesmo comando com `variant: :today` e
+# saída em public/shortcuts/tempo-tela-hoje.shortcut.
 #
 # Fluxo: [Texto do token] -> [Obter Atividade em Apps (during=yesterday)] ->
 # [Repetir: Texto do item] -> [Combinar] -> [POST /api/usage_raw]. O servidor
 # parseia "Nome (2h 36min)" e agrega.
+#
+# Variante :today ("Life Tempo de Tela Hoje"): mesma coleta, mas do dia CORRENTE
+# (during=today, period=today) e, depois do POST, lê `alert_text` da resposta —
+# o servidor o devolve quando um hábito "no máximo X" de tela cruzou o limiar
+# neste sync (ScreenTimeAlerts) — e o exibe como notificação local. Pensada pra
+# rodar por automação "ao fechar" os apps monitorados (e/ou horários fixos).
 class HealthShortcutBuilder
   # Marcador de versão: vai na query ("client_version"); o servidor devolve na
   # resposta. Bumpe a cada build p/ confirmar que NÃO baixou arquivo cacheado.
@@ -24,6 +32,8 @@ class HealthShortcutBuilder
   # scheme "shortcuts://run-shortcut?name=..." achar o atalho de forma confiável
   # (o botão "atualizar agora"). Renomear o atalho no iPhone quebra o botão.
   SHORTCUT_NAME = "Life Tempo de Tela".freeze
+  TODAY_SHORTCUT_NAME = "Life Tempo de Tela Hoje".freeze
+  TODAY_VERSION = "hoje-v1".freeze
 
   TOKEN_UUID = "11111111-1111-1111-1111-111111111111".freeze
   REPEAT_ITEM_VAR = "Repeat Item".freeze # nome interno (inglês) do item do laço
@@ -37,29 +47,45 @@ class HealthShortcutBuilder
   STX_UUID = "99999999-9999-9999-9999-999999999999".freeze
   ST_END_UUID = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa".freeze
   SCOMB_UUID = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb".freeze
+  # Bloco de alerta (só na variante :today).
+  POST_UUID = "cccccccc-cccc-cccc-cccc-cccccccccccc".freeze
+  ALERT_VALUE_UUID = "dddddddd-dddd-dddd-dddd-dddddddddddd".freeze
+  ALERT_IF_GROUP_UUID = "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee".freeze
 
-  def initialize(endpoint:)
+  def initialize(endpoint:, variant: :daily)
     # Aceita a URL de health_raw (legado) ou usage_raw; só o usage_raw é usado.
     @usage_endpoint = endpoint.sub("health_raw", "usage_raw")
+    @variant = variant
+  end
+
+  def today?
+    @variant == :today
+  end
+
+  def shortcut_name
+    today? ? TODAY_SHORTCUT_NAME : SHORTCUT_NAME
   end
 
   def filename
-    "Tempo-Tela-Life.shortcut"
+    today? ? "Tempo-Tela-Hoje-Life.shortcut" : "Tempo-Tela-Life.shortcut"
   end
 
   def usage_url
-    "#{@usage_endpoint}?period=yesterday&device=iphone&client_version=#{VERSION}"
+    period = today? ? "today" : "yesterday"
+    version = today? ? TODAY_VERSION : VERSION
+    "#{@usage_endpoint}?period=#{period}&device=iphone&client_version=#{version}"
   end
 
   def plist
     actions = [token_action] + screen_time_block
+    actions += alert_block if today?
     <<~XML
       <?xml version="1.0" encoding="UTF-8"?>
       <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
       <plist version="1.0">
       <dict>
         <key>WFWorkflowName</key>
-        <string>#{xml_escape(SHORTCUT_NAME)}</string>
+        <string>#{xml_escape(shortcut_name)}</string>
         <key>WFWorkflowClientVersion</key>
         <string>900</string>
         <key>WFWorkflowMinimumClientVersion</key>
@@ -199,7 +225,7 @@ class HealthShortcutBuilder
           <key>UUID</key>
           <string>#{uuid}</string>
           <key>during</key>
-          <string>yesterday</string>
+          <string>#{today? ? "today" : "yesterday"}</string>
           <key>activityType</key>
           <string>app</string>
         </dict>
@@ -231,6 +257,8 @@ class HealthShortcutBuilder
         <string>is.workflow.actions.downloadurl</string>
         <key>WFWorkflowActionParameters</key>
         <dict>
+          <key>UUID</key>
+          <string>#{POST_UUID}</string>
           <key>WFURL</key>
           <string>#{xml_escape(usage_url)}</string>
           <key>WFHTTPMethod</key>
@@ -241,6 +269,97 @@ class HealthShortcutBuilder
           <string>File</string>
           <key>WFRequestVariable</key>
           #{output_variable(combine_uuid, "Combined Text")}
+        </dict>
+      </dict>
+    XML
+  end
+
+  # --- Bloco de alerta (variante :today) ---
+  # A resposta do POST traz `alert_text` quando um hábito "no máximo X" de tela
+  # cruzou o limiar neste sync (ScreenTimeAlerts). Fluxo: [Obter Valor do
+  # Dicionário alert_text] -> [Se tem algum valor] -> [Mostrar Notificação].
+  def alert_block
+    [
+      alert_value_action,
+      if_has_value_action,
+      notification_action,
+      end_if_action
+    ]
+  end
+
+  def alert_value_action
+    <<~XML
+      <dict>
+        <key>WFWorkflowActionIdentifier</key>
+        <string>is.workflow.actions.getvalueforkey</string>
+        <key>WFWorkflowActionParameters</key>
+        <dict>
+          <key>UUID</key>
+          <string>#{ALERT_VALUE_UUID}</string>
+          <key>WFDictionaryKey</key>
+          <string>alert_text</string>
+          <key>WFInput</key>
+          #{output_variable(POST_UUID, "Contents of URL")}
+        </dict>
+      </dict>
+    XML
+  end
+
+  # "Se [Dictionary Value] tem algum valor" (WFCondition 100 = Has Any Value).
+  # O servidor OMITE alert_text quando não há alerta, então "sem valor" = sem
+  # notificação. O input do Se usa a forma {Type: Variable} (como o iOS exporta).
+  def if_has_value_action
+    <<~XML
+      <dict>
+        <key>WFWorkflowActionIdentifier</key>
+        <string>is.workflow.actions.conditional</string>
+        <key>WFWorkflowActionParameters</key>
+        <dict>
+          <key>WFControlFlowMode</key>
+          <integer>0</integer>
+          <key>GroupingIdentifier</key>
+          <string>#{ALERT_IF_GROUP_UUID}</string>
+          <key>WFCondition</key>
+          <integer>100</integer>
+          <key>WFInput</key>
+          <dict>
+            <key>Type</key>
+            <string>Variable</string>
+            <key>Variable</key>
+            #{output_variable(ALERT_VALUE_UUID, "Dictionary Value")}
+          </dict>
+        </dict>
+      </dict>
+    XML
+  end
+
+  def notification_action
+    <<~XML
+      <dict>
+        <key>WFWorkflowActionIdentifier</key>
+        <string>is.workflow.actions.notification</string>
+        <key>WFWorkflowActionParameters</key>
+        <dict>
+          <key>WFNotificationActionTitle</key>
+          <string>⚠️ Tempo de tela</string>
+          <key>WFNotificationActionBody</key>
+          #{attachment_token(OBJ.dup, ALERT_VALUE_UUID, "Dictionary Value")}
+        </dict>
+      </dict>
+    XML
+  end
+
+  def end_if_action
+    <<~XML
+      <dict>
+        <key>WFWorkflowActionIdentifier</key>
+        <string>is.workflow.actions.conditional</string>
+        <key>WFWorkflowActionParameters</key>
+        <dict>
+          <key>WFControlFlowMode</key>
+          <integer>2</integer>
+          <key>GroupingIdentifier</key>
+          <string>#{ALERT_IF_GROUP_UUID}</string>
         </dict>
       </dict>
     XML
