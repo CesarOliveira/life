@@ -41,12 +41,18 @@ class Task < ApplicationRecord
   belongs_to :creator, class_name: "User", optional: true
   has_many :comments, -> { order(:created_at, :id) }, class_name: "TaskComment", dependent: :destroy, inverse_of: :task
 
+  has_many :events, -> { order(:occurred_at, :id) }, class_name: "TaskEvent", dependent: :destroy, inverse_of: :task
+
+  # Importações trazem o próprio histórico: desligam o evento automático de criação.
+  attr_accessor :skip_created_event
+
   validates :title, presence: true, length: { maximum: 200 }
   validates :number, presence: true, uniqueness: { scope: :account_id }
   validate :column_belongs_to_board
 
   before_validation :assign_number, on: :create
   before_validation :assign_position, on: :create
+  after_create :record_created_event, unless: :skip_created_event
 
   def done?
     completed_at.present?
@@ -57,6 +63,10 @@ class Task < ApplicationRecord
   end
 
   private
+
+  def record_created_event
+    events.create!(kind: "created", to_column: task_column.name, user: creator, occurred_at: created_at)
+  end
 
   def assign_number
     self.number ||= account.tasks.maximum(:number).to_i + 1 if account

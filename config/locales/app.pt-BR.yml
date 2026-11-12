@@ -389,6 +389,10 @@ pt-BR:
 
   tasks:
     title: "Tarefas"
+    history: "Histórico"
+    events:
+      created: 'Criada em "%{column}"'
+      moved: 'Movida de "%{from}" para "%{to}"'
     customize: "Personalizar quadro"
     new_board: "+ Novo quadro"
     new_task: "+ Nova tarefa"

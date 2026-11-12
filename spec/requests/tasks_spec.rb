@@ -58,6 +58,10 @@ RSpec.describe "Tasks", type: :request do
 
     patch move_task_path(task), params: { column_id: todo.id }
     expect(task.reload).to have_attributes(task_column_id: todo.id, completed_at: nil)
+    expect(task.events.map { |e| [e.kind, e.from_column, e.to_column] })
+      .to eq([["created", nil, "A fazer"], ["moved", "A fazer", "Concluído"], ["moved", "Concluído", "A fazer"]])
+    get task_path(task)
+    expect(response.body).to include(I18n.t("tasks.history"))
     expect(first.reload.position).to eq(1)
   end
 

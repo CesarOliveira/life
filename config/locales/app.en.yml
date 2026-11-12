@@ -389,6 +389,10 @@ en:
 
   tasks:
     title: "Tasks"
+    history: "History"
+    events:
+      created: 'Created in "%{column}"'
+      moved: 'Moved from "%{from}" to "%{to}"'
     customize: "Customize board"
     new_board: "+ New board"
     new_task: "+ New task"

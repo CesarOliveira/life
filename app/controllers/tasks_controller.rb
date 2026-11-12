@@ -37,7 +37,7 @@ class TasksController < ApplicationController
   # Arrastar e soltar (JSON) e botões da página da tarefa (HTML).
   def move
     column = TaskColumn.joins(:task_board).where(task_boards: { account_id: current_account.id }).find_by(id: params[:column_id])
-    ok = column.present? && TaskMover.new(@task).call(column: column, position: params[:position].presence)
+    ok = column.present? && TaskMover.new(@task).call(column: column, position: params[:position].presence, user: current_user)
 
     respond_to do |format|
       format.json { ok ? render(json: { ok: true, done: @task.reload.done? }) : render(json: { ok: false }, status: :unprocessable_entity) }

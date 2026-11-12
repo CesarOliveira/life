@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_12_000002) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_12_000003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -263,6 +263,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_000002) do
     t.index ["user_id"], name: "index_task_comments_on_user_id"
   end
 
+  create_table "task_events", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "from_column"
+    t.string "kind", null: false
+    t.datetime "occurred_at", null: false
+    t.bigint "task_id", null: false
+    t.string "to_column"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id"
+    t.index ["task_id", "occurred_at"], name: "index_task_events_on_task_id_and_occurred_at"
+    t.index ["task_id"], name: "index_task_events_on_task_id"
+    t.index ["user_id"], name: "index_task_events_on_user_id"
+  end
+
   create_table "tasks", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.datetime "completed_at"
@@ -352,6 +366,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_000002) do
   add_foreign_key "task_columns", "task_boards"
   add_foreign_key "task_comments", "tasks"
   add_foreign_key "task_comments", "users"
+  add_foreign_key "task_events", "tasks"
+  add_foreign_key "task_events", "users"
   add_foreign_key "tasks", "accounts"
   add_foreign_key "tasks", "task_boards"
   add_foreign_key "tasks", "task_columns"

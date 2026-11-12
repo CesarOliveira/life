@@ -8,7 +8,10 @@ RSpec.describe "API::Tasks", type: :request do
     payload = { tasks: [
       { external_id: "trello:1", board: "Tarefas Diárias", column: "A fazer", title: "Agendar pintor", description: "Primeiro passo" },
       { external_id: "trello:2", board: "Tarefas Diárias", column: "Concluído", title: "Comprar cantoneira",
-        created_at: "2026-11-08T10:00:00-03:00", comments: [{ body: "Comprei na loja X", created_at: "2026-11-09T15:00:00-03:00" }] }
+        created_at: "2026-11-08T10:00:00-03:00",
+        events: [{ kind: "created", to: "A fazer", at: "2026-11-08T10:00:00-03:00" },
+                 { kind: "moved", from: "A fazer", to: "Concluído", at: "2026-11-09T15:07:00-03:00" }],
+        comments: [{ body: "Comprei na loja X", created_at: "2026-11-09T15:00:00-03:00" }] }
     ] }.to_json
 
     expect { post "/api/tasks", params: payload, headers: headers }
@@ -21,7 +24,11 @@ RSpec.describe "API::Tasks", type: :request do
     expect(done.comments.map(&:body)).to eq(["Comprei na loja X"])
     expect(account.task_boards.first.columns.map(&:name)).to eq(TaskBoard.default_column_names)
 
-    expect { post "/api/tasks", params: payload, headers: headers }.not_to change(TaskComment, :count)
+    expect(done.events.map(&:kind)).to eq(%w[created moved])                       # histórico importado
+    expect(account.tasks.find_by!(external_id: "trello:1").events.map(&:kind)).to eq(["created"]) # automático
+
+    expect { post "/api/tasks", params: payload, headers: headers }
+      .to change(TaskComment, :count).by(0).and change(TaskEvent, :count).by(0)
     expect(account.tasks.count).to eq(2)
     expect(JSON.parse(response.body)).to include("created" => 0, "updated" => 2)
   end

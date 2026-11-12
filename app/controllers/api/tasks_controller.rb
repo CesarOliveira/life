@@ -4,7 +4,8 @@ module Api
   #   { "tasks": [ { "external_id": "trello:abc", "board": "Tarefas Diárias",
   #       "column": "A fazer", "title": "…", "description": "…", "due_on": "2026-11-20",
   #       "created_at": "…", "completed_at": "…",
-  #       "comments": [ { "body": "…", "created_at": "…" } ] } ] }
+  #       "comments": [ { "body": "…", "created_at": "…" } ],
+  #       "events": [ { "kind": "moved", "from": "A fazer", "to": "Concluído", "at": "…" } ] } ] }
   # Quadro e coluna são achados pelo nome e criados se não existirem. Com
   # `external_id`, reenviar atualiza a tarefa em vez de duplicar (os comentários
   # só são gravados na criação).
@@ -48,9 +49,11 @@ module Api
                              description: entry["description"].to_s.presence, due_on: parse_date(entry["due_on"]),
                              completed_at: completed_at(entry, column, task))
       task.created_at = parse_time(entry["created_at"]) || Time.current if is_new
+      task.skip_created_event = entry["events"].is_a?(Array)
       return nil unless task.save
 
       add_comments(task, entry["comments"]) if is_new
+      replace_events(task, entry["events"]) if entry["events"].is_a?(Array)
       is_new ? :created : :updated
     end
 
@@ -82,6 +85,23 @@ module Api
         next if body.blank?
 
         task.comments.create(body: body.first(5000), created_at: parse_time(comment["created_at"]) || Time.current)
+      end
+    end
+
+    # Histórico importado: substitui o existente (reenviar não duplica).
+    def replace_events(task, events)
+      rows = events.first(200).filter_map do |event|
+        next unless event.is_a?(Hash) && TaskEvent::KINDS.include?(event["kind"].to_s)
+
+        at = parse_time(event["at"])
+        next if at.nil?
+
+        { task_id: task.id, kind: event["kind"], from_column: event["from"].to_s.first(40).presence,
+          to_column: event["to"].to_s.first(40).presence, occurred_at: at }
+      end
+      TaskEvent.transaction do
+        task.events.delete_all
+        TaskEvent.insert_all(rows, record_timestamps: true) if rows.any?
       end
     end
 

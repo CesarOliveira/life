@@ -5,7 +5,7 @@ class TaskMover
     @task = task
   end
 
-  def call(column:, position: nil)
+  def call(column:, position: nil, user: nil)
     return false unless column.task_board.account_id == @task.account_id
 
     Task.transaction do
@@ -15,6 +15,9 @@ class TaskMover
       siblings.insert(index, @task)
 
       @task.update!(task_column: column, task_board: column.task_board, completed_at: completed_at_for(column))
+      if source && source.id != column.id
+        @task.events.create!(kind: "moved", from_column: source.name, to_column: column.name, user: user, occurred_at: Time.current)
+      end
       renumber(siblings)
       renumber(source.tasks.reload.to_a) if source && source.id != column.id
     end
