@@ -1,4 +1,7 @@
-<%= form_with model: @habit, data: { controller: "habit-form" },
+<%# Quais métricas usam horário (HH:MM) e quais pedem escolha de apps: vem do catálogo, não do JS. %>
+<% time_metrics = Habit::AUTO_METRICS.select { |_, meta| meta[:time_of_day] }.keys %>
+<% app_metrics = Habit::AUTO_METRICS.select { |_, meta| meta[:apps] }.keys %>
+<%= form_with model: @habit, data: { controller: "habit-form", habit_form_time_metrics_value: time_metrics.to_json, habit_form_app_metrics_value: app_metrics.to_json },
       class: "max-w-lg space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" do |f| %>
   <% if @habit.errors.any? %>
     <div class="rounded-lg border border-rose-200 bg-rose-50 p-2 text-sm text-rose-700">

@@ -149,4 +149,18 @@ RSpec.describe HabitRuleEvaluator do
       expect(habit.habit_checks.where(date: today - 1)).not_to exist
     end
   end
+
+  describe "Apple Watch metrics" do
+    it "auto-completes an exercise habit and a wake-time habit from the day's measurements" do
+      category = create(:habit_category, account: account)
+      exercise = create(:habit, account: account, habit_category: category, auto: true, metric_key: "exercise_minutes", comparator: "gte", threshold_value: 30)
+      wake = create(:habit, account: account, habit_category: category, auto: true, metric_key: "sleep_wake", comparator: "lte", threshold_value: 7 * 60)
+      create(:measurement, account: account, key: "exercise_minutes", value: 42, category: "health", measured_on: today)
+      create(:measurement, account: account, key: "sleep_wake", value: (7 * 60) + 20, category: "health", measured_on: today)
+
+      described_class.new(account).evaluate([today])
+      expect(exercise.habit_checks.where(date: today)).to exist
+      expect(wake.habit_checks.where(date: today)).not_to exist # acordou 07:20, meta era até 07:00
+    end
+  end
 end

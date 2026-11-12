@@ -196,7 +196,7 @@ module Mcp
       { period: { from: from, to: to, days: days },
         habits: @account.habits.where(active: true).order(:position).map do |habit|
           dates = (checks[habit.id] || []).map(&:date).sort
-          { name: habit.name, description: habit.description.presence, automatic: habit.auto, frequency: habit.frequency,
+          { name: habit.name, description: habit.description.presence, automatic: habit.auto, rule: habit_rule(habit), frequency: habit.frequency,
             days_done: dates.size, percent_of_days: (dates.size * 100.0 / days).round, done_on: dates }.compact
         end }
     end
@@ -274,6 +274,15 @@ module Mcp
         minutes: workout.duration_seconds / 60, distance_km: workout.distance_km&.to_f, pace: workout.pace_label,
         energy_kcal: workout.energy_kcal&.round, avg_hr: workout.avg_hr&.round, max_hr: workout.max_hr&.round,
         source: workout.source }.compact
+    end
+
+    # Regra de um hábito automático: { metric:, operator:, threshold:, unit: }.
+    def habit_rule(habit)
+      return nil unless habit.auto?
+
+      threshold = habit.time_of_day_metric? ? format("%02d:%02d", habit.threshold_value.to_i / 60, habit.threshold_value.to_i % 60) : habit.threshold_value.to_f
+      { metric: I18n.t("habits.auto_metrics.#{habit.metric_key}", default: habit.metric_key), operator: habit.comparator == "lte" ? "no máximo" : "no mínimo",
+        threshold: threshold, unit: habit.auto_metric[:unit], apps: habit.app_filtered? ? habit.app_bundle_ids : nil }.compact
     end
 
     def task_row(task)

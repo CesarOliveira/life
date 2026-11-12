@@ -55,7 +55,20 @@ class Habit < ApplicationRecord
     "sleep_bedtime"     => { source: :measurement, measurement_key: "sleep_bedtime", unit: "hh:mm", time_of_day: true },
     "steps"             => { source: :measurement, measurement_key: "steps", unit: "passos" },
     "github_contributions" => { source: :measurement, measurement_key: "github_contributions", unit: "contributions" },
-    "resting_hr"        => { source: :measurement, measurement_key: "resting_hr", unit: "bpm" }
+    "resting_hr"        => { source: :measurement, measurement_key: "resting_hr", unit: "bpm" },
+    # iPhone + Apple Watch (app nativo)
+    "sleep_wake"        => { source: :measurement, measurement_key: "sleep_wake", unit: "hh:mm", time_of_day: true },
+    "sleep_deep_minutes" => { source: :measurement, measurement_key: "sleep_deep_minutes", unit: "min" },
+    "exercise_minutes"  => { source: :measurement, measurement_key: "exercise_minutes", unit: "min" },
+    "active_energy"     => { source: :measurement, measurement_key: "active_energy", unit: "kcal" },
+    "stand_hours"       => { source: :measurement, measurement_key: "stand_hours", unit: "h" },
+    "rings_closed"      => { source: :measurement, measurement_key: "rings_closed", unit: "anéis" },
+    "distance_km"       => { source: :measurement, measurement_key: "distance_km", unit: "km" },
+    "workout_minutes"   => { source: :measurement, measurement_key: "workout_minutes", unit: "min" },
+    "mindful_minutes"   => { source: :measurement, measurement_key: "mindful_minutes", unit: "min" },
+    "daylight_minutes"  => { source: :measurement, measurement_key: "daylight_minutes", unit: "min" },
+    "hrv"               => { source: :measurement, measurement_key: "hrv", unit: "ms" },
+    "water_ml"          => { source: :measurement, measurement_key: "water_ml", unit: "ml" }
   }.freeze
 
   belongs_to :account
