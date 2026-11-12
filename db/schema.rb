@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_12_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_12_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -233,6 +233,59 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_000001) do
     t.index ["user_id"], name: "index_roles_users_on_user_id"
   end
 
+  create_table "task_boards", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_task_boards_on_account_id"
+  end
+
+  create_table "task_columns", force: :cascade do |t|
+    t.string "color", default: "slate", null: false
+    t.datetime "created_at", null: false
+    t.boolean "done", default: false, null: false
+    t.string "name", null: false
+    t.integer "position", default: 0, null: false
+    t.bigint "task_board_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["task_board_id"], name: "index_task_columns_on_task_board_id"
+  end
+
+  create_table "task_comments", force: :cascade do |t|
+    t.text "body", null: false
+    t.datetime "created_at", null: false
+    t.bigint "task_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id"
+    t.index ["task_id"], name: "index_task_comments_on_task_id"
+    t.index ["user_id"], name: "index_task_comments_on_user_id"
+  end
+
+  create_table "tasks", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.bigint "creator_id"
+    t.text "description"
+    t.date "due_on"
+    t.string "external_id"
+    t.integer "number", null: false
+    t.integer "position", default: 0, null: false
+    t.bigint "task_board_id", null: false
+    t.bigint "task_column_id", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "external_id"], name: "index_tasks_on_account_id_and_external_id", unique: true, where: "(external_id IS NOT NULL)"
+    t.index ["account_id", "number"], name: "index_tasks_on_account_id_and_number", unique: true
+    t.index ["account_id"], name: "index_tasks_on_account_id"
+    t.index ["creator_id"], name: "index_tasks_on_creator_id"
+    t.index ["task_board_id"], name: "index_tasks_on_task_board_id"
+    t.index ["task_column_id", "position"], name: "index_tasks_on_task_column_id_and_position"
+    t.index ["task_column_id"], name: "index_tasks_on_task_column_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email", default: "", null: false
@@ -295,6 +348,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_000001) do
   add_foreign_key "measurements", "accounts"
   add_foreign_key "memberships", "accounts"
   add_foreign_key "memberships", "users"
+  add_foreign_key "task_boards", "accounts"
+  add_foreign_key "task_columns", "task_boards"
+  add_foreign_key "task_comments", "tasks"
+  add_foreign_key "task_comments", "users"
+  add_foreign_key "tasks", "accounts"
+  add_foreign_key "tasks", "task_boards"
+  add_foreign_key "tasks", "task_columns"
+  add_foreign_key "tasks", "users", column: "creator_id"
   add_foreign_key "weight_entries", "accounts"
   add_foreign_key "workouts", "accounts"
 end

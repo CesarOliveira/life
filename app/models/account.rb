@@ -31,6 +31,8 @@ class Account < ApplicationRecord
   has_many :app_usages, dependent: :destroy
   has_many :measurements, dependent: :destroy
   has_many :workouts, dependent: :destroy
+  has_many :task_boards, dependent: :destroy
+  has_many :tasks, dependent: :destroy
   has_many :goals, dependent: :destroy
   has_many :exam_extractions, dependent: :destroy
   has_many :exam_results, dependent: :destroy

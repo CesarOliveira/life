@@ -1,0 +1,69 @@
+<div class="mx-auto max-w-2xl space-y-5">
+  <%= link_to "‹ #{@board.name}", task_board_path(@board), class: "text-sm font-medium text-emerald-700 hover:underline" %>
+
+  <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div class="flex items-start justify-between gap-3">
+      <h1 class="text-xl font-bold text-slate-900"><%= @task.title %></h1>
+      <span class="shrink-0 text-sm text-slate-400">#<%= @task.number %></span>
+    </div>
+    <p class="mt-1 text-xs text-slate-400">
+      <%= t("tasks.created_at", time: l(@task.created_at, format: :short)) %>
+      <% if @task.done? %> · <%= t("tasks.completed_at", time: l(@task.completed_at, format: :short)) %><% end %>
+      <% if @task.due_on %> · <span class="<%= 'font-semibold text-rose-600' if @task.overdue? %>"><%= t("tasks.due", date: l(@task.due_on, format: :long)) %></span><% end %>
+    </p>
+
+    <%# Mover entre colunas (alternativa ao arrastar, pensada para o celular) %>
+    <div class="mt-4 flex flex-wrap gap-2">
+      <% @columns.each do |column| %>
+        <% if column.id == @task.task_column_id %>
+          <span class="rounded-lg px-3 py-1.5 text-xs font-semibold <%= column_style(column, :badge) %> ring-2 ring-slate-400"><%= column.name %></span>
+        <% else %>
+          <%= button_to column.name, move_task_path(@task), method: :patch, params: { column_id: column.id },
+                class: "rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50" %>
+        <% end %>
+      <% end %>
+    </div>
+
+    <% if @task.description.present? %>
+      <div class="mt-4 space-y-2 border-t border-slate-100 pt-4 text-sm leading-relaxed text-slate-700"><%= task_text(@task.description) %></div>
+    <% end %>
+
+    <details class="mt-4 border-t border-slate-100 pt-3">
+      <summary class="cursor-pointer text-xs font-medium text-slate-500 hover:text-slate-700"><%= t("tasks.edit") %></summary>
+      <%= form_with model: @task, url: task_path(@task), method: :patch, class: "mt-3 space-y-3" do |f| %>
+        <%= f.text_field :title, required: true, maxlength: 200, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
+        <%= f.text_area :description, rows: 6, class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
+        <div class="flex flex-wrap items-end gap-3">
+          <div>
+            <%= f.label :due_on, t("tasks.due_on"), class: "mb-1 block text-xs font-medium text-slate-600" %>
+            <%= f.date_field :due_on, class: "rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
+          </div>
+          <%= f.submit t("tasks.save"), class: "rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700" %>
+        </div>
+      <% end %>
+      <%= button_to t("tasks.remove_task"), task_path(@task), method: :delete,
+            class: "mt-3 text-xs text-rose-600 hover:underline", form: { data: { turbo_confirm: t("tasks.remove_task_confirm") } } %>
+    </details>
+  </section>
+
+  <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <h2 class="font-semibold text-slate-900"><%= t("tasks.comments") %> <span class="text-sm font-normal text-slate-400"><%= @task.comments.size %></span></h2>
+    <ul class="mt-3 space-y-3">
+      <% @task.comments.each do |comment| %>
+        <li class="rounded-xl bg-slate-50 p-3">
+          <div class="flex items-center justify-between gap-2 text-xs text-slate-400">
+            <span><%= comment.user&.name.presence || t("tasks.imported") %> · <%= l(comment.created_at, format: :short) %></span>
+            <%= button_to t("memberships.remove"), task_task_comment_path(@task, comment), method: :delete,
+                  class: "text-rose-600 hover:underline", form: { data: { turbo_confirm: t("tasks.remove_comment_confirm") } } %>
+          </div>
+          <div class="mt-1 space-y-2 text-sm text-slate-700"><%= task_text(comment.body) %></div>
+        </li>
+      <% end %>
+    </ul>
+    <%= form_with model: @comment, url: task_task_comments_path(@task), class: "mt-4 space-y-2" do |f| %>
+      <%= f.text_area :body, rows: 3, required: true, placeholder: t("tasks.comment_placeholder"),
+            class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+      <%= f.submit t("tasks.comment"), class: "rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700" %>
+    <% end %>
+  </section>
+</div>

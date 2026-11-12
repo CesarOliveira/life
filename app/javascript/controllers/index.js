@@ -45,3 +45,6 @@ application.register("radar-chart", RadarChartController)
 
 import ScrollEndController from "./scroll_end_controller"
 application.register("scroll-end", ScrollEndController)
+
+import KanbanController from "./kanban_controller"
+application.register("kanban", KanbanController)

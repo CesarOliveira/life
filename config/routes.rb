@@ -46,6 +46,16 @@ Rails.application.routes.draw do
   resources :exam_results, only: [:create, :destroy]
   post "exam_groups/:id/favorite", to: "exam_group_favorites#toggle", as: :toggle_exam_group_favorite
   resources :goals, only: [:index, :create, :destroy]
+
+  # Tarefas (kanban): quadros personalizáveis, colunas, tarefas e comentários.
+  resources :task_boards, path: "tasks" do
+    resources :task_columns, path: "columns", only: [:create, :update, :destroy]
+    resources :tasks, path: "items", only: [:create]
+  end
+  resources :tasks, path: "task", only: [:show, :update, :destroy] do
+    patch :move, on: :member
+    resources :task_comments, path: "comments", only: [:create, :destroy]
+  end
   get "configurar", to: "setup#index", as: :setup
 
   # Conectores (integrações que puxam dados sozinhas)
@@ -68,6 +78,7 @@ Rails.application.routes.draw do
     post "usage_raw", to: "usage#create_raw"
     post "metrics", to: "metrics#create"
     post "workouts", to: "workouts#create"
+    post "tasks", to: "tasks#create"
     post "health_raw", to: "health_raw#create"
     get "exams", to: "exams#index"
   end

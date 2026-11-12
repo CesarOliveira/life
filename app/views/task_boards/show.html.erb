@@ -1,0 +1,78 @@
+<div class="space-y-5">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <h1 class="text-2xl font-bold text-slate-900"><%= t("tasks.title") %></h1>
+    <%= link_to t("tasks.customize"), edit_task_board_path(@board),
+          class: "rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50" %>
+  </div>
+
+  <%# Quadros da conta %>
+  <nav class="flex gap-2 overflow-x-auto pb-1">
+    <% @boards.each do |board| %>
+      <%= link_to board.name, task_board_path(board),
+            class: "shrink-0 rounded-lg border px-3 py-1.5 text-sm font-medium #{board == @board ? 'border-emerald-500 bg-emerald-600 text-white' : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-50'}" %>
+    <% end %>
+    <%= link_to t("tasks.new_board"), new_task_board_path,
+          class: "shrink-0 rounded-lg border border-dashed border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-500 hover:border-emerald-400 hover:text-emerald-700" %>
+  </nav>
+
+  <%# Nova tarefa %>
+  <details class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <summary class="cursor-pointer font-semibold text-emerald-700"><%= t("tasks.new_task") %></summary>
+    <%= form_with model: @task, url: task_board_tasks_path(@board), class: "mt-3 space-y-3" do |f| %>
+      <%= f.text_field :title, required: true, maxlength: 200, placeholder: t("tasks.title_placeholder"),
+            class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+      <%= f.text_area :description, rows: 3, placeholder: t("tasks.description_placeholder"),
+            class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+      <div class="flex flex-wrap items-end gap-3">
+        <div>
+          <%= f.label :task_column_id, t("tasks.column"), class: "mb-1 block text-xs font-medium text-slate-600" %>
+          <%= f.select :task_column_id, @columns.map { |c| [c.name, c.id] }, {},
+                class: "rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
+        </div>
+        <div>
+          <%= f.label :due_on, t("tasks.due_on"), class: "mb-1 block text-xs font-medium text-slate-600" %>
+          <%= f.date_field :due_on, class: "rounded-lg border border-slate-300 px-3 py-2 text-sm" %>
+        </div>
+        <%= f.submit t("tasks.create"), class: "rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700" %>
+      </div>
+    <% end %>
+  </details>
+
+  <%# Quadro: colunas lado a lado (rolagem horizontal no celular) %>
+  <div class="-mx-4 overflow-x-auto px-4 pb-2" data-controller="kanban" data-kanban-empty-value="<%= t('tasks.empty_column') %>">
+    <div class="flex min-w-max gap-3 lg:min-w-0">
+      <% @columns.each do |column| %>
+        <section class="flex w-72 shrink-0 flex-col rounded-2xl border-2 border-dashed p-3 lg:w-auto lg:min-w-0 lg:flex-1 <%= column_style(column, :column) %>"
+                 data-kanban-target="column" data-column-id="<%= column.id %>"
+                 data-action="dragover->kanban#over dragleave->kanban#leave drop->kanban#drop">
+          <header class="mb-3 flex items-center justify-between gap-2">
+            <h2 class="truncate text-xs font-bold uppercase tracking-wide text-slate-700"><%= column.name %></h2>
+            <span class="rounded-full px-2 py-0.5 text-xs font-semibold <%= column_style(column, :badge) %>" data-kanban-target="count"><%= column.tasks.size %></span>
+          </header>
+          <div class="min-h-24 flex-1 space-y-2" data-kanban-target="list">
+            <% column.tasks.each do |task| %>
+              <%= link_to task_path(task), draggable: true,
+                    class: "block cursor-grab rounded-xl border border-slate-200 bg-white p-3 shadow-sm hover:border-emerald-300 active:cursor-grabbing",
+                    data: { kanban_target: "card", task_id: task.id, move_url: move_task_path(task, format: :json),
+                            action: "dragstart->kanban#start dragend->kanban#end" } do %>
+                <div class="flex items-start justify-between gap-2">
+                  <p class="text-sm font-medium text-slate-900 <%= 'text-slate-500 line-through' if task.done? %>"><%= task.title %></p>
+                  <span class="shrink-0 text-xs text-slate-400">#<%= task.number %></span>
+                </div>
+                <p class="mt-1 flex flex-wrap items-center gap-x-2 text-xs text-slate-400">
+                  <span><%= t("tasks.ago", time: time_ago_in_words(task.updated_at)) %></span>
+                  <% if task.due_on %>
+                    <span class="<%= task.overdue? ? 'font-semibold text-rose-600' : '' %>">· <%= l(task.due_on, format: :day_month) %></span>
+                  <% end %>
+                  <% if task.comments.size.positive? %><span>· <%= t("tasks.comments_count", count: task.comments.size) %></span><% end %>
+                </p>
+              <% end %>
+            <% end %>
+            <p class="py-6 text-center text-xs text-slate-400 <%= 'hidden' if column.tasks.any? %>" data-kanban-target="empty"><%= t("tasks.empty_column") %></p>
+          </div>
+        </section>
+      <% end %>
+    </div>
+  </div>
+  <p class="text-xs text-slate-400"><%= t("tasks.drag_hint") %></p>
+</div>

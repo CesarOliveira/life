@@ -1,0 +1,33 @@
+<div class="mx-auto max-w-xl space-y-5">
+  <div>
+    <h1 class="text-2xl font-bold text-slate-900"><%= t("tasks.new_board_title") %></h1>
+    <p class="mt-1 text-sm text-slate-500"><%= t("tasks.new_board_hint") %></p>
+  </div>
+
+  <%= form_with model: @board, url: task_boards_path, class: "space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" do |f| %>
+    <% if @board.errors.any? %>
+      <div class="rounded-lg border border-rose-200 bg-rose-50 p-2 text-sm text-rose-700"><%= @board.errors.full_messages.to_sentence %></div>
+    <% end %>
+    <div>
+      <%= f.label :name, t("tasks.board_name"), class: "mb-1 block text-xs font-medium text-slate-600" %>
+      <%= f.text_field :name, required: true, maxlength: 80, autofocus: true, placeholder: t("tasks.board_name_placeholder"),
+            class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500" %>
+    </div>
+    <fieldset>
+      <legend class="mb-1 text-xs font-medium text-slate-600"><%= t("tasks.columns") %></legend>
+      <p class="mb-2 text-xs text-slate-400"><%= t("tasks.columns_hint") %></p>
+      <div class="space-y-2">
+        <% (@column_names + [""] * 2).first(6).each do |name| %>
+          <input type="text" name="columns[]" value="<%= name %>" maxlength="40" placeholder="<%= t('tasks.column_optional') %>"
+                 class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500">
+        <% end %>
+      </div>
+    </fieldset>
+    <div class="flex items-center gap-3">
+      <%= f.submit t("tasks.create_board"), class: "rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700" %>
+      <% if current_account.task_boards.exists? %>
+        <%= link_to t("habits.cancel"), task_boards_path, class: "text-sm text-slate-500 hover:underline" %>
+      <% end %>
+    </div>
+  <% end %>
+</div>
