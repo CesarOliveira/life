@@ -145,9 +145,10 @@ class MeasurementsController < ApplicationController
         label: group.first.label,
         unit: group.first.unit,
         latest: group.last,
-        rows: group.reverse
+        rows: group.reverse,
+        section: Measurement.section(key)
       }
-    end.sort_by { |g| g[:label] }
+    end.sort_by { |g| [Measurement.catalog_position(g[:key]), g[:label]] }
   end
 
   # Preenche categoria/unidade a partir do catálogo quando não informados.

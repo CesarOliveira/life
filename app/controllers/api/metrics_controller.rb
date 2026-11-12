@@ -1,6 +1,7 @@
 module Api
   # POST /api/metrics — ingestão de métricas de saúde (sono, passos, FC…) via
-  # token pessoal. Pensado para um Atalho do iPhone (saúde) ou outro coletor.
+  # token pessoal. Fonte principal: o app nativo (HealthKit do iPhone + Apple
+  # Watch), que envia um lote com todas as métricas por dia.
   # Corpo JSON:
   #   { "date": "2026-06-28",  # ou "period": "yesterday"/"today"
   #     "metrics": [ { "key": "sleep_minutes", "value": 437 },
@@ -9,6 +10,8 @@ module Api
   # a unidade e a faixa de referência saem do catálogo (Measurement::CATALOG)
   # quando não vierem no payload. Upsert idempotente por (account, key, date).
   class MetricsController < BaseController
+    after_action(only: :create) { record_ingestion("metrics") }
+
     MAX_ENTRIES = 500
 
     def create
@@ -33,6 +36,7 @@ module Api
         HabitRuleEvaluator.new(current_account).evaluate(rows.map { |r| r[:measured_on] })
       end
 
+      @ingestion_result = { upserted: rows.size, skipped: skipped, days: rows.map { |r| r[:measured_on] }.uniq.size }
       response = { ok: true, upserted: rows.size, skipped: skipped }
       response[:client_version] = data["client_version"].to_s.first(40) if data["client_version"].present?
       render json: response

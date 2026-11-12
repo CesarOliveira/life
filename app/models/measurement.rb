@@ -32,14 +32,52 @@ class Measurement < ApplicationRecord
   # Abas da página Saúde (produtividade vive no dashboard/hábitos, não ali).
   TABS = %w[health exam].freeze
 
+  # Seções da aba "Sinais" (ordem de exibição). Chaves fora do catálogo caem em "other".
+  SECTIONS = %w[sleep activity heart vitals workouts other].freeze
+
   # Catálogo de métricas de SAÚDE (sinais). Exames vivem em ExamType/ExamResult.
+  # As chaves de iPhone/Apple Watch vêm do app nativo (HealthCollector.swift) por
+  # POST /api/metrics; a ordem aqui é a ordem de exibição dentro da seção.
   CATALOG = {
-    "sleep_minutes" => { category: "health", unit: "min" },
-    "sleep_bedtime" => { category: "health", unit: "hh:mm" },
-    "sleep_wake"    => { category: "health", unit: "hh:mm" },
-    "steps"         => { category: "health", unit: "passos" },
-    "resting_hr"    => { category: "health", unit: "bpm" },
-    "active_energy" => { category: "health", unit: "kcal" },
+    # Sono (noite atribuída ao dia em que acorda)
+    "sleep_minutes"        => { category: "health", unit: "min", section: "sleep" },
+    "sleep_bedtime"        => { category: "health", unit: "hh:mm", section: "sleep" },
+    "sleep_wake"           => { category: "health", unit: "hh:mm", section: "sleep" },
+    "sleep_deep_minutes"   => { category: "health", unit: "min", section: "sleep" },
+    "sleep_rem_minutes"    => { category: "health", unit: "min", section: "sleep" },
+    "sleep_core_minutes"   => { category: "health", unit: "min", section: "sleep" },
+    "sleep_awake_minutes"  => { category: "health", unit: "min", section: "sleep" },
+    "sleep_in_bed_minutes" => { category: "health", unit: "min", section: "sleep" },
+    "wrist_temperature"    => { category: "health", unit: "°C", section: "sleep" },
+    # Atividade (anéis do Watch: energia ativa, exercício, horas em pé)
+    "steps"            => { category: "health", unit: "passos", section: "activity" },
+    "active_energy"    => { category: "health", unit: "kcal", section: "activity" },
+    "exercise_minutes" => { category: "health", unit: "min", section: "activity" },
+    "stand_hours"      => { category: "health", unit: "h", section: "activity" },
+    "stand_minutes"    => { category: "health", unit: "min", section: "activity" },
+    "distance_km"      => { category: "health", unit: "km", section: "activity" },
+    "flights_climbed"  => { category: "health", unit: "andares", section: "activity" },
+    "basal_energy"     => { category: "health", unit: "kcal", section: "activity" },
+    "walking_speed"    => { category: "health", unit: "km/h", section: "activity" },
+    "cycling_km"       => { category: "health", unit: "km", section: "activity" },
+    "swimming_m"       => { category: "health", unit: "m", section: "activity" },
+    "daylight_minutes" => { category: "health", unit: "min", section: "activity" },
+    # Coração
+    "resting_hr" => { category: "health", unit: "bpm", section: "heart" },
+    "hrv"        => { category: "health", unit: "ms", section: "heart" },
+    "hr_avg"     => { category: "health", unit: "bpm", section: "heart" },
+    "hr_min"     => { category: "health", unit: "bpm", section: "heart" },
+    "hr_max"     => { category: "health", unit: "bpm", section: "heart" },
+    "walking_hr" => { category: "health", unit: "bpm", section: "heart" },
+    "vo2max"     => { category: "health", unit: "ml/kg·min", section: "heart" },
+    # Respiração e oxigenação
+    "spo2"             => { category: "health", unit: "%", section: "vitals" },
+    "respiratory_rate" => { category: "health", unit: "resp/min", section: "vitals" },
+    # Treinos e atenção plena
+    "workout_minutes" => { category: "health", unit: "min", section: "workouts" },
+    "workout_count"   => { category: "health", unit: "treinos", section: "workouts" },
+    "workout_energy"  => { category: "health", unit: "kcal", section: "workouts" },
+    "mindful_minutes" => { category: "health", unit: "min", section: "workouts" },
     "github_contributions" => { category: "productivity", unit: "contributions" }
   }.freeze
 
@@ -57,6 +95,16 @@ class Measurement < ApplicationRecord
 
   def self.meta(key)
     CATALOG[key.to_s] || {}
+  end
+
+  # Seção de exibição da chave na aba "Sinais".
+  def self.section(key)
+    meta(key)[:section] || "other"
+  end
+
+  # Posição da chave no catálogo (ordem de exibição); desconhecidas vão para o fim.
+  def self.catalog_position(key)
+    CATALOG.keys.index(key.to_s) || CATALOG.size
   end
 
   # Chaves do catálogo de uma categoria (para o seletor manual).
@@ -82,7 +130,10 @@ class Measurement < ApplicationRecord
   # Chaves cujo valor é um horário (minutos desde a meia-noite) -> exibir HH:MM.
   TIME_KEYS = %w[sleep_bedtime sleep_wake].freeze
   # Chaves cujo valor é uma duração em minutos -> exibir "Xh Ym".
-  DURATION_KEYS = %w[sleep_minutes].freeze
+  DURATION_KEYS = %w[
+    sleep_minutes sleep_deep_minutes sleep_rem_minutes sleep_core_minutes sleep_awake_minutes
+    sleep_in_bed_minutes exercise_minutes stand_minutes daylight_minutes workout_minutes mindful_minutes
+  ].freeze
 
   def time_of_day?
     TIME_KEYS.include?(key.to_s)

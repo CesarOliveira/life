@@ -70,4 +70,26 @@ RSpec.describe "API::Metrics", type: :request do
     expect(json["upserted"]).to eq(1)
     expect(json["skipped"]).to eq(1)
   end
+
+  it "ingests an Apple Watch batch from the native app across days and logs it" do
+    yesterday = (Date.current - 1).iso8601
+    payload = { client_version: "app-0.2.0", metrics: [
+      { key: "hrv", value: 48.2, date: yesterday },
+      { key: "exercise_minutes", value: 42, date: yesterday },
+      { key: "sleep_deep_minutes", value: 61, date: Date.current.iso8601 },
+      { key: "spo2", value: 96.5, date: yesterday }
+    ] }.to_json
+
+    expect { post "/api/metrics", params: payload, headers: headers }
+      .to change(account.measurements, :count).by(4).and change(IngestionLog, :count).by(1)
+
+    hrv = account.measurements.find_by(key: "hrv")
+    expect(hrv).to have_attributes(unit: "ms", category: "health", measured_on: Date.current - 1)
+    expect(account.measurements.find_by(key: "sleep_deep_minutes").display_value).to eq("1h 1min")
+    expect(IngestionLog.last).to have_attributes(endpoint: "metrics", status: 200)
+    expect(IngestionLog.last.result).to include("upserted" => 4, "days" => 2)
+
+    # reenvio do mesmo lote sobrescreve, não duplica
+    expect { post "/api/metrics", params: payload, headers: headers }.not_to change(account.measurements, :count)
+  end
 end

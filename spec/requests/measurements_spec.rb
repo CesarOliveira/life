@@ -24,6 +24,20 @@ RSpec.describe "Measurements", type: :request do
       expect(response.body).to include(I18n.t("measurements.keys.steps"))
     end
 
+    it "groups signals by section in catalog order, with unknown keys under Other" do
+      { "hrv" => 48, "sleep_deep_minutes" => 61, "steps" => 9000, "custom_thing" => 3 }.each do |key, value|
+        create(:measurement, account: account, key: key, value: value, category: "health", measured_on: Date.current - 1)
+      end
+      get measurements_path
+      expect(response).to have_http_status(:ok)
+      body = response.body
+      order = %w[sleep activity heart other].map { |sec| body.index(">\n            #{I18n.t("measurements.sections.#{sec}")}") || body.index(I18n.t("measurements.sections.#{sec}")) }
+      expect(order).to all(be_present)
+      expect(order).to eq(order.sort)
+      expect(body).to include(I18n.t("measurements.keys.hrv"))
+      expect(body).to include("1h 1min") # duração formatada
+    end
+
     it "shows exam results grouped by catalog group when filtered" do
       create(:exam_result, account: account, exam_type: liver_type, value: 23, unit: "U/L")
       get measurements_path(category: "exam")
