@@ -5,6 +5,8 @@ class ScreenTimeController < ApplicationController
   DAY_RANGES = { "7" => 7, "15" => 15, "30" => 30 }.freeze
   MONTHS_OPTIONS = (2..12).to_a.freeze
 
+  TOP_APPS = 8 # apps visíveis antes do "ver todos"
+
   def index
     current_account.regenerate_api_token if current_account.api_token.blank?
     @token = current_account.api_token
@@ -14,11 +16,13 @@ class ScreenTimeController < ApplicationController
     usages = current_account.app_usages.where(date: @from..@to)
     @total = usages.sum(:seconds)
     by_date = usages.group(:date).sum(:seconds)
-    # Todos os dias do período (dias sem dado = barra vazia, como no iPhone).
-    @daily = (@from..@to).map { |d| { date: d, seconds: by_date[d] || 0 } }
-    @max_day = @daily.map { |d| d[:seconds] }.max || 0
-    days_with_data = by_date.size
-    @avg = days_with_data.positive? ? (by_date.values.sum / days_with_data) : 0
+    @days_with_data = by_date.size
+    @avg = @days_with_data.positive? ? (@total / @days_with_data) : 0
+    @peak = by_date.max_by { |_, seconds| seconds }
+    @last_data_on = current_account.app_usages.maximum(:date)
+
+    @chart = ScreenTimeChart.new(by_date, from: @from, to: @to)
+    @avg_delta = avg_delta_vs_previous
 
     names = usages.where.not(name: nil).group(:bundle_id).maximum(:name)
     @apps = usages.group(:bundle_id).sum(:seconds)
@@ -76,6 +80,21 @@ class ScreenTimeController < ApplicationController
   end
 
   private
+
+  # Variação (%) da média diária contra o período imediatamente anterior, de
+  # mesmo tamanho. nil quando um dos lados não tem dado (nada a comparar).
+  def avg_delta_vs_previous
+    return nil unless @avg.positive?
+
+    length = (@to - @from).to_i + 1
+    previous = current_account.app_usages.where(date: (@from - length)..(@from - 1)).group(:date).sum(:seconds)
+    return nil if previous.empty?
+
+    previous_avg = previous.values.sum / previous.size
+    return nil unless previous_avg.positive?
+
+    ((@avg - previous_avg) * 100.0 / previous_avg).round
+  end
 
   # Define @from/@to/@range_key/@months a partir dos params (intervalo livre,
   # meses, dias rápidos ou o padrão da tela). @today também.

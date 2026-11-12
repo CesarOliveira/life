@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>online.cesaroliveira.tempodetela</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Users/cesaroliveira/Scripts/tempodetela/tempodetela-runner</string>
+		<string>--dias</string>
+		<string>3</string>
+	</array>
+	<key>StandardErrorPath</key>
+	<string>/Users/cesaroliveira/Library/Logs/tempodetela.log</string>
+	<key>StandardOutPath</key>
+	<string>/Users/cesaroliveira/Library/Logs/tempodetela.log</string>
+	<key>StartCalendarInterval</key>
+	<dict>
+		<key>Hour</key>
+		<integer>6</integer>
+		<key>Minute</key>
+		<integer>15</integer>
+	</dict>
+</dict>
+</plist>

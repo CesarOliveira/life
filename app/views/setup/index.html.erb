@@ -25,91 +25,40 @@
     </div>
   </section>
 
-  <%# Fluxo único: o atalho Life faz tudo (Saúde + Tempo de tela) %>
-  <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" data-controller="checklist">
-    <h2 class="mb-1 font-semibold text-slate-900"><%= t("setup.shortcut_section") %></h2>
-    <p class="mb-4 text-xs text-slate-500"><%= t("setup.shortcut_hint") %></p>
+  <%# Coleta pelo Mac: situação, requisitos, token no Chaves e limites %>
+  <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <h2 class="mb-1 font-semibold text-slate-900"><%= t("setup.mac.section") %></h2>
+    <p class="mb-4 text-xs text-slate-500"><%= t("setup.mac.hint") %></p>
 
-    <ul class="space-y-4">
-      <li class="flex gap-3" data-checklist-row>
-        <input type="checkbox" data-checklist-target="item" data-key="copy_token" data-action="change->checklist#toggle"
-               class="mt-1 h-5 w-5 shrink-0 rounded border-slate-300 text-emerald-600">
-        <p class="flex-1 text-sm font-medium text-slate-800"><%= t("setup.steps.copy_token") %></p>
-      </li>
-
-      <li class="flex gap-3" data-checklist-row>
-        <input type="checkbox" data-checklist-target="item" data-key="install" data-action="change->checklist#toggle"
-               class="mt-1 h-5 w-5 shrink-0 rounded border-slate-300 text-emerald-600">
-        <div class="flex-1" data-controller="clipboard" data-clipboard-fetch-url-value="<%= screen_time_token_path %>">
-          <p class="text-sm font-medium text-slate-800"><%= t("setup.steps.install") %></p>
-          <p class="mt-0.5 text-xs text-slate-500"><%= t("setup.steps.install_help") %></p>
-          <div class="mt-2 flex items-center gap-2">
-            <%= link_to t("setup.steps.download"), health_shortcut_path(v: @health_version),
-                  data: { action: "clipboard#copy" },
-                  class: "inline-block rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700" %>
-            <span data-clipboard-target="feedback" class="hidden text-xs font-medium text-emerald-700"><%= t("setup.token_copied") %></span>
-          </div>
-        </div>
-      </li>
-
-      <li class="flex gap-3" data-checklist-row>
-        <input type="checkbox" data-checklist-target="item" data-key="automation" data-action="change->checklist#toggle"
-               class="mt-1 h-5 w-5 shrink-0 rounded border-slate-300 text-emerald-600">
-        <div class="flex-1">
-          <p class="text-sm font-medium text-slate-800"><%= t("setup.steps.automation") %></p>
-          <p class="mt-0.5 text-xs text-slate-500"><%= t("setup.automation_help") %></p>
-        </div>
-      </li>
-    </ul>
-
-    <%# Atalho: rodar sob demanda (dispara o Shortcuts em foreground). Útil se a
-        automação diária falhou. A automação continua sendo o disparo automático. %>
-    <div class="mt-4 border-t border-slate-100 pt-4">
-      <%= link_to t("setup.run_now"), @shortcut_run_url,
-            class: "inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50" %>
-      <p class="mt-1 text-xs text-slate-400"><%= t("setup.run_now_hint") %></p>
+    <div class="rounded-xl bg-slate-50 p-4">
+      <p class="text-xs font-medium uppercase tracking-wide text-slate-400"><%= t("setup.mac.status_title") %></p>
+      <p class="mt-1 text-sm font-medium text-slate-800">
+        <%= @last_ingestion ? t("setup.mac.last_received", time: l(@last_ingestion.created_at, format: :short)) : t("setup.mac.never_received") %>
+      </p>
+      <% if @last_data_on %>
+        <p class="text-sm text-slate-600"><%= t("setup.mac.last_day", date: l(@last_data_on, format: :long)) %></p>
+      <% end %>
     </div>
-  </section>
 
-  <%# Alertas durante o dia (opcional): atalho "Hoje" + automação ao fechar apps %>
-  <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" data-controller="checklist">
-    <h2 class="mb-1 font-semibold text-slate-900"><%= t("setup.today.section") %></h2>
-    <p class="mb-4 text-xs text-slate-500"><%= t("setup.today.hint") %></p>
-
-    <ul class="space-y-4">
-      <li class="flex gap-3" data-checklist-row>
-        <input type="checkbox" data-checklist-target="item" data-key="today_habit" data-action="change->checklist#toggle"
-               class="mt-1 h-5 w-5 shrink-0 rounded border-slate-300 text-emerald-600">
-        <div class="flex-1">
-          <p class="text-sm font-medium text-slate-800"><%= t("setup.today.steps.habit") %></p>
-          <p class="mt-0.5 text-xs text-slate-500"><%= t("setup.today.steps.habit_help") %> <%= link_to t("setup.today.steps.habit_link"), habits_path, class: "font-medium text-emerald-700 hover:underline" %></p>
-        </div>
-      </li>
-
-      <li class="flex gap-3" data-checklist-row>
-        <input type="checkbox" data-checklist-target="item" data-key="today_install" data-action="change->checklist#toggle"
-               class="mt-1 h-5 w-5 shrink-0 rounded border-slate-300 text-emerald-600">
-        <div class="flex-1" data-controller="clipboard" data-clipboard-fetch-url-value="<%= screen_time_token_path %>">
-          <p class="text-sm font-medium text-slate-800"><%= t("setup.today.steps.install") %></p>
-          <p class="mt-0.5 text-xs text-slate-500"><%= t("setup.today.steps.install_help") %></p>
-          <div class="mt-2 flex items-center gap-2">
-            <%= link_to t("setup.today.steps.download"), today_shortcut_path(v: @today_version),
-                  data: { action: "clipboard#copy" },
-                  class: "inline-block rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700" %>
-            <span data-clipboard-target="feedback" class="hidden text-xs font-medium text-emerald-700"><%= t("setup.token_copied") %></span>
-          </div>
-        </div>
-      </li>
-
-      <li class="flex gap-3" data-checklist-row>
-        <input type="checkbox" data-checklist-target="item" data-key="today_automation" data-action="change->checklist#toggle"
-               class="mt-1 h-5 w-5 shrink-0 rounded border-slate-300 text-emerald-600">
-        <div class="flex-1">
-          <p class="text-sm font-medium text-slate-800"><%= t("setup.today.steps.automation") %></p>
-          <p class="mt-0.5 text-xs text-slate-500"><%= t("setup.today.steps.automation_help", name: @today_shortcut_name) %></p>
-        </div>
-      </li>
+    <h3 class="mt-5 text-sm font-semibold text-slate-800"><%= t("setup.mac.requirements_title") %></h3>
+    <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-600">
+      <% %w[share icloud mac_on].each do |key| %>
+        <li><%= t("setup.mac.requirements.#{key}") %></li>
+      <% end %>
     </ul>
+
+    <h3 class="mt-5 text-sm font-semibold text-slate-800"><%= t("setup.mac.token_title") %></h3>
+    <p class="mt-1 text-sm text-slate-600"><%= t("setup.mac.token_help") %></p>
+    <pre class="mt-2 overflow-x-auto rounded-lg bg-slate-900 px-3 py-2 text-xs text-slate-100"><code>security add-generic-password -U -s tempodetela-life -a life -w</code></pre>
+
+    <h3 class="mt-5 text-sm font-semibold text-slate-800"><%= t("setup.mac.limits_title") %></h3>
+    <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-600">
+      <% %w[web carplay delay].each do |key| %>
+        <li><%= t("setup.mac.limits.#{key}") %></li>
+      <% end %>
+    </ul>
+
+    <p class="mt-4 text-xs text-slate-400"><%= t("setup.mac.guide") %></p>
   </section>
 
   <%# Conectores: integrações que puxam dados sozinhas %>
@@ -160,5 +109,4 @@
     </div>
   </section>
 
-  <p class="text-center text-xs text-slate-400"><%= t("setup.progress") %></p>
 </div>

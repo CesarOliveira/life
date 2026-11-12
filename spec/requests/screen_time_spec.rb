@@ -45,6 +45,28 @@ RSpec.describe "Screen time", type: :request do
     expect(response.body).to include(I18n.t("screen_time.n_months", count: 3))
   end
 
+  it "shows summary numbers, delta vs previous period and collapses the long tail of apps" do
+    10.times { |i| create(:app_usage, account: account, bundle_id: "App #{i}", name: "App #{i}", date: Date.current - 1, seconds: 600 * (i + 1)) }
+    create(:app_usage, account: account, bundle_id: "App 0", name: "App 0", date: Date.current - 2, seconds: 3600)
+    create(:app_usage, account: account, bundle_id: "App 0", name: "App 0", date: Date.current - 9, seconds: 7200)
+
+    get screen_time_path(range: "7")
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include(I18n.t("screen_time.days_with_data"))
+    expect(response.body).to include(I18n.t("screen_time.peak_day"))
+    expect(response.body).to include("9h 10m") # maior dia = ontem (soma dos 10 apps)
+    expect(response.body).to include("▲")      # média subiu contra os 7 dias anteriores
+    expect(response.body).to include(I18n.t("screen_time.show_more", count: 2, total: "50m"))
+  end
+
+  it "groups long periods into weekly bars starting at the first day with data" do
+    create(:app_usage, account: account, date: Date.current - 60, seconds: 3600)
+    create(:app_usage, account: account, date: Date.current - 1, seconds: 7200)
+    get screen_time_path(months: "6")
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include(I18n.t("screen_time.weekly_note"))
+  end
+
   it "regenerates the token and returns to the caller (fallback: setup)" do
     old = account.api_token
     post regenerate_screen_time_token_path

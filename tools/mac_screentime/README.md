@@ -1,86 +1,75 @@
-# Sync de Tempo de Uso por app — uso do PRÓPRIO Mac (opcional)
+# Tempo de tela do iPhone, coletado pelo Mac
 
-Coleta o **tempo de uso por app do próprio Mac** (via `knowledgeC.db`) e envia
-para o app Life (`life.cesaroliveira.online`).
+Fonte única do tempo de tela do Life. O iPhone sincroniza o uso de apps com o Mac
+pelo iCloud ("Compartilhar Entre Dispositivos"); o script lê esse histórico no
+Mac, grava um CSV no Google Drive e envia para `POST /api/usage`.
 
-> ⚠️ **Para o iPhone, use o Atalho — não este script.** No macOS 26 o Tempo de
-> Uso sincronizado do iPhone **não** fica legível no Mac (vira E2E no CloudKit;
-> o `knowledgeC.db` do Mac só tem o uso local dele). A rota oficial para o iPhone
-> é a ação de Atalhos **"Get App & Website Activity"** (iOS/macOS 26), que devolve
-> a lista por app e faz `POST` direto em `/api/usage`. Veja a página
-> **"Tempo de tela"** do app. Este script aqui serve **apenas** se você também
-> quiser registrar o uso do **Mac** (rode com `DEVICE_FILTER=local` e um `DEVICE`
-> próprio, ex.: `DEVICE=mac`).
+O Atalho do iPhone foi aposentado em 2026-11. Não rode os dois ao mesmo tempo: a
+página soma todos os registros e o uso seria contado em dobro.
 
-## 1. No iPhone
-- **Ajustes → Tempo de Uso → Compartilhar Entre Dispositivos = ON.**
-- Mesmo Apple ID do Mac, com 2FA. A 1ª sincronização pode levar algumas horas.
+## Arquivos
 
-## 2. No Mac
-1. Copie esta pasta para, por exemplo, `~/life-screentime/`.
-2. **Full Disk Access**: Ajustes do Sistema → Privacidade e Segurança → Acesso
-   Total ao Disco → adicione o **Terminal** (e/ou `/usr/bin/python3`). Sem isso o
-   script não lê o `knowledgeC.db`.
-3. Pegue seu **token** e o **endpoint** na página **"Tempo de tela"** do app.
-4. Teste manualmente:
-   ```bash
-   LIFE_TOKEN="seu_token" \
-   LIFE_ENDPOINT="https://life.cesaroliveira.online/api/usage" \
-   python3 ~/life-screentime/screentime_sync.py
-   ```
-   Deve imprimir algo como `2026-06-24: 12 apps -> HTTP 200 {"ok":true,...}`.
-   Recarregue a página "Tempo de tela" e veja os apps aparecerem.
+| Arquivo | Papel |
+|---|---|
+| `tempodetela.py` | Lê, soma por app e por dia, grava o CSV e envia ao Life. Só biblioteca padrão (Python 3.9+). |
+| `nomes_apps.json` | Dicionário editável bundle id → nome. O nome é a chave do app no Life. Aqui vai só um exemplo; a lista real fica na instalação. |
+| `tempodetela-runner.c` | Lançador para o launchd (ver "Acesso Total ao Disco"). |
+| `online.cesaroliveira.tempodetela.plist` | LaunchAgent: todo dia às 06:15, `--dias 3`. |
 
-## 3. Automatizar (launchd, a cada 6h)
-1. Edite `com.life.screentime.plist`: troque `SEU_USUARIO`, o caminho do script,
-   e cole `LIFE_TOKEN`.
-2. Instale:
-   ```bash
-   cp com.life.screentime.plist ~/Library/LaunchAgents/
-   launchctl load ~/Library/LaunchAgents/com.life.screentime.plist
-   launchctl start com.life.screentime   # roda agora
-   ```
-3. Logs em `/tmp/life-screentime.log` e `/tmp/life-screentime.err`.
-4. Para parar/atualizar:
-   ```bash
-   launchctl unload ~/Library/LaunchAgents/com.life.screentime.plist
-   ```
+Instalação em uso: `~/Scripts/tempodetela/` e `~/Library/LaunchAgents/`. Os
+caminhos estão fixos no `.c` e no `.plist`; ajuste se mudar de pasta ou usuário.
 
-## Troubleshooting
-- **`PermissionError: Operation not permitted` no knowledgeC.db** → falta Full Disk
-  Access. Ligue para o **app de terminal que você usa** (Terminal/iTerm/VS Code/
-  Warp/Ghostty…) em Ajustes do Sistema → Privacidade e Segurança → **Acesso Total
-  ao Disco**, e **feche (Cmd+Q) e reabra o terminal** (a permissão só vale para
-  processos novos).
-- **Rodou mas "Sem eventos de uso no período"** → ou o sync do iPhone ainda não
-  populou o Mac (espere), ou o filtro. Faça um teste de sanidade com o uso do
-  PRÓPRIO Mac (não depende de sync):
-  ```bash
-  DEVICE_FILTER=local LIFE_TOKEN="seu_token" python3 .../screentime_sync.py
-  ```
-  Se aparecerem apps do Mac, a leitura funciona — aí é só ligar "Compartilhar
-  Entre Dispositivos" no iPhone e esperar o iCloud sincronizar para usar `remote`.
+## De onde vêm os dados
 
-## Config (variáveis de ambiente)
-| Var | Default | O que é |
-|---|---|---|
-| `LIFE_TOKEN` | — | **Obrigatório.** Token da página Tempo de tela. |
-| `LIFE_ENDPOINT` | `…/api/usage` | URL do endpoint. |
-| `DEVICE` | `iphone` | Rótulo enviado junto. |
-| `DEVICE_FILTER` | `remote` | `remote` = só o que veio sincronizado (~iPhone); `local` = só o Mac; `all` = tudo. |
-| `DAYS` | `3` | Reenviar os últimos N dias (upsert idempotente — não duplica). |
+`~/Library/Biome/streams/restricted/App.InFocus/remote/<dispositivo>/` (arquivos
+SEGB v2). O id do iPhone vai em `DEVICE_ID` no script (placeholder nesta cópia); a lista de dispositivos
+fica na tabela `DevicePeer` de `~/Library/Biome/sync/sync.db`. O `knowledgeC.db`
+do macOS 26 **não** tem o uso de apps do iPhone.
 
-## Notas e limitações
-- **Device split é heurístico:** no knowledgeC, eventos do próprio Mac têm
-  `ZSOURCE` nulo e os sincronizados (iPhone/iPad/Watch) têm `ZSOURCE` preenchido.
-  Com só iPhone + Mac, `remote` ≈ iPhone. Se tiver iPad/Watch, pode misturar.
-- **Schema não-oficial:** o `knowledgeC.db` é interno da Apple e pode mudar entre
-  versões grandes de macOS/iOS — se parar de funcionar, o script precisa de ajuste.
-- **Mac precisa ligar de vez em quando** para rodar e enviar. Se ficar dias
-  desligado, os dados acumulam no iCloud e sobem quando ligar (não perde).
-- O envio é **idempotente** por `(device, data, bundle_id)`: reenviar o mesmo dia
-  sobrescreve, não duplica.
-- **Token:** colado no `.plist`, ele fica em texto claro num arquivo do seu usuário.
-  Trate como senha (deixe o `.plist` em `chmod 600`). Mais seguro: guardar no
-  Keychain e ler no script (`security find-generic-password -w ...`) em vez de env.
-  Se vazar, gere um novo na página "Tempo de tela" (invalida o antigo).
+O script copia os arquivos para `/tmp` antes de ler e apaga a cópia no final.
+Nunca escreve na pasta do Biome.
+
+## Acesso Total ao Disco
+
+A pasta do Biome é protegida. Em Ajustes do Sistema → Privacidade e Segurança →
+Acesso Total ao Disco:
+
+- **Execução manual:** libere o app de terminal em uso.
+- **launchd:** libere o binário `tempodetela-runner`. Liberar o Python do Xcode
+  não funciona. O runner chama o Python como processo filho, que herda a permissão.
+
+Compilar o runner (recompilar muda a assinatura e exige liberar de novo):
+
+```bash
+clang -O2 -o tempodetela-runner tempodetela-runner.c
+codesign -s - -i online.cesaroliveira.tempodetela-runner -f tempodetela-runner
+```
+
+## Token
+
+O token da conta (página "Configurar Tempo de tela") fica no Chaves do macOS:
+
+```bash
+security add-generic-password -U -s tempodetela-life -a life -w
+```
+
+## Uso
+
+```bash
+python3 tempodetela.py                # ontem
+python3 tempodetela.py --dias 28      # reenvia os últimos 28 dias
+python3 tempodetela.py --sem-life     # só o CSV
+launchctl kickstart -k gui/$(id -u)/online.cesaroliveira.tempodetela
+tail ~/Library/Logs/tempodetela.log
+```
+
+Códigos de saída: 0 ok, 2 sem acesso ao Biome, 3 Drive não encontrado, 4 envio ao
+Life falhou (o CSV é gravado mesmo assim).
+
+## Limites
+
+- O Mac guarda cerca de um mês do histórico do iPhone.
+- O dado chega em lotes, com horas de atraso. Por isso cada execução reenvia os
+  últimos 3 dias; o servidor faz upsert por (conta, dispositivo, dia, app).
+- Sem uso de sites e sem apps usados pelo CarPlay.
+- O formato SEGB é interno da Apple e pode mudar entre versões do macOS.

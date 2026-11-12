@@ -1,51 +1,89 @@
 <div class="space-y-6">
-  <h1 class="text-2xl font-bold text-slate-900"><%= t("screen_time.title") %></h1>
+  <div class="flex flex-wrap items-baseline justify-between gap-2">
+    <h1 class="text-2xl font-bold text-slate-900"><%= t("screen_time.title") %></h1>
+    <% if @last_data_on %>
+      <p class="text-xs text-slate-400"><%= t("screen_time.last_data", date: l(@last_data_on, format: :day_month)) %></p>
+    <% end %>
+  </div>
 
   <%# Filtros: dias rápidos / meses / intervalo livre %>
   <%= render "filters", link_proc: ->(p) { screen_time_path(p) }, hidden_params: {},
         range_key: @range_key, months: @months, from: @from, to: @to, today: @today %>
 
   <% if @apps.any? || @total.positive? %>
-    <%# Card principal: total grande + barras com linha da média (estilo iOS) %>
+    <% multi_day = @from != @to %>
+    <%# Card principal: média/total em destaque, indicadores e gráfico %>
     <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <p class="text-xs font-medium uppercase tracking-wide text-slate-400">
         <%= screen_time_period_label(range_key: @range_key, from: @from, to: @to, months: @months) %>
       </p>
-      <p class="mt-1 text-3xl font-bold text-slate-900"><%= humanize_duration(@total) %></p>
-      <% if @from != @to && @avg.positive? %>
-        <p class="text-xs text-slate-400"><%= t("screen_time.avg_day") %>: <%= humanize_duration(@avg) %></p>
+
+      <div class="mt-1 flex flex-wrap items-end gap-x-3 gap-y-1">
+        <p class="text-3xl font-bold text-slate-900"><%= humanize_duration(multi_day ? @avg : @total) %></p>
+        <% if multi_day %><p class="pb-1 text-sm text-slate-500"><%= t("screen_time.per_day") %></p><% end %>
+        <% if @avg_delta %>
+          <%# Menos tela = bom (verde); mais tela = atenção (rosa). %>
+          <span class="mb-1 rounded-full px-2 py-0.5 text-xs font-semibold <%= @avg_delta <= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700' %>"
+                title="<%= t('screen_time.delta_hint') %>">
+            <%= @avg_delta.positive? ? "▲" : "▼" %> <%= @avg_delta.abs %>%
+          </span>
+        <% end %>
+      </div>
+
+      <% if multi_day %>
+        <dl class="mt-4 grid grid-cols-3 gap-3 border-t border-slate-100 pt-4 text-sm">
+          <div>
+            <dt class="text-xs text-slate-400"><%= t("screen_time.total_period") %></dt>
+            <dd class="font-semibold text-slate-800"><%= humanize_duration(@total) %></dd>
+          </div>
+          <div>
+            <dt class="text-xs text-slate-400"><%= t("screen_time.days_with_data") %></dt>
+            <dd class="font-semibold text-slate-800"><%= @days_with_data %></dd>
+          </div>
+          <% if @peak %>
+            <div>
+              <dt class="text-xs text-slate-400"><%= t("screen_time.peak_day") %></dt>
+              <dd class="font-semibold text-slate-800">
+                <%= humanize_duration(@peak[1]) %>
+                <span class="font-normal text-slate-400">· <%= l(@peak[0], format: :day_month) %></span>
+              </dd>
+            </div>
+          <% end %>
+        </dl>
       <% end %>
 
-      <% if @from != @to && @max_day.positive? %>
-        <div class="relative mt-4" data-controller="tooltip">
+      <% chart_max = @chart.max %>
+      <% if multi_day && chart_max.positive? && @chart.bars.size > 1 %>
+        <% if @chart.weekly? %>
+          <p class="mt-4 text-xs text-slate-400"><%= t("screen_time.weekly_note") %></p>
+        <% end %>
+        <div class="relative <%= @chart.weekly? ? 'mt-2' : 'mt-4' %>" data-controller="tooltip">
           <div data-tooltip-target="bubble"
                class="pointer-events-none absolute z-20 hidden whitespace-nowrap rounded-lg bg-slate-900 px-2.5 py-1.5 text-center text-[11px] leading-snug text-white shadow-lg"></div>
           <%# linha tracejada da média %>
-          <% avg_pct = @max_day.zero? ? 0 : (@avg * 100.0 / @max_day).clamp(0, 100) %>
+          <% avg_pct = (@avg * 100.0 / chart_max).clamp(0, 100) %>
           <div class="pointer-events-none absolute inset-x-0 z-10 border-t-2 border-dashed border-slate-300"
                style="bottom: calc(<%= avg_pct.round(1) %>% * 0.86 + 22px)">
             <span class="absolute -top-2.5 right-0 bg-white pl-1 text-[10px] text-slate-400"><%= t("screen_time.avg_label") %></span>
           </div>
 
-          <div class="flex h-44 items-end gap-1">
-            <% @daily.each do |d| %>
-              <% pct = @max_day.zero? ? 0 : (d[:seconds] * 100 / @max_day) %>
+          <div class="flex h-44 items-end <%= @chart.bars.size > 31 ? 'gap-0.5' : 'gap-1' %>">
+            <% @chart.bars.each do |bar| %>
+              <% pct = bar[:seconds] * 100 / chart_max %>
+              <% tip = if bar[:weekly]
+                         t("screen_time.week_tooltip", from: l(bar[:from], format: :day_month), to: l(bar[:to], format: :day_month),
+                           avg: humanize_duration(bar[:seconds]), count: bar[:days])
+                       else
+                         "#{t('date.abbr_day_names')[bar[:from].wday]}, #{l(bar[:from], format: :day_month)} — #{bar[:days].positive? ? humanize_duration(bar[:seconds]) : t('screen_time.no_data')}"
+                       end %>
               <div class="flex min-w-0 flex-1 flex-col items-center justify-end gap-1 self-stretch"
-                   data-tooltip-content="<%= l(d[:date], format: :day_month) %> — <%= humanize_duration(d[:seconds]) %>"
+                   data-tooltip-content="<%= tip %>"
                    data-action="mouseenter->tooltip#show mouseleave->tooltip#hide click->tooltip#show">
-                <div class="flex w-full flex-1 items-end">
-                  <div class="w-full rounded-t <%= d[:seconds].positive? ? 'bg-emerald-500' : 'bg-slate-100' %>"
-                       style="height: <%= d[:seconds].positive? ? [pct, 2].max : 2 %>%"></div>
+                <div class="flex w-full flex-1 items-end justify-center">
+                  <div class="w-full max-w-10 rounded-t <%= bar[:seconds].positive? ? (bar[:seconds] > @avg ? 'bg-emerald-600' : 'bg-emerald-400') : 'bg-slate-100' %>"
+                       style="height: <%= bar[:seconds].positive? ? [pct, 2].max : 2 %>%"></div>
                 </div>
-                <span class="h-4 truncate text-[9px] font-medium uppercase text-slate-400">
-                  <% if @daily.size <= 7 %>
-                    <%= t("date.abbr_day_names")[d[:date].wday].first(1).upcase %>
-                  <% elsif @daily.size <= 16 %>
-                    <%= d[:date].day %>
-                  <% else %>
-                    <%= d[:date].day if (d[:date].day % 5).zero? %>
-                  <% end %>
-                </span>
+                <span class="h-4 whitespace-nowrap text-[9px] font-medium uppercase text-slate-400"><%= bar[:label] %></span>
               </div>
             <% end %>
           </div>
@@ -53,32 +91,62 @@
       <% end %>
     </section>
 
-    <%# Mais usados (no período) %>
+    <%# Mais usados (no período): posição, participação no total e média por dia %>
     <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <h2 class="mb-4 font-semibold text-slate-900"><%= t("screen_time.most_used") %></h2>
+      <div class="mb-4 flex items-baseline justify-between gap-3">
+        <h2 class="font-semibold text-slate-900"><%= t("screen_time.most_used") %></h2>
+        <p class="text-xs text-slate-400"><%= t("screen_time.apps_count", count: @apps.size) %></p>
+      </div>
       <% if @apps.empty? %>
         <p class="text-sm text-slate-500"><%= t("screen_time.app_empty") %></p>
       <% else %>
-        <ul class="space-y-3">
-          <% @apps.each do |a| %>
-            <li>
-              <%= link_to screen_time_app_path(bundle_id: a[:bundle_id]), class: "block rounded-lg -mx-2 px-2 py-1 hover:bg-slate-50" do %>
-                <div class="mb-1 flex items-center justify-between gap-3 text-sm">
+        <% app_row = lambda do |a, position| %>
+          <li>
+            <%= link_to screen_time_app_path(bundle_id: a[:bundle_id]), class: "block rounded-lg -mx-2 px-2 py-1 hover:bg-slate-50" do %>
+              <div class="mb-1 flex items-center justify-between gap-3 text-sm">
+                <span class="flex min-w-0 items-baseline gap-2">
+                  <span class="w-5 shrink-0 text-right text-xs tabular-nums text-slate-400"><%= position %></span>
                   <span class="truncate font-medium text-slate-700"><%= a[:name] %></span>
-                  <span class="shrink-0 text-slate-500"><%= humanize_duration(a[:seconds]) %> ›</span>
-                </div>
-                <div class="h-2 w-full rounded-full bg-slate-100">
-                  <div class="h-2 rounded-full bg-emerald-500" style="width: <%= @max_app.zero? ? 0 : (a[:seconds] * 100 / @max_app) %>%"></div>
-                </div>
+                </span>
+                <span class="shrink-0 text-right text-slate-500">
+                  <span class="font-medium text-slate-700"><%= humanize_duration(a[:seconds]) %></span>
+                  <span class="ml-1 text-xs text-slate-400"><%= @total.positive? ? (a[:seconds] * 100.0 / @total).round : 0 %>%</span>
+                  ›
+                </span>
+              </div>
+              <div class="ml-7 h-2 rounded-full bg-slate-100">
+                <div class="h-2 rounded-full bg-emerald-500" style="width: <%= @max_app.zero? ? 0 : (a[:seconds] * 100 / @max_app) %>%"></div>
+              </div>
+              <% if multi_day && @days_with_data > 1 %>
+                <p class="ml-7 mt-1 text-[11px] text-slate-400"><%= t("screen_time.app_avg", avg: humanize_duration(a[:seconds] / @days_with_data)) %></p>
               <% end %>
-            </li>
-          <% end %>
+            <% end %>
+          </li>
+        <% end %>
+
+        <ul class="space-y-3">
+          <% @apps.first(ScreenTimeController::TOP_APPS).each_with_index { |a, i| app_row.call(a, i + 1) } %>
         </ul>
+        <% rest = @apps.drop(ScreenTimeController::TOP_APPS) %>
+        <% if rest.any? %>
+          <details class="group mt-3">
+            <summary class="cursor-pointer list-none rounded-lg border border-slate-200 px-3 py-2 text-center text-xs font-medium text-slate-600 hover:bg-slate-50">
+              <span class="group-open:hidden"><%= t("screen_time.show_more", count: rest.size, total: humanize_duration(rest.sum { |a| a[:seconds] })) %></span>
+              <span class="hidden group-open:inline"><%= t("screen_time.show_less") %></span>
+            </summary>
+            <ul class="mt-3 space-y-3">
+              <% rest.each_with_index { |a, i| app_row.call(a, i + 1 + ScreenTimeController::TOP_APPS) } %>
+            </ul>
+          </details>
+        <% end %>
       <% end %>
     </section>
   <% else %>
     <div class="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
       <p class="text-slate-500"><%= t("screen_time.empty") %></p>
+      <% if @last_data_on %>
+        <p class="mt-1 text-xs text-slate-400"><%= t("screen_time.empty_hint", date: l(@last_data_on, format: :day_month)) %></p>
+      <% end %>
       <%= link_to t("screen_time.go_setup"), setup_path, class: "mt-3 inline-block rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700" %>
     </div>
   <% end %>

@@ -9,13 +9,16 @@ RSpec.describe "Setup", type: :request do
     sign_in user
   end
 
-  it "renders a single-flow checklist with the masked token and download link" do
+  it "shows the masked token and the Mac collection status" do
     account.update!(api_token: "abcd1234567890efgh")
+    create(:app_usage, account: account, date: Date.current - 1, seconds: 600)
     get setup_path
     expect(response).to have_http_status(:ok)
-    expect(response.body).to include(health_shortcut_path(v: HealthShortcutBuilder::VERSION))
     expect(response.body).not_to include("abcd1234567890efgh") # token mascarado
-    expect(response.body).to include(I18n.t("setup.shortcut_section"))
+    expect(response.body).to include(I18n.t("setup.mac.section"))
+    expect(response.body).to include(I18n.t("setup.mac.never_received"))
+    expect(response.body).to include("tempodetela-life")
+    expect(response.body).not_to include(".shortcut")
   end
 
   it "requires authentication" do
