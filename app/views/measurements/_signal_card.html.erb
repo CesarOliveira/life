@@ -1,0 +1,47 @@
+<%# locals: g (grupo do HealthSignals) — cartão compacto: valor, variação, médias e série curta. %>
+<% latest = g[:latest] %>
+<% plain = Measurement.self_explanatory?(g[:key]) %>
+<% unit = plain ? nil : display_unit(g[:unit]) %>
+<article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+  <div class="flex items-start justify-between gap-2">
+    <h3 class="flex min-w-0 items-center gap-1.5 text-sm font-medium text-slate-600">
+      <% if (ic = metric_icon(g[:key], css: "h-4 w-4 shrink-0 text-emerald-600")) %><%= ic %><% end %>
+      <span class="truncate"><%= g[:label] %></span>
+    </h3>
+    <%= trend_badge(g[:delta], g[:trend]) %>
+  </div>
+
+  <p class="mt-1 text-2xl font-bold tabular-nums text-slate-900">
+    <%= plain ? latest.display_value : number_with_delimiter(latest.display_value) %>
+    <% if unit.present? %><span class="text-sm font-medium text-slate-400"><%= unit %></span><% end %>
+  </p>
+  <p class="text-xs text-slate-400"><%= l(latest.measured_on, format: :day_month) %></p>
+
+  <% if (spark = sparkline_svg(g[:spark])) %>
+    <div class="mt-2"><%= spark %></div>
+  <% end %>
+
+  <% if g[:rows].size > 1 %>
+    <dl class="mt-2 flex gap-4 text-xs text-slate-500">
+      <div><dt class="inline text-slate-400"><%= t("measurements.avg7") %></dt>
+        <dd class="inline font-medium text-slate-700"><%= number_with_delimiter(Measurement.format_value(g[:key], g[:avg7])) %></dd></div>
+      <div><dt class="inline text-slate-400"><%= t("measurements.avg30") %></dt>
+        <dd class="inline font-medium text-slate-700"><%= number_with_delimiter(Measurement.format_value(g[:key], g[:avg30])) %></dd></div>
+    </dl>
+  <% end %>
+
+  <details class="mt-2">
+    <summary class="cursor-pointer text-xs font-medium text-slate-400 hover:text-slate-600"><%= t("measurements.history") %> (<%= g[:rows].size %>)</summary>
+    <ul class="mt-2 max-h-56 divide-y divide-slate-100 overflow-y-auto">
+      <% g[:rows].each do |m| %>
+        <li class="flex items-center gap-3 py-1.5 text-xs">
+          <span class="w-12 shrink-0 text-slate-500"><%= l(m.measured_on, format: :day_month) %></span>
+          <span class="font-medium tabular-nums text-slate-900"><%= plain ? m.display_value : "#{number_with_delimiter(m.display_value)} #{unit}" %></span>
+          <%= button_to t("memberships.remove"), measurement_path(m), method: :delete,
+                class: "ml-auto shrink-0 text-rose-600 hover:underline",
+                form: { class: "ml-auto", data: { turbo_confirm: t("measurements.remove_confirm") } } %>
+        </li>
+      <% end %>
+    </ul>
+  </details>
+</article>

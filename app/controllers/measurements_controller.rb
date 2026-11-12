@@ -11,8 +11,7 @@ class MeasurementsController < ApplicationController
       load_exams
     else
       @measurement = current_account.measurements.new(measured_on: Date.current, category: "health")
-      @groups = build_groups("health")
-      @catalog_keys = Measurement.catalog_keys("health")
+      load_signals
       load_weight
     end
   end
@@ -43,8 +42,7 @@ class MeasurementsController < ApplicationController
       redirect_to measurements_path(category: "health"), notice: t("flash.measurements.saved")
     else
       @category = "health"
-      @groups = build_groups("health")
-      @catalog_keys = Measurement.catalog_keys("health")
+      load_signals
       load_weight
       render :index, status: :unprocessable_entity
     end
@@ -136,19 +134,11 @@ class MeasurementsController < ApplicationController
     @weight_entry = current_account.weight_entries.new(date: Date.current)
   end
 
-  # Agrupa as medições por chave: [{ key, label, unit, latest, rows, chart }, ...].
-  def build_groups(category)
-    rows = current_account.measurements.where(category: category).chronological.to_a
-    rows.group_by(&:key).map do |key, group|
-      {
-        key: key,
-        label: group.first.label,
-        unit: group.first.unit,
-        latest: group.last,
-        rows: group.reverse,
-        section: Measurement.section(key)
-      }
-    end.sort_by { |g| [Measurement.catalog_position(g[:key]), g[:label]] }
+  # Aba Sinais: cartões por métrica, resumo, sono, anéis e treinos.
+  def load_signals
+    @signals = HealthSignals.new(current_account)
+    @groups = @signals.groups
+    @catalog_keys = Measurement.catalog_keys("health")
   end
 
   # Preenche categoria/unidade a partir do catálogo quando não informados.

@@ -57,6 +57,39 @@ module ApplicationHelper
                 "stroke-linejoin": "round", "aria-hidden": "true")
   end
 
+  # Série curta em SVG (linha + área), sem JS: `points` = [{ date:, value: }] em
+  # ordem cronológica. O eixo X segue as datas, então dias sem dado viram vão.
+  def sparkline_svg(points, css: "h-10 w-full text-emerald-500")
+    return nil if points.size < 2
+
+    values = points.map { |p| p[:value].to_f }
+    min, max = values.minmax
+    span = (points.last[:date] - points.first[:date]).to_f
+    range = (max - min).zero? ? 1.0 : (max - min)
+    coords = points.map do |p|
+      x = span.zero? ? 0 : (p[:date] - points.first[:date]) * 100.0 / span
+      y = 28 - ((p[:value].to_f - min) * 26.0 / range)
+      "#{x.round(1)},#{y.round(1)}"
+    end
+    area = "0,30 #{coords.join(' ')} 100,30"
+    content_tag(:svg, class: css, viewBox: "0 0 100 30", preserveAspectRatio: "none", "aria-hidden": "true") do
+      safe_join([
+        tag.polygon(points: area, fill: "currentColor", "fill-opacity": "0.12"),
+        tag.polyline(points: coords.join(" "), fill: "none", stroke: "currentColor", "stroke-width": "1.5",
+                     "vector-effect": "non-scaling-stroke", "stroke-linejoin": "round", "stroke-linecap": "round")
+      ])
+    end
+  end
+
+  # Selo de variação (▲/▼ %) colorido pelo sentido "bom" da métrica.
+  def trend_badge(delta, trend)
+    return nil if delta.nil? || delta.zero?
+
+    color = { good: "bg-emerald-100 text-emerald-700", bad: "bg-rose-100 text-rose-700" }[trend] || "bg-slate-100 text-slate-600"
+    content_tag(:span, "#{delta.positive? ? '▲' : '▼'} #{delta.abs}%",
+                class: "rounded-full px-1.5 py-0.5 text-[10px] font-semibold #{color}", title: t("measurements.vs_avg"))
+  end
+
   METRIC_ICON_PATHS = {
     "resting_hr" => '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/>',
     "steps" => '<path d="M6 21c-1.5 0-2.5-1-2.5-3 0-1.2.3-2.3.3-3.5C4 12 4.5 10 6.5 10S9 12 9 14.5c0 1.3-.3 2.4-.3 3.5C8.7 20 7.5 21 6 21Z"/><path d="M6.5 10c0-2 .2-3.4-.3-5.2C5.8 3.4 6.4 2 8 2s2.2 1.4 1.8 2.8C9.3 6.6 9.5 8 9.5 10"/><path d="M17.5 22c1.4 0 2.3-1 2.3-2.8 0-1.1-.3-2.1-.3-3.2 0-2.3-.5-4-2.3-4S15 13.7 15 16c0 1.1.3 2.1.3 3.2 0 1.8.8 2.8 2.2 2.8Z"/>',

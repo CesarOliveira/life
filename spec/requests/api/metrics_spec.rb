@@ -92,4 +92,19 @@ RSpec.describe "API::Metrics", type: :request do
     # reenvio do mesmo lote sobrescreve, não duplica
     expect { post "/api/metrics", params: payload, headers: headers }.not_to change(account.measurements, :count)
   end
+
+  it "routes body weight and height to their own records instead of measurements" do
+    account.update!(height_cm: nil)
+    payload = { metrics: [
+      { key: "body_weight", value: 82.4, date: (Date.current - 1).iso8601 },
+      { key: "body_height", value: 178, date: (Date.current - 1).iso8601 },
+      { key: "body_fat", value: 18.5, date: (Date.current - 1).iso8601 }
+    ] }.to_json
+
+    expect { post "/api/metrics", params: payload, headers: headers }
+      .to change(account.weight_entries, :count).by(1).and change(account.measurements, :count).by(1)
+    expect(account.weight_entries.last.weight_kg).to eq(82.4)
+    expect(account.reload.height_cm).to eq(178)
+    expect(account.measurements.pluck(:key)).to eq(["body_fat"])
+  end
 end

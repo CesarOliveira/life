@@ -31,11 +31,29 @@ RSpec.describe "Measurements", type: :request do
       get measurements_path
       expect(response).to have_http_status(:ok)
       body = response.body
-      order = %w[sleep activity heart other].map { |sec| body.index(">\n            #{I18n.t("measurements.sections.#{sec}")}") || body.index(I18n.t("measurements.sections.#{sec}")) }
+      order = %w[sleep activity heart other].map { |sec| body.index(%(id="sec-#{sec}")) }
       expect(order).to all(be_present)
       expect(order).to eq(order.sort)
       expect(body).to include(I18n.t("measurements.keys.hrv"))
       expect(body).to include("1h 1min") # duração formatada
+    end
+
+    it "shows the overview: summary with trend, last night, rings and recent workouts" do
+      (1..5).each { |i| create(:measurement, account: account, key: "steps", value: 5000, category: "health", measured_on: Date.current - 1 - i) }
+      { "steps" => 10_000, "sleep_minutes" => 430, "sleep_bedtime" => 1380, "sleep_wake" => 410, "sleep_deep_minutes" => 60,
+        "sleep_rem_minutes" => 100, "active_energy" => 600, "move_goal" => 500 }.each do |key, value|
+        create(:measurement, account: account, key: key, value: value, category: "health", measured_on: Date.current - 1)
+      end
+      Workout.create!(account: account, uuid: "w-1", activity: "running", started_at: 1.day.ago, date: Date.current - 1,
+                      duration_seconds: 1800, distance_m: 5000, energy_kcal: 350, avg_hr: 150)
+
+      get measurements_path
+      body = response.body
+      expect(body).to include(I18n.t("measurements.overview.title"))
+      expect(body).to include("▲ 100%")                 # 10.000 passos contra média de 5.000
+      expect(body).to include("7h 10min", "23:00 → 06:50") # última noite
+      expect(body).to include("120%")                   # anel de movimento: 600 de 500
+      expect(body).to include(I18n.t("workouts.activities.running"), "6:00 /km")
     end
 
     it "shows exam results grouped by catalog group when filtered" do

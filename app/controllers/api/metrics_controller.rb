@@ -31,18 +31,40 @@ module Api
       end
 
       rows = rows.reverse.uniq { |r| [r[:key], r[:measured_on]] }.reverse
+      rows = route_body_metrics(rows)
       if rows.any?
         Measurement.upsert_all(rows, unique_by: :idx_measurements_unique, record_timestamps: true)
         HabitRuleEvaluator.new(current_account).evaluate(rows.map { |r| r[:measured_on] })
       end
 
-      @ingestion_result = { upserted: rows.size, skipped: skipped, days: rows.map { |r| r[:measured_on] }.uniq.size }
-      response = { ok: true, upserted: rows.size, skipped: skipped }
+      @ingestion_result = { upserted: rows.size, skipped: skipped, body: @body_rows.to_i,
+                            days: rows.map { |r| r[:measured_on] }.uniq.size }
+      response = { ok: true, upserted: rows.size + @body_rows.to_i, skipped: skipped }
       response[:client_version] = data["client_version"].to_s.first(40) if data["client_version"].present?
       render json: response
     end
 
     private
+
+    # Peso e altura têm registro próprio no Life (WeightEntry / Account#height_cm):
+    # as chaves `body_weight` e `body_height` vão para lá, não para Measurement.
+    def route_body_metrics(rows)
+      weights, rest = rows.partition { |r| r[:key] == "body_weight" }
+      heights, rest = rest.partition { |r| r[:key] == "body_height" }
+
+      weight_rows = weights.select { |r| r[:value].positive? && r[:value] < 1000 }
+                           .map { |r| { account_id: current_account.id, date: r[:measured_on], weight_kg: r[:value].round(2) } }
+      if weight_rows.any?
+        WeightEntry.upsert_all(weight_rows, unique_by: :index_weight_entries_on_account_id_and_date, record_timestamps: true)
+      end
+
+      height = heights.max_by { |r| r[:measured_on] }
+      if height && current_account.height_cm.blank? && height[:value].between?(50, 260)
+        current_account.update(height_cm: height[:value].round)
+      end
+      @body_rows = weight_rows.size + heights.size
+      rest
+    end
 
     def build_row(entry, default_date)
       return nil unless entry.is_a?(Hash)

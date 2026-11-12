@@ -1,0 +1,114 @@
+<%# locals: signals (HealthSignals) — topo da aba Sinais: destaques, sono, anéis e treinos. %>
+<% summary = signals.summary %>
+<% night = signals.last_night %>
+<% rings = signals.rings %>
+<% workouts = signals.workouts %>
+<% stage_colors = { "sleep_deep_minutes" => "bg-indigo-600", "sleep_core_minutes" => "bg-sky-400",
+                    "sleep_rem_minutes" => "bg-violet-400", "sleep_awake_minutes" => "bg-amber-300" } %>
+<% ring_colors = { "move" => "bg-rose-500", "exercise" => "bg-lime-500", "stand" => "bg-cyan-500" } %>
+
+<% if summary.any? %>
+  <section>
+    <h2 class="mb-3 text-lg font-semibold text-slate-900"><%= t("measurements.overview.title") %></h2>
+    <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <% summary.each do |g| %>
+        <% plain = Measurement.self_explanatory?(g[:key]) %>
+        <a href="#sec-<%= g[:section] %>" class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm hover:border-emerald-300">
+          <p class="truncate text-xs font-medium text-slate-500"><%= g[:label] %></p>
+          <p class="mt-0.5 text-xl font-bold tabular-nums text-slate-900">
+            <%= plain ? g[:latest].display_value : number_with_delimiter(g[:latest].display_value) %>
+            <% unless plain %><span class="text-xs font-medium text-slate-400"><%= display_unit(g[:unit]) %></span><% end %>
+          </p>
+          <div class="mt-1 flex items-center justify-between gap-1">
+            <span class="text-[11px] text-slate-400"><%= l(g[:latest].measured_on, format: :day_month) %></span>
+            <%= trend_badge(g[:delta], g[:trend]) %>
+          </div>
+        </a>
+      <% end %>
+    </div>
+  </section>
+<% end %>
+
+<% if night || rings.any? %>
+  <div class="grid gap-4 lg:grid-cols-2">
+    <% if night %>
+      <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="flex items-baseline justify-between gap-2">
+          <h2 class="font-semibold text-slate-900"><%= t("measurements.overview.last_night") %></h2>
+          <span class="text-xs text-slate-400"><%= l(night[:date], format: :day_month) %></span>
+        </div>
+        <p class="mt-1 text-3xl font-bold text-slate-900"><%= Measurement.format_value("sleep_minutes", night[:minutes]) %></p>
+        <% if night[:bedtime] && night[:wake] %>
+          <p class="text-sm text-slate-500"><%= night[:bedtime].display_value %> → <%= night[:wake].display_value %></p>
+        <% end %>
+        <% if night[:stages].any? %>
+          <div class="mt-4 flex h-3 overflow-hidden rounded-full bg-slate-100">
+            <% night[:stages].each do |s| %>
+              <div class="<%= stage_colors[s[:key]] %>" style="width: <%= s[:pct] %>%"
+                   title="<%= Measurement.key_label(s[:key]) %> — <%= Measurement.format_value(s[:key], s[:minutes]) %>"></div>
+            <% end %>
+          </div>
+          <ul class="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-slate-600">
+            <% night[:stages].each do |s| %>
+              <li class="flex items-center gap-2">
+                <span class="h-2 w-2 shrink-0 rounded-full <%= stage_colors[s[:key]] %>"></span>
+                <span class="truncate"><%= Measurement.key_label(s[:key]) %></span>
+                <span class="ml-auto font-medium tabular-nums text-slate-800"><%= Measurement.format_value(s[:key], s[:minutes]) %></span>
+              </li>
+            <% end %>
+          </ul>
+        <% end %>
+      </section>
+    <% end %>
+
+    <% if rings.any? %>
+      <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="flex items-baseline justify-between gap-2">
+          <h2 class="font-semibold text-slate-900"><%= t("measurements.overview.rings") %></h2>
+          <span class="text-xs text-slate-400"><%= l(rings.first[:date], format: :day_month) %></span>
+        </div>
+        <ul class="mt-4 space-y-4">
+          <% rings.each do |ring| %>
+            <li>
+              <div class="mb-1 flex items-baseline justify-between gap-2 text-sm">
+                <span class="font-medium text-slate-700"><%= t("measurements.overview.ring_#{ring[:name]}") %></span>
+                <span class="tabular-nums text-slate-600">
+                  <span class="font-semibold text-slate-900"><%= number_with_delimiter(Measurement.format_value(ring[:key], ring[:value])) %></span>
+                  <% if ring[:goal] %>/ <%= number_with_delimiter(Measurement.format_value(ring[:key], ring[:goal])) %><% end %>
+                  <% unless Measurement.self_explanatory?(ring[:key]) %><%= display_unit(Measurement.meta(ring[:key])[:unit]) %><% end %>
+                  <% if ring[:pct] %><span class="ml-1 text-xs <%= ring[:pct] >= 100 ? 'font-semibold text-emerald-600' : 'text-slate-400' %>"><%= ring[:pct] %>%</span><% end %>
+                </span>
+              </div>
+              <div class="h-2.5 overflow-hidden rounded-full bg-slate-100">
+                <div class="h-full rounded-full <%= ring_colors[ring[:name]] %>" style="width: <%= ring[:pct] ? [ring[:pct], 100].min : 100 %>%"></div>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      </section>
+    <% end %>
+  </div>
+<% end %>
+
+<% if workouts.any? %>
+  <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <h2 class="mb-2 font-semibold text-slate-900"><%= t("workouts.title") %></h2>
+    <ul class="divide-y divide-slate-100">
+      <% workouts.each do |w| %>
+        <li class="flex flex-wrap items-center gap-x-4 gap-y-1 py-2.5 text-sm">
+          <div class="min-w-0 flex-1">
+            <p class="truncate font-medium text-slate-800"><%= w.activity_label %></p>
+            <p class="text-xs text-slate-400"><%= l(w.started_at, format: :short) %><% if w.source.present? %> · <%= w.source %><% end %></p>
+          </div>
+          <dl class="flex shrink-0 flex-wrap gap-x-4 text-xs text-slate-500">
+            <div><dt class="sr-only"><%= t("workouts.duration") %></dt><dd class="font-semibold tabular-nums text-slate-800"><%= w.duration_label %></dd></div>
+            <% if w.distance_km %><div><dd class="tabular-nums"><%= number_with_delimiter(w.distance_km) %> km</dd></div><% end %>
+            <% if w.pace_label %><div><dd class="tabular-nums"><%= w.pace_label %></dd></div><% end %>
+            <% if w.energy_kcal %><div><dd class="tabular-nums"><%= w.energy_kcal.round %> kcal</dd></div><% end %>
+            <% if w.avg_hr %><div><dd class="tabular-nums">♥ <%= w.avg_hr.round %><% if w.max_hr %> / <%= w.max_hr.round %><% end %> bpm</dd></div><% end %>
+          </dl>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+<% end %>

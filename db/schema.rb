@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_21_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_12_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -259,6 +259,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_21_000001) do
     t.index ["account_id"], name: "index_weight_entries_on_account_id"
   end
 
+  create_table "workouts", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.string "activity", null: false
+    t.decimal "avg_hr", precision: 5, scale: 1
+    t.datetime "created_at", null: false
+    t.date "date", null: false
+    t.decimal "distance_m", precision: 10, scale: 1
+    t.integer "duration_seconds", default: 0, null: false
+    t.datetime "ended_at"
+    t.decimal "energy_kcal", precision: 8, scale: 1
+    t.decimal "max_hr", precision: 5, scale: 1
+    t.string "source"
+    t.datetime "started_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "uuid", null: false
+    t.index ["account_id", "date"], name: "index_workouts_on_account_id_and_date"
+    t.index ["account_id", "uuid"], name: "idx_workouts_unique", unique: true
+    t.index ["account_id"], name: "index_workouts_on_account_id"
+  end
+
   add_foreign_key "accounts", "users", column: "owner_id"
   add_foreign_key "app_usages", "accounts"
   add_foreign_key "connectors", "accounts"
@@ -276,4 +296,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_21_000001) do
   add_foreign_key "memberships", "accounts"
   add_foreign_key "memberships", "users"
   add_foreign_key "weight_entries", "accounts"
+  add_foreign_key "workouts", "accounts"
 end

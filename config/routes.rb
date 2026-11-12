@@ -67,6 +67,7 @@ Rails.application.routes.draw do
     post "usage", to: "usage#create"
     post "usage_raw", to: "usage#create_raw"
     post "metrics", to: "metrics#create"
+    post "workouts", to: "workouts#create"
     post "health_raw", to: "health_raw#create"
     get "exams", to: "exams#index"
   end
