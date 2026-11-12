@@ -235,9 +235,14 @@ def main():
     # Envio ao Life: so o destino real (nao em --saida de teste) e so dias a partir de LIFE_DESDE.
     if a.sem_life or a.saida:
         return 0
-    dias_life = [d for d in sorted(brutos) if d >= LIFE_DESDE and brutos[d]]
+    # So dias COMPLETOS vao para o Life: um dia so esta fechado quando ja chegou algum evento do dia seguinte.
+    # Enviar o dia pela metade marcaria errado os habitos de limite ("tela no maximo X horas").
+    dias_life = [d for d in sorted(brutos) if d >= LIFE_DESDE and brutos[d] and ultimo.date() > d]
+    pendentes = [d for d in sorted(brutos) if d >= LIFE_DESDE and brutos[d] and ultimo.date() <= d]
+    if pendentes:
+        log(f"Life: aguardando sincronizacao completa de {', '.join(str(d) for d in pendentes)} (nao enviado ainda)")
     if not dias_life:
-        log(f"Life: nenhum dia a enviar (so a partir de {LIFE_DESDE})"); return 0
+        log("Life: nenhum dia completo a enviar"); return 0
     token = life_token()
     if not token:
         log(f"ERRO Life: token nao encontrado no Chaves (item '{LIFE_KEYCHAIN}'); CSV gravado, envio pulado"); return 4

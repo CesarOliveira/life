@@ -14,7 +14,7 @@ página soma todos os registros e o uso seria contado em dobro.
 | `tempodetela.py` | Lê, soma por app e por dia, grava o CSV e envia ao Life. Só biblioteca padrão (Python 3.9+). |
 | `nomes_apps.json` | Dicionário editável bundle id → nome. O nome é a chave do app no Life. Aqui vai só um exemplo; a lista real fica na instalação. |
 | `tempodetela-runner.c` | Lançador para o launchd (ver "Acesso Total ao Disco"). |
-| `online.cesaroliveira.tempodetela.plist` | LaunchAgent: todo dia às 06:15, `--dias 3`. |
+| `online.cesaroliveira.tempodetela.plist` | LaunchAgent: cinco vezes por dia (06:15 a 22:15), `--dias 3`. Só dias completos vão para o Life. |
 
 Instalação em uso: `~/Scripts/tempodetela/` e `~/Library/LaunchAgents/`. Os
 caminhos estão fixos no `.c` e no `.plist`; ajuste se mudar de pasta ou usuário.
