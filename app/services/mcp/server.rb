@@ -17,8 +17,10 @@ module Mcp
     TEXT
 
     WRITE_INSTRUCTIONS = <<~TEXT.squish.freeze
-      O usuário também autorizou alterações: você pode criar, editar, mover e comentar tarefas, marcar hábitos manuais
-      e registrar peso. Só altere quando o usuário pedir ou concordar; diga o que fez depois. Não existe ferramenta de exclusão.
+      O usuário também autorizou alterações: você pode criar, editar, mover (para frente ou para trás) e comentar tarefas,
+      criar e renomear quadros, criar, alterar e reordenar colunas, marcar hábitos manuais e registrar peso. Só altere
+      quando o usuário pedir ou concordar; ao mover uma tarefa por conta própria, deixe um comentário explicando o motivo.
+      Diga o que fez depois. Não existe ferramenta de exclusão.
     TEXT
 
     def initialize(account, write: false, user: nil)

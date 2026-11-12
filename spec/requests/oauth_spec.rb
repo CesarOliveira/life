@@ -174,6 +174,38 @@ RSpec.describe "OAuth for MCP", type: :request do
       expect(error).to be(true)
     end
 
+    it "lets an authorized assistant create boards and create, change and reorder columns" do
+      token = tokens_with(true)["access_token"]
+
+      _, made = call_tool(token, "create_board", { name: "Casa", columns: %w[Ideias Fazendo Feito] })
+      expect(made["created"]["columns"].map { |c| [c["name"], c["done"]] }).to eq([["Ideias", false], ["Fazendo", false], ["Feito", true]])
+      expect(call_tool(token, "create_board", { name: "casa" }).first).to be(true) # nome repetido
+
+      call_tool(token, "add_column", { board: "Casa", name: "Aguardando", color: "rose" })
+      call_tool(token, "update_column", { board: "Casa", column: "Ideias", name: "Entrada", color: "violet" })
+      _, moved = call_tool(token, "move_column", { board: "Casa", column: "Aguardando", position: 2 })
+      expect(moved["board"]["columns"].map { |c| c["name"] }).to eq(%w[Entrada Aguardando Fazendo Feito])
+      casa = account.task_boards.find_by!(name: "Casa")
+      expect(casa.columns.find_by!(name: "Entrada").color).to eq("violet")
+
+      call_tool(token, "rename_board", { board: "Casa", name: "Casa e reforma" })
+      expect(casa.reload.name).to eq("Casa e reforma")
+
+      # mover tarefa para frente e para trás, com comentário
+      _, created = call_tool(token, "create_task", { title: "Pintar a sala", board: "Casa e reforma" })
+      number = created["created"]["number"]
+      call_tool(token, "move_task", { number: number, column: "Fazendo" })
+      call_tool(token, "move_task", { number: number, column: "Entrada" })
+      call_tool(token, "add_task_comment", { number: number, text: "Voltou: falta comprar a tinta" })
+      task = account.tasks.find_by!(number: number)
+      expect(task.events.map { |e| [e.from_column, e.to_column] }).to eq([[nil, "Entrada"], ["Entrada", "Fazendo"], ["Fazendo", "Entrada"]])
+
+      error, text = call_tool(token, "update_column", { board: "Casa e reforma", column: "Feito", color: "laranja" })
+      expect(error).to be(true)
+      expect(text).to include("slate")
+      expect(call_tool(token, "move_column", { board: "Casa e reforma", column: "Feito", position: 9 }).first).to be(true)
+    end
+
     it "marks manual habits and logs weight, but refuses automatic habits" do
       token = tokens_with(true)["access_token"]
       category = create(:habit_category, account: account)

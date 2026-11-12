@@ -84,6 +84,29 @@ module Mcp
       { name: "add_task_comment", title: "Comentar tarefa",
         description: "Adiciona um comentário a uma tarefa.",
         required: %w[number text], properties: TASK_REF.merge(text: { type: "string" }) },
+      { name: "create_board", title: "Criar quadro",
+        description: "Cria um quadro de tarefas. Sem 'columns', usa a sugestão padrão (A fazer, Em andamento, QA, Concluído). " \
+                     "A última coluna é tratada como concluído.",
+        required: ["name"],
+        properties: { name: { type: "string" }, columns: { type: "array", items: { type: "string" }, description: "Nomes das colunas, na ordem. Máximo 12." } } },
+      { name: "rename_board", title: "Renomear quadro",
+        description: "Muda o nome de um quadro.",
+        required: %w[board name], properties: { board: { type: "string", description: "Nome atual." }, name: { type: "string", description: "Nome novo." } } },
+      { name: "add_column", title: "Criar coluna",
+        description: "Adiciona uma coluna ao fim de um quadro. Use move_column para reposicionar.",
+        required: %w[board name],
+        properties: { board: { type: "string" }, name: { type: "string" },
+                      color: { type: "string", enum: TaskColumn::COLORS, description: "Padrão: slate (cinza)." },
+                      done: { type: "boolean", description: "true se tarefas nesta coluna contam como concluídas." } } },
+      { name: "update_column", title: "Alterar coluna",
+        description: "Renomeia, troca a cor ou muda se a coluna significa concluído. Só os campos enviados mudam.",
+        required: %w[board column],
+        properties: { board: { type: "string" }, column: { type: "string", description: "Nome atual da coluna." },
+                      name: { type: "string", description: "Nome novo." }, color: { type: "string", enum: TaskColumn::COLORS }, done: { type: "boolean" } } },
+      { name: "move_column", title: "Reordenar coluna",
+        description: "Move uma coluna dentro do quadro para a posição informada (1 = primeira, à esquerda).",
+        required: %w[board column position],
+        properties: { board: { type: "string" }, column: { type: "string" }, position: { type: "integer", minimum: 1 } } },
       { name: "set_habit_done", title: "Marcar hábito",
         description: "Marca ou desmarca um hábito MANUAL num dia (padrão: hoje). Hábitos automáticos seguem a métrica e não podem ser marcados.",
         required: ["habit"],
@@ -156,6 +179,62 @@ module Mcp
 
       task.comments.create!(body: text.first(5000), user: @user)
       { commented: task_row(task.reload) }
+    end
+
+    def create_board(args)
+      name = args["name"].to_s.strip
+      raise InvalidArguments, "Informe 'name'." if name.blank?
+      raise InvalidArguments, "Já existe um quadro chamado #{name}." if @account.task_boards.any? { |b| b.name.casecmp?(name) }
+      raise InvalidArguments, "Limite de 30 quadros por conta." if @account.task_boards.count >= 30
+
+      board = TaskBoard.create_with_columns!(account: @account, name: name.first(80), column_names: args["columns"])
+      { created: board_row(board) }
+    end
+
+    def rename_board(args)
+      board = find_board!(args["board"].to_s.presence || raise(InvalidArguments, "Informe 'board'."))
+      name = args["name"].to_s.strip
+      raise InvalidArguments, "Informe 'name'." if name.blank?
+
+      board.update!(name: name.first(80))
+      { renamed: board_row(board) }
+    end
+
+    def add_column(args)
+      board = find_board!(args["board"].to_s.presence || raise(InvalidArguments, "Informe 'board'."))
+      name = args["name"].to_s.strip
+      raise InvalidArguments, "Informe 'name'." if name.blank?
+      raise InvalidArguments, "O quadro já tem uma coluna #{name}." if board.columns.any? { |c| c.name.casecmp?(name) }
+      raise InvalidArguments, "Limite de 12 colunas por quadro." if board.columns.size >= 12
+
+      board.columns.create!(name: name.first(40), color: column_color(args["color"]) || "slate", done: args["done"] == true,
+                            position: board.columns.maximum(:position).to_i + 1)
+      { board: board_row(board.reload) }
+    end
+
+    def update_column(args)
+      board = find_board!(args["board"].to_s.presence || raise(InvalidArguments, "Informe 'board'."))
+      column = find_column!(board, args["column"], required: true)
+      changes = {}
+      changes[:name] = args["name"].to_s.strip.first(40) if args["name"].to_s.strip.present?
+      changes[:color] = column_color(args["color"]) if args.key?("color")
+      changes[:done] = args["done"] == true if args.key?("done")
+      raise InvalidArguments, "Nada para alterar: envie name, color ou done." if changes.compact.empty?
+
+      column.update!(changes.compact)
+      { board: board_row(board.reload) }
+    end
+
+    def move_column(args)
+      board = find_board!(args["board"].to_s.presence || raise(InvalidArguments, "Informe 'board'."))
+      column = find_column!(board, args["column"], required: true)
+      columns = board.columns.to_a
+      raise InvalidArguments, "'position' deve ficar entre 1 e #{columns.size}." unless args["position"].to_i.between?(1, columns.size)
+
+      columns.delete(column)
+      columns.insert(args["position"].to_i - 1, column)
+      columns.each_with_index { |c, index| c.update_column(:position, index) }
+      { board: board_row(board.reload) }
     end
 
     def set_habit_done(args)
@@ -339,6 +418,17 @@ module Mcp
 
     # ---------------------------------------------------------------- busca (escrita)
 
+    def board_row(board)
+      { name: board.name, columns: board.columns.reload.map { |c| { name: c.name, color: c.color, done: c.done, tasks: c.tasks.size } } }
+    end
+
+    def column_color(value)
+      return nil if value.blank?
+      raise InvalidArguments, "Cor inválida: #{value}. Use uma de: #{TaskColumn::COLORS.join(', ')}." unless TaskColumn::COLORS.include?(value.to_s)
+
+      value.to_s
+    end
+
     def find_task!(number)
       task = @account.tasks.find_by(number: number.to_i)
       raise InvalidArguments, "Tarefa ##{number} não encontrada. Use get_tasks para ver os números." if task.nil?
@@ -348,7 +438,7 @@ module Mcp
 
     def find_board!(name)
       boards = @account.task_boards.ordered
-      raise InvalidArguments, "A conta ainda não tem quadros de tarefas. Peça ao usuário para criar um em Tarefas." if boards.empty?
+      raise InvalidArguments, "A conta ainda não tem quadros de tarefas. Crie um com create_board." if boards.empty?
       return boards.first if name.to_s.strip.blank?
 
       boards.find { |b| b.name.casecmp?(name.to_s.strip) } ||
