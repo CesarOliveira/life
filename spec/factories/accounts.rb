@@ -7,6 +7,7 @@
 #  height_cm  :integer
 #  join_code  :string
 #  locale     :string           default("pt-BR"), not null
+#  mcp_token  :string
 #  name       :string           not null
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
@@ -16,6 +17,7 @@
 #
 #  index_accounts_on_api_token  (api_token) UNIQUE
 #  index_accounts_on_join_code  (join_code) UNIQUE
+#  index_accounts_on_mcp_token  (mcp_token) UNIQUE
 #  index_accounts_on_owner_id   (owner_id)
 #
 # Foreign Keys

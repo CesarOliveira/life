@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_12_000003) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_12_000004) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -20,11 +20,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_000003) do
     t.integer "height_cm"
     t.string "join_code"
     t.string "locale", default: "pt-BR", null: false
+    t.string "mcp_token"
     t.string "name", null: false
     t.bigint "owner_id"
     t.datetime "updated_at", null: false
     t.index ["api_token"], name: "index_accounts_on_api_token", unique: true
     t.index ["join_code"], name: "index_accounts_on_join_code", unique: true
+    t.index ["mcp_token"], name: "index_accounts_on_mcp_token", unique: true
     t.index ["owner_id"], name: "index_accounts_on_owner_id"
   end
 

@@ -7,6 +7,7 @@
 #  height_cm  :integer
 #  join_code  :string
 #  locale     :string           default("pt-BR"), not null
+#  mcp_token  :string
 #  name       :string           not null
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
@@ -16,6 +17,7 @@
 #
 #  index_accounts_on_api_token  (api_token) UNIQUE
 #  index_accounts_on_join_code  (join_code) UNIQUE
+#  index_accounts_on_mcp_token  (mcp_token) UNIQUE
 #  index_accounts_on_owner_id   (owner_id)
 #
 # Foreign Keys
@@ -46,6 +48,15 @@ class Account < ApplicationRecord
 
   # Token pessoal para a API de ingestão (ex.: script do Mac enviando uso por app).
   has_secure_token :api_token
+
+  # Token do servidor MCP: opcional (nil = desligado), gerado só quando o dono liga.
+  def enable_mcp!
+    update!(mcp_token: self.class.generate_unique_secure_token(length: 40))
+  end
+
+  def disable_mcp!
+    update!(mcp_token: nil)
+  end
 
   validates :name, presence: true
   validates :join_code, uniqueness: true, allow_nil: true

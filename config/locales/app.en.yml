@@ -554,6 +554,25 @@ en:
     regenerate: "Generate new token"
     regenerate_confirm: "Generating a new token invalidates the current one. Uploads from the Mac stop working until you update the token in the macOS Keychain. Continue?"
     regenerate_hint: "Use this if the token leaked. Then update the token on the Mac with the command below."
+    mcp:
+      section: "AI assistants (MCP)"
+      hint: "Connect Claude, ChatGPT or another MCP-compatible assistant so it can read and cross-reference your data: screen time, health, workouts, tasks, habits and lab exams."
+      off: "Access is off. When you enable it, Life generates a secret read-only address for you to paste into the assistant."
+      enable: "Enable access"
+      url_label: "MCP server address"
+      copy: "Copy address"
+      keep_secret: "Anyone with this address can read all your data. Do not share it; if it leaks, generate a new one."
+      how_title: "How to connect"
+      how:
+        claude: "Claude (claude.ai or app): Settings → Connectors → Add custom connector → paste the address."
+        chatgpt: "ChatGPT: Settings → Connectors → Create → paste the address as the MCP server URL, with no authentication."
+        claude_code: "Claude Code: run claude mcp add --transport http life followed by the address."
+      reads_title: "What the assistant can do"
+      reads: "Read only. It can query the overview, a specific day, screen time by app, health metrics, workouts, tasks with history, habits, weight and exams. It cannot create, change or delete anything."
+      rotate: "Generate new address"
+      rotate_confirm: "The current address stops working and you will need to paste the new one into the assistant. Continue?"
+      disable: "Turn off access"
+      disable_confirm: "Connected assistants lose access immediately. Continue?"
     mac:
       section: "Collection from the Mac"
       hint: "There is nothing to install on the iPhone. The script runs by itself on the Mac every day and resends the last few days, so a day that arrived incomplete is fixed later."
@@ -772,6 +791,9 @@ en:
       members_count: "%{total} (%{active} active)"
 
   flash:
+    mcp:
+      enabled: "Assistant access enabled. Copy the address below."
+      disabled: "Assistant access turned off."
     tasks:
       board_created: "Board created."
       board_updated: "Board updated."

@@ -554,6 +554,25 @@ pt-BR:
     regenerate: "Gerar novo token"
     regenerate_confirm: "Gerar um novo token invalida o atual. O envio pelo Mac para de funcionar até você atualizar o token no Chaves do macOS. Continuar?"
     regenerate_hint: "Use se o token vazou. Depois, atualize o token no Mac com o comando abaixo."
+    mcp:
+      section: "Assistentes de IA (MCP)"
+      hint: "Conecte o Claude, o ChatGPT ou outro assistente compatível com MCP para ele ler e cruzar seus dados: tempo de tela, saúde, treinos, tarefas, hábitos e exames."
+      off: "O acesso está desligado. Ao ativar, o Life gera um endereço secreto só de leitura para você colar no assistente."
+      enable: "Ativar acesso"
+      url_label: "Endereço do servidor MCP"
+      copy: "Copiar endereço"
+      keep_secret: "Quem tiver este endereço lê todos os seus dados. Não compartilhe; se vazar, gere um novo."
+      how_title: "Como conectar"
+      how:
+        claude: "Claude (claude.ai ou app): Configurações → Conectores → Adicionar conector personalizado → cole o endereço."
+        chatgpt: "ChatGPT: Configurações → Conectores → Criar → cole o endereço como URL do servidor MCP, sem autenticação."
+        claude_code: "Claude Code: rode claude mcp add --transport http life seguido do endereço."
+      reads_title: "O que o assistente consegue fazer"
+      reads: "Só ler. Ele consulta resumo geral, um dia específico, tempo de tela por app, métricas de saúde, treinos, tarefas com histórico, hábitos, peso e exames. Não cria, altera nem apaga nada."
+      rotate: "Gerar novo endereço"
+      rotate_confirm: "O endereço atual para de funcionar e você precisará colar o novo no assistente. Continuar?"
+      disable: "Desligar acesso"
+      disable_confirm: "Os assistentes conectados perdem o acesso na hora. Continuar?"
     mac:
       section: "Coleta pelo Mac"
       hint: "Não há nada para instalar no iPhone. O script roda sozinho no Mac todos os dias e reenvia os últimos dias, então um dia que chegou incompleto é corrigido depois."
@@ -772,6 +791,9 @@ pt-BR:
       members_count: "%{total} (%{active} ativos)"
 
   flash:
+    mcp:
+      enabled: "Acesso de assistentes ativado. Copie o endereço abaixo."
+      disabled: "Acesso de assistentes desligado."
     tasks:
       board_created: "Quadro criado."
       board_updated: "Quadro atualizado."

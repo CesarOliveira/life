@@ -72,6 +72,12 @@ Rails.application.routes.draw do
   get "screen-time/history", to: "screen_time#history", as: :screen_time_history
   post "screen-time/token", to: "screen_time#regenerate", as: :regenerate_screen_time_token
 
+  # Servidor MCP: assistentes de IA lendo os dados da conta (somente leitura).
+  post "mcp(/:token)", to: "mcp#create", as: :mcp
+  match "mcp(/:token)", to: "mcp#unsupported", via: [:get, :delete]
+  post "configurar/mcp", to: "setup#enable_mcp", as: :enable_mcp
+  delete "configurar/mcp", to: "setup#disable_mcp", as: :disable_mcp
+
   # API de ingestão (token pessoal) — ex.: script do Mac enviando tempo de tela; app enviando saúde.
   namespace :api do
     post "usage", to: "usage#create"
