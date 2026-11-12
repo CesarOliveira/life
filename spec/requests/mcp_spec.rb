@@ -19,6 +19,7 @@ RSpec.describe "MCP server", type: :request do
   it "rejects unknown tokens, the ingestion token and disabled access" do
     post "/mcp/nope", params: "{}"
     expect(response).to have_http_status(:unauthorized)
+    expect(response.headers["WWW-Authenticate"]).to include("resource_metadata=", "/.well-known/oauth-protected-resource")
     post "/mcp/#{account.api_token}", params: "{}"
     expect(response).to have_http_status(:unauthorized)
 
@@ -103,20 +104,17 @@ RSpec.describe "MCP server", type: :request do
     expect(rpc("tools/call", { name: "delete_everything", arguments: {} })["error"]["code"]).to eq(-32_602)
   end
 
-  it "lets the owner enable, rotate and disable access from the setup page" do
+  it "lets the owner generate, rotate and turn off the manual token from the setup page" do
     plain = create(:account, owner: user)
     create(:membership, user: user, account: plain, role: "owner", status: "active")
     sign_in user
 
     get setup_path
-    expect(response.body).to include(I18n.t("setup.mcp.enable"))
+    expect(response.body).to include(mcp_url, I18n.t("setup.mcp.connected_empty"), I18n.t("setup.mcp.enable"))
 
     post enable_mcp_path
     first = plain.reload.mcp_token
     expect(first.length).to eq(40)
-    get setup_path
-    expect(response.body).to include("/mcp/#{first}") # endereço completo só no elemento oculto de cópia
-
     post enable_mcp_path
     expect(plain.reload.mcp_token).not_to eq(first)
     delete disable_mcp_path

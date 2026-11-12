@@ -1,14 +1,17 @@
 # Endpoint do servidor MCP (transporte "Streamable HTTP", sem sessão):
-#   POST /mcp/<token>        -> JSON-RPC 2.0 (mensagem única ou lote)
-#   POST /mcp + Authorization: Bearer <token>
-# O token é o Account#mcp_token (só leitura, opcional). GET/DELETE respondem 405:
+#   POST /mcp + Authorization: Bearer <access token OAuth>   (caminho principal)
+#   POST /mcp + Authorization: Bearer <Account#mcp_token>    (token manual)
+#   POST /mcp/<Account#mcp_token>                            (token no endereço)
+# Tudo somente leitura. GET/DELETE respondem 405:
 # o servidor não abre stream nem guarda sessão.
 class McpController < ActionController::API
+  include Oauth::Cors
+
   RATE_LIMIT = 120 # requisições por minuto por conta
   MAX_BODY_BYTES = 200_000
 
-  before_action :authenticate!
-  before_action :throttle!
+  before_action :authenticate!, except: :preflight
+  before_action :throttle!, except: :preflight
 
   def create
     return head(:payload_too_large) if request.content_length.to_i > MAX_BODY_BYTES
@@ -33,10 +36,19 @@ class McpController < ActionController::API
 
   private
 
+  # Aceita, nesta ordem: access token OAuth (Bearer), token MCP no cabeçalho ou
+  # token MCP no caminho. Sem credencial válida: 401 apontando para a descoberta
+  # OAuth — é o que faz o cliente abrir a tela de login.
   def authenticate!
-    token = params[:token].presence || request.headers["Authorization"].to_s[/\ABearer\s+(.+)\z/i, 1]
-    @account = Account.find_by(mcp_token: token) if token.present? && token.length >= 20
-    head :unauthorized unless @account
+    bearer = request.headers["Authorization"].to_s[/\ABearer\s+(.+)\z/i, 1]
+    @account = OauthGrant.account_for_access_token(bearer)
+    legacy = params[:token].presence || bearer
+    @account ||= Account.find_by(mcp_token: legacy) if legacy.present? && legacy.length >= 20
+    return if @account
+
+    metadata = "#{request.base_url}/.well-known/oauth-protected-resource"
+    response.set_header("WWW-Authenticate", %(Bearer resource_metadata="#{metadata}", scope="#{OauthGrant::SCOPE}"))
+    head :unauthorized
   end
 
   def throttle!

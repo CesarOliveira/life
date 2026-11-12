@@ -59,6 +59,7 @@ class User < ApplicationRecord
     role?(Role::SUPER_ADMIN)
   end
 
+  has_many :oauth_grants, dependent: :destroy
   has_many :memberships, dependent: :destroy
   has_many :accounts, through: :memberships
   has_many :owned_accounts, class_name: "Account", foreign_key: :owner_id, dependent: :nullify

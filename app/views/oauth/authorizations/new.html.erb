@@ -1,0 +1,29 @@
+<% redirect_host = (URI.parse(@redirect_uri).host rescue nil) %>
+<div class="mx-auto max-w-md space-y-5">
+  <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <p class="text-xs font-medium uppercase tracking-wide text-slate-400"><%= t("oauth.request") %></p>
+    <h1 class="mt-1 text-xl font-bold text-slate-900"><%= t("oauth.title", client: @client.display_name) %></h1>
+    <p class="mt-2 text-sm text-slate-600"><%= t("oauth.account", account: current_account.name, email: current_user.email) %></p>
+
+    <h2 class="mt-5 text-sm font-semibold text-slate-800"><%= t("oauth.can_title") %></h2>
+    <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-600">
+      <% %w[screen_time health tasks exams].each do |key| %><li><%= t("oauth.can.#{key}") %></li><% end %>
+    </ul>
+    <h2 class="mt-4 text-sm font-semibold text-slate-800"><%= t("oauth.cannot_title") %></h2>
+    <p class="mt-1 text-sm text-slate-600"><%= t("oauth.cannot") %></p>
+
+    <p class="mt-4 rounded-lg bg-slate-50 p-3 text-xs text-slate-500">
+      <%= t("oauth.redirect_notice", host: redirect_host || @redirect_uri) %>
+      <% if @client.kind == "dcr" %><br><%= t("oauth.unverified") %><% end %>
+    </p>
+
+    <%= form_with url: oauth_authorize_path, method: :post, data: { turbo: false }, class: "mt-5 flex gap-3" do %>
+      <% %w[client_id redirect_uri state code_challenge code_challenge_method response_type scope resource].each do |key| %>
+        <%= hidden_field_tag key, params[key] %>
+      <% end %>
+      <button name="decision" value="deny" class="flex-1 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"><%= t("oauth.deny") %></button>
+      <button name="decision" value="approve" class="flex-1 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700"><%= t("oauth.approve") %></button>
+    <% end %>
+    <p class="mt-3 text-center text-xs text-slate-400"><%= t("oauth.revoke_hint") %></p>
+  </section>
+</div>

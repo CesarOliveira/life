@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_12_000004) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_12_000005) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -220,6 +220,43 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_000004) do
     t.index ["user_id"], name: "index_memberships_on_user_id"
   end
 
+  create_table "oauth_clients", force: :cascade do |t|
+    t.string "client_id", null: false
+    t.datetime "created_at", null: false
+    t.string "kind", default: "dcr", null: false
+    t.datetime "metadata_fetched_at"
+    t.string "name"
+    t.string "redirect_uris", default: [], null: false, array: true
+    t.datetime "updated_at", null: false
+    t.index ["client_id"], name: "index_oauth_clients_on_client_id", unique: true
+  end
+
+  create_table "oauth_grants", force: :cascade do |t|
+    t.datetime "access_expires_at"
+    t.string "access_token_digest"
+    t.bigint "account_id", null: false
+    t.string "code_challenge"
+    t.string "code_digest"
+    t.datetime "code_expires_at"
+    t.datetime "created_at", null: false
+    t.datetime "last_used_at"
+    t.bigint "oauth_client_id", null: false
+    t.string "redirect_uri", null: false
+    t.datetime "refresh_expires_at"
+    t.string "refresh_token_digest"
+    t.string "resource"
+    t.datetime "revoked_at"
+    t.string "scope", default: "life:read", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["access_token_digest"], name: "index_oauth_grants_on_access_token_digest", unique: true
+    t.index ["account_id"], name: "index_oauth_grants_on_account_id"
+    t.index ["code_digest"], name: "index_oauth_grants_on_code_digest", unique: true
+    t.index ["oauth_client_id"], name: "index_oauth_grants_on_oauth_client_id"
+    t.index ["refresh_token_digest"], name: "index_oauth_grants_on_refresh_token_digest", unique: true
+    t.index ["user_id"], name: "index_oauth_grants_on_user_id"
+  end
+
   create_table "roles", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "description"
@@ -364,6 +401,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_000004) do
   add_foreign_key "measurements", "accounts"
   add_foreign_key "memberships", "accounts"
   add_foreign_key "memberships", "users"
+  add_foreign_key "oauth_grants", "accounts"
+  add_foreign_key "oauth_grants", "oauth_clients"
+  add_foreign_key "oauth_grants", "users"
   add_foreign_key "task_boards", "accounts"
   add_foreign_key "task_columns", "task_boards"
   add_foreign_key "task_comments", "tasks"

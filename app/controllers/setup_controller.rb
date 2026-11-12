@@ -8,10 +8,9 @@ class SetupController < ApplicationController
     @last_ingestion = IngestionLog.where(account: current_account, endpoint: "usage").recent_first.first
     @last_data_on = current_account.app_usages.maximum(:date)
     @github_connector = current_account.connectors.find_by(kind: "github")
-    return if current_account.mcp_token.blank?
-
-    @mcp_url = mcp_url(token: current_account.mcp_token)
-    @mcp_masked = mcp_url(token: "#{current_account.mcp_token.first(6)}••••••••••")
+    @mcp_url = mcp_url
+    @mcp_token = current_account.mcp_token.presence
+    @oauth_grants = current_account.oauth_grants.active.includes(:oauth_client).order(created_at: :desc)
   end
 
   # Liga (ou troca) o acesso de assistentes de IA: gera um token MCP novo.

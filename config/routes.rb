@@ -75,6 +75,20 @@ Rails.application.routes.draw do
   # Servidor MCP: assistentes de IA lendo os dados da conta (somente leitura).
   post "mcp(/:token)", to: "mcp#create", as: :mcp
   match "mcp(/:token)", to: "mcp#unsupported", via: [:get, :delete]
+  match "mcp(/:token)", to: "mcp#preflight", via: :options
+
+  # OAuth 2.1 do MCP: descoberta, cadastro de cliente, consentimento e tokens.
+  get ".well-known/oauth-protected-resource(/*rest)", to: "oauth/metadata#protected_resource"
+  get ".well-known/oauth-authorization-server(/*rest)", to: "oauth/metadata#authorization_server"
+  match ".well-known/oauth-protected-resource(/*rest)", to: "oauth/metadata#preflight", via: :options
+  match ".well-known/oauth-authorization-server(/*rest)", to: "oauth/metadata#preflight", via: :options
+  get "oauth/authorize", to: "oauth/authorizations#new", as: :oauth_authorize
+  post "oauth/authorize", to: "oauth/authorizations#create"
+  delete "oauth/grants/:id", to: "oauth/authorizations#destroy", as: :oauth_grant
+  post "oauth/register", to: "oauth/tokens#register", as: :oauth_register
+  post "oauth/token", to: "oauth/tokens#create", as: :oauth_token
+  post "oauth/revoke", to: "oauth/tokens#revoke", as: :oauth_revoke
+  match "oauth/(:action_name)", to: "oauth/tokens#preflight", via: :options
   post "configurar/mcp", to: "setup#enable_mcp", as: :enable_mcp
   delete "configurar/mcp", to: "setup#disable_mcp", as: :disable_mcp
 
