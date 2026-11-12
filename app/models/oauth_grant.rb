@@ -39,7 +39,9 @@
 #  fk_rails_...  (user_id => users.id)
 #
 class OauthGrant < ApplicationRecord
-  SCOPE = "life:read".freeze
+  SCOPE = "life:read".freeze        # sempre concedido
+  WRITE_SCOPE = "life:write".freeze  # opcional: criar/alterar tarefas, hábitos e peso
+  SCOPES = [SCOPE, WRITE_SCOPE].freeze
   CODE_TTL = 10.minutes
   ACCESS_TTL = 1.hour
   REFRESH_TTL = 90.days
@@ -54,16 +56,24 @@ class OauthGrant < ApplicationRecord
     Digest::SHA256.hexdigest(token.to_s)
   end
 
-  # Conta dona de um access token válido (ou nil). Atualiza o "último uso" no
-  # máximo uma vez por minuto.
-  def self.account_for_access_token(token)
+  def write?
+    scope.to_s.split.include?(WRITE_SCOPE)
+  end
+
+  def allow_write!(allowed)
+    update!(scope: allowed ? SCOPES.join(" ") : SCOPE)
+  end
+
+  # Autorização dona de um access token válido (ou nil). Atualiza o "último uso"
+  # no máximo uma vez por minuto.
+  def self.for_access_token(token)
     return nil if token.blank?
 
     grant = find_by(access_token_digest: digest(token), revoked_at: nil)
     return nil if grant.nil? || grant.access_expires_at.nil? || grant.access_expires_at < Time.current
 
     grant.update_column(:last_used_at, Time.current) if grant.last_used_at.nil? || grant.last_used_at < 1.minute.ago
-    grant.account
+    grant
   end
 
   # Emite o código de autorização (uso único, 10 min) e devolve o valor em claro.

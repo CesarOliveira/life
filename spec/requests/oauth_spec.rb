@@ -108,6 +108,113 @@ RSpec.describe "OAuth for MCP", type: :request do
     expect(mcp_ping(renewed["access_token"])).to eq(401)
   end
 
+  describe "write permission (life:write)" do
+    let(:board) { TaskBoard.create_with_columns!(account: account, name: "Pessoal") }
+
+    def rpc(token, method, params = nil)
+      post "/mcp", params: { jsonrpc: "2.0", id: 1, method: method, params: params }.compact.to_json,
+                   headers: { "CONTENT_TYPE" => "application/json", "Authorization" => "Bearer #{token}" }
+      JSON.parse(response.body)
+    end
+
+    def call_tool(token, name, arguments)
+      result = rpc(token, "tools/call", { name: name, arguments: arguments })["result"]
+      [result["isError"], result["isError"] ? result["content"][0]["text"] : JSON.parse(result["content"][0]["text"])]
+    end
+
+    def tokens_with(allow_write)
+      client_id = register["client_id"]
+      extra = allow_write ? { allow_write: "1" } : {}
+      post oauth_authorize_path, params: authorize_params(client_id, decision: "approve", scope: "life:read life:write", **extra)
+      code = Rack::Utils.parse_query(URI.parse(response.location).query)["code"]
+      post oauth_token_path, params: { grant_type: "authorization_code", code: code, client_id: client_id, redirect_uri: redirect_uri, code_verifier: verifier }
+      JSON.parse(response.body)
+    end
+
+    before do
+      sign_in user
+      board
+    end
+
+    it "is off unless the user ticks it, even if the client asks for it: write tools do not exist" do
+      tokens = tokens_with(false)
+      expect(tokens["scope"]).to eq("life:read")
+      names = rpc(tokens["access_token"], "tools/list")["result"]["tools"].map { |t| t["name"] }
+      expect(names).to include("get_tasks")
+      expect(names).not_to include("create_task", "move_task")
+      expect(rpc(tokens["access_token"], "tools/call", { name: "create_task", arguments: { title: "x" } })["error"]["code"]).to eq(-32_602)
+      expect(account.tasks.count).to eq(0)
+    end
+
+    it "lets an authorized assistant create, edit, move and comment on tasks, attributed to the user" do
+      token = tokens_with(true)["access_token"]
+      tools = rpc(token, "tools/list")["result"]["tools"].index_by { |t| t["name"] }
+      expect(tools["create_task"]["annotations"]).to include("readOnlyHint" => false, "destructiveHint" => false)
+      expect(tools["get_tasks"]["annotations"]["readOnlyHint"]).to be(true)
+      expect(tools.keys.grep(/delete|destroy|remove/)).to be_empty
+
+      _, created = call_tool(token, "create_task", { title: "Ligar para o pintor", description: "Pedir orçamento", due_on: "2026-11-20" })
+      number = created["created"]["number"]
+      task = account.tasks.find_by!(number: number)
+      expect(task).to have_attributes(title: "Ligar para o pintor", creator: user, due_on: Date.new(2026, 11, 20))
+      expect(task.task_column.name).to eq("A fazer")
+
+      call_tool(token, "update_task", { number: number, title: "Ligar para o pintor hoje" })
+      call_tool(token, "add_task_comment", { number: number, text: "Ele atende só de manhã" })
+      _, moved = call_tool(token, "move_task", { number: number, column: "concluído" })
+      expect(moved["moved"]).to include("column" => "Concluído", "title" => "Ligar para o pintor hoje")
+      expect(task.reload.completed_at).to be_present
+      expect(task.comments.first).to have_attributes(body: "Ele atende só de manhã", user: user)
+      expect(task.events.map(&:kind)).to eq(%w[created moved])
+
+      error, text = call_tool(token, "move_task", { number: number, column: "Inexistente" })
+      expect(error).to be(true)
+      expect(text).to include("A fazer", "QA") # diz as colunas válidas
+      error, = call_tool(token, "update_task", { number: 999, title: "x" })
+      expect(error).to be(true)
+    end
+
+    it "marks manual habits and logs weight, but refuses automatic habits" do
+      token = tokens_with(true)["access_token"]
+      category = create(:habit_category, account: account)
+      manual = create(:habit, account: account, habit_category: category, name: "Ler 20 min")
+      create(:habit, :auto_screen_time, account: account, habit_category: category, name: "Tela")
+
+      _, done = call_tool(token, "set_habit_done", { habit: "ler 20 min" })
+      expect(done).to include("done" => true)
+      expect(manual.habit_checks.where(date: Date.current)).to exist
+      call_tool(token, "set_habit_done", { habit: "Ler 20 min", done: false })
+      expect(manual.habit_checks.where(date: Date.current)).not_to exist
+
+      error, text = call_tool(token, "set_habit_done", { habit: "Tela" })
+      expect(error).to be(true)
+      expect(text).to include("automático")
+
+      _, weight = call_tool(token, "log_weight", { kg: 81.4 })
+      expect(weight).to include("weight_kg" => 81.4)
+      expect(account.weight_entries.find_by(date: Date.current).weight_kg).to eq(81.4)
+    end
+
+    it "can be switched on and off later from the setup page, per assistant" do
+      token = tokens_with(false)["access_token"]
+      grant = OauthGrant.last
+      patch oauth_grant_path(grant), params: { allow_write: "1" }
+      expect(grant.reload).to be_write
+      expect(call_tool(token, "create_task", { title: "Agora pode" }).first).to be(false)
+
+      get setup_path
+      expect(response.body).to include(I18n.t("setup.mcp.access_write"))
+      patch oauth_grant_path(grant), params: { allow_write: "0" }
+      expect(rpc(token, "tools/call", { name: "create_task", arguments: { title: "Não pode mais" } })["error"]["code"]).to eq(-32_602)
+    end
+
+    it "keeps the manual token read-only" do
+      account.enable_mcp!
+      names = rpc(account.mcp_token, "tools/list")["result"]["tools"].map { |t| t["name"] }
+      expect(names).not_to include("create_task")
+    end
+  end
+
   it "rejects a wrong PKCE verifier and burns the code" do
     sign_in user
     client_id = register["client_id"]

@@ -88,12 +88,21 @@
         <% @oauth_grants.each do |grant| %>
           <li class="flex items-center justify-between gap-3 py-2 text-sm">
             <div class="min-w-0">
-              <p class="truncate font-medium text-slate-800"><%= grant.oauth_client.display_name %></p>
+              <p class="flex items-center gap-2 truncate font-medium text-slate-800">
+                <%= grant.oauth_client.display_name %>
+                <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold <%= grant.write? ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600' %>">
+                  <%= t(grant.write? ? "setup.mcp.access_write" : "setup.mcp.access_read") %>
+                </span>
+              </p>
               <p class="text-xs text-slate-400">
                 <%= t("setup.mcp.connected_since", date: l(grant.created_at.to_date, format: :long)) %> ·
                 <%= grant.last_used_at ? t("setup.mcp.last_used", time: l(grant.last_used_at, format: :short)) : t("setup.mcp.never_used") %>
               </p>
             </div>
+            <%= button_to t(grant.write? ? "setup.mcp.make_read_only" : "setup.mcp.allow_write"), oauth_grant_path(grant), method: :patch,
+                  params: { allow_write: grant.write? ? "0" : "1" },
+                  class: "shrink-0 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50",
+                  form: { data: { turbo_confirm: (t("setup.mcp.allow_write_confirm", client: grant.oauth_client.display_name) unless grant.write?) } } %>
             <%= button_to t("setup.mcp.revoke"), oauth_grant_path(grant), method: :delete,
                   class: "shrink-0 rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-medium text-rose-600 hover:bg-rose-50",
                   form: { data: { turbo_confirm: t("setup.mcp.revoke_confirm", client: grant.oauth_client.display_name) } } %>

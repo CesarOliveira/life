@@ -17,12 +17,23 @@
       <% if @client.kind == "dcr" %><br><%= t("oauth.unverified") %><% end %>
     </p>
 
-    <%= form_with url: oauth_authorize_path, method: :post, data: { turbo: false }, class: "mt-5 flex gap-3" do %>
+    <%# O segundo clique é ignorado: cada envio criaria uma autorização. %>
+    <%= form_with url: oauth_authorize_path, method: :post, data: { turbo: false }, class: "mt-5",
+          html: { onsubmit: "var f=this;setTimeout(function(){f.querySelectorAll('button').forEach(function(b){b.disabled=true})},0)" } do %>
       <% %w[client_id redirect_uri state code_challenge code_challenge_method response_type scope resource].each do |key| %>
         <%= hidden_field_tag key, params[key] %>
       <% end %>
+      <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3">
+        <%= check_box_tag :allow_write, "1", false, class: "mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600" %>
+        <span>
+          <span class="block text-sm font-semibold text-slate-800"><%= t("oauth.write_label") %></span>
+          <span class="block text-xs text-slate-600"><%= t("oauth.write_hint") %></span>
+        </span>
+      </label>
+      <div class="mt-4 flex gap-3">
       <button name="decision" value="deny" class="flex-1 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"><%= t("oauth.deny") %></button>
       <button name="decision" value="approve" class="flex-1 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700"><%= t("oauth.approve") %></button>
+      </div>
     <% end %>
     <p class="mt-3 text-center text-xs text-slate-400"><%= t("oauth.revoke_hint") %></p>
   </section>

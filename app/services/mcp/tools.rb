@@ -1,5 +1,6 @@
 module Mcp
-  # Ferramentas de leitura do servidor MCP. Cada uma devolve um Hash pequeno e
+  # Ferramentas do servidor MCP: leitura sempre, escrita só com life:write.
+  # Cada uma devolve um Hash pequeno e
   # autoexplicativo (datas ISO, minutos, rótulos em português) — o modelo lê isso
   # como texto, então nomes claros valem mais que estrutura compacta.
   class Tools
@@ -60,25 +61,128 @@ module Mcp
         properties: PERIOD.merge(only_out_of_range: { type: "boolean", description: "Só resultados fora da faixa de referência." }) }
     ].freeze
 
-    def self.definitions
-      DEFINITIONS.map do |tool|
-        { name: tool[:name], title: tool[:title], description: tool[:description],
-          inputSchema: { type: "object", properties: tool[:properties], additionalProperties: false },
-          annotations: { readOnlyHint: true, openWorldHint: false } }
-      end
-    end
+    TASK_REF = { number: { type: "integer", description: "Número da tarefa (o #N mostrado em get_tasks)." } }.freeze
 
-    def self.known?(name)
-      DEFINITIONS.any? { |tool| tool[:name] == name }
-    end
+    # Ferramentas de ESCRITA: só existem com a permissão life:write. Nenhuma apaga dados.
+    WRITE_DEFINITIONS = [
+      { name: "create_task", title: "Criar tarefa",
+        description: "Cria uma tarefa. Sem 'board', usa o primeiro quadro; sem 'column', a primeira coluna. " \
+                     "Use get_tasks antes para ver quadros e colunas existentes.",
+        required: ["title"],
+        properties: { title: { type: "string" }, description: { type: "string" },
+                      board: { type: "string", description: "Nome do quadro." }, column: { type: "string", description: "Nome da coluna." },
+                      due_on: { type: "string", description: "Prazo (AAAA-MM-DD)." } } },
+      { name: "update_task", title: "Editar tarefa",
+        description: "Altera título, descrição ou prazo de uma tarefa. Só os campos enviados mudam; due_on vazio remove o prazo.",
+        required: ["number"],
+        properties: TASK_REF.merge(title: { type: "string" }, description: { type: "string" }, due_on: { type: "string", description: "AAAA-MM-DD ou vazio." }) },
+      { name: "move_task", title: "Mover tarefa",
+        description: "Move a tarefa para outra coluna (do mesmo quadro, ou de outro se 'board' for informado). " \
+                     "Mover para a coluna de concluído marca a tarefa como concluída.",
+        required: %w[number column],
+        properties: TASK_REF.merge(column: { type: "string", description: "Nome da coluna de destino." }, board: { type: "string", description: "Nome do quadro de destino." }) },
+      { name: "add_task_comment", title: "Comentar tarefa",
+        description: "Adiciona um comentário a uma tarefa.",
+        required: %w[number text], properties: TASK_REF.merge(text: { type: "string" }) },
+      { name: "set_habit_done", title: "Marcar hábito",
+        description: "Marca ou desmarca um hábito MANUAL num dia (padrão: hoje). Hábitos automáticos seguem a métrica e não podem ser marcados.",
+        required: ["habit"],
+        properties: { habit: { type: "string", description: "Nome do hábito, como em get_habits." },
+                      date: { type: "string", description: "AAAA-MM-DD. Padrão: hoje." }, done: { type: "boolean", description: "Padrão: true." } } },
+      { name: "log_weight", title: "Registrar peso",
+        description: "Registra o peso (kg) de um dia (padrão: hoje). Regravar o mesmo dia substitui o valor.",
+        required: ["kg"],
+        properties: { kg: { type: "number" }, date: { type: "string", description: "AAAA-MM-DD. Padrão: hoje." } } }
+    ].freeze
 
-    def initialize(account, today: Date.current)
+    def initialize(account, today: Date.current, write: false, user: nil)
       @account = account
       @today = today
+      @write = write
+      @user = user
+    end
+
+    def definitions
+      read = DEFINITIONS.map { |tool| definition(tool, read_only: true) }
+      @write ? read + WRITE_DEFINITIONS.map { |tool| definition(tool, read_only: false) } : read
+    end
+
+    def known?(name)
+      DEFINITIONS.any? { |tool| tool[:name] == name } || (@write && WRITE_DEFINITIONS.any? { |tool| tool[:name] == name })
     end
 
     def call(name, args)
       I18n.with_locale(:"pt-BR") { public_send(name, args) }
+    end
+
+    # ---------------------------------------------------------------- escrita
+
+    def create_task(args)
+      title = args["title"].to_s.strip
+      raise InvalidArguments, "Informe 'title'." if title.blank?
+
+      board = find_board!(args["board"])
+      column = find_column!(board, args["column"])
+      task = board.tasks.create!(account: @account, task_column: column, creator: @user, title: title.first(200),
+                                 description: args["description"].to_s.presence, due_on: parse_date(args["due_on"], "due_on"),
+                                 completed_at: column.done ? Time.current : nil)
+      { created: task_row(task.reload) }
+    end
+
+    def update_task(args)
+      task = find_task!(args["number"])
+      changes = {}
+      changes[:title] = args["title"].to_s.strip.first(200) if args.key?("title") && args["title"].to_s.strip.present?
+      changes[:description] = args["description"].to_s.presence if args.key?("description")
+      changes[:due_on] = parse_date(args["due_on"], "due_on") if args.key?("due_on")
+      raise InvalidArguments, "Nada para alterar: envie title, description ou due_on." if changes.empty?
+
+      task.update!(changes)
+      { updated: task_row(task.reload) }
+    end
+
+    def move_task(args)
+      task = find_task!(args["number"])
+      board = args["board"].to_s.strip.present? ? find_board!(args["board"]) : task.task_board
+      column = find_column!(board, args["column"], required: true)
+      TaskMover.new(task).call(column: column, user: @user)
+      { moved: task_row(task.reload) }
+    end
+
+    def add_task_comment(args)
+      task = find_task!(args["number"])
+      text = args["text"].to_s.strip
+      raise InvalidArguments, "Informe 'text'." if text.blank?
+
+      task.comments.create!(body: text.first(5000), user: @user)
+      { commented: task_row(task.reload) }
+    end
+
+    def set_habit_done(args)
+      name = args["habit"].to_s.strip
+      habit = @account.habits.where(active: true).find_by("lower(name) = ?", name.downcase)
+      raise InvalidArguments, "Hábito não encontrado: #{name}. Hábitos: #{@account.habits.where(active: true).pluck(:name).join(', ')}" if habit.nil?
+      raise InvalidArguments, "\"#{habit.name}\" é automático: a marcação vem da métrica e não pode ser alterada." if habit.auto?
+
+      date = parse_date(args["date"], "date") || @today
+      raise InvalidArguments, "Não é possível marcar um dia futuro." if date > @today
+
+      done = args["done"] != false
+      check = habit.habit_checks.find_by(date: date)
+      done ? (check || habit.habit_checks.create!(date: date)) : check&.destroy
+      { habit: habit.name, date: date, done: done }
+    end
+
+    def log_weight(args)
+      kg = args["kg"].to_f
+      raise InvalidArguments, "Peso inválido: informe 'kg' entre 20 e 400." unless kg.between?(20, 400)
+
+      date = parse_date(args["date"], "date") || @today
+      raise InvalidArguments, "Não é possível registrar um dia futuro." if date > @today
+
+      entry = @account.weight_entries.find_or_initialize_by(date: date)
+      entry.update!(weight_kg: kg.round(2))
+      { date: date, weight_kg: entry.weight_kg.to_f, bmi: entry.bmi }.compact
     end
 
     # ---------------------------------------------------------------- ferramentas
@@ -225,6 +329,39 @@ module Mcp
     end
 
     private
+
+    def definition(tool, read_only:)
+      schema = { type: "object", properties: tool[:properties], additionalProperties: false }
+      schema[:required] = tool[:required] if tool[:required]
+      { name: tool[:name], title: tool[:title], description: tool[:description], inputSchema: schema,
+        annotations: { readOnlyHint: read_only, destructiveHint: false, openWorldHint: false } }
+    end
+
+    # ---------------------------------------------------------------- busca (escrita)
+
+    def find_task!(number)
+      task = @account.tasks.find_by(number: number.to_i)
+      raise InvalidArguments, "Tarefa ##{number} não encontrada. Use get_tasks para ver os números." if task.nil?
+
+      task
+    end
+
+    def find_board!(name)
+      boards = @account.task_boards.ordered
+      raise InvalidArguments, "A conta ainda não tem quadros de tarefas. Peça ao usuário para criar um em Tarefas." if boards.empty?
+      return boards.first if name.to_s.strip.blank?
+
+      boards.find { |b| b.name.casecmp?(name.to_s.strip) } ||
+        raise(InvalidArguments, "Quadro não encontrado: #{name}. Quadros: #{boards.map(&:name).join(', ')}")
+    end
+
+    def find_column!(board, name, required: false)
+      raise InvalidArguments, "Informe 'column'. Colunas de #{board.name}: #{board.columns.map(&:name).join(', ')}" if required && name.to_s.strip.blank?
+      return board.columns.first if name.to_s.strip.blank?
+
+      board.columns.find { |c| c.name.casecmp?(name.to_s.strip) } ||
+        raise(InvalidArguments, "Coluna não encontrada: #{name}. Colunas de #{board.name}: #{board.columns.map(&:name).join(', ')}")
+    end
 
     # ---------------------------------------------------------------- argumentos
 

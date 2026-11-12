@@ -12,10 +12,18 @@ module Oauth
       return redirect_back_to_client(error: "access_denied") unless params[:decision] == "approve"
 
       grant = current_account.oauth_grants.create!(
-        user: current_user, oauth_client: @client, redirect_uri: @redirect_uri, scope: OauthGrant::SCOPE,
+        user: current_user, oauth_client: @client, redirect_uri: @redirect_uri,
+        scope: params[:allow_write] == "1" ? OauthGrant::SCOPES.join(" ") : OauthGrant::SCOPE, # quem decide é o usuário, na tela
         resource: params[:resource].to_s.first(300).presence, code_challenge: @code_challenge
       )
       redirect_back_to_client(code: grant.issue_code!)
+    end
+
+    # PATCH /oauth/grants/:id — liga/desliga a permissão de alterar, pela página de configuração.
+    def update
+      grant = current_account.oauth_grants.find(params[:id])
+      grant.allow_write!(params[:allow_write] == "1")
+      redirect_to setup_path(anchor: "mcp"), notice: t(grant.write? ? "flash.mcp.write_on" : "flash.mcp.write_off")
     end
 
     # DELETE /oauth/grants/:id — revogar pela página de configuração.

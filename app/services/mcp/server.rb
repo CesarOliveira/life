@@ -1,7 +1,8 @@
 module Mcp
   # Servidor MCP (Model Context Protocol) mínimo, sem estado, sobre JSON-RPC 2.0.
-  # Expõe só FERRAMENTAS de leitura (ver Mcp::Tools) para um assistente de IA
-  # cruzar tempo de tela, saúde, treinos, tarefas, hábitos e exames da conta.
+  # Expõe FERRAMENTAS (ver Mcp::Tools) para um assistente de IA cruzar tempo de
+  # tela, saúde, treinos, tarefas, hábitos e exames da conta. As de escrita só
+  # existem quando o usuário deu a permissão life:write.
   class Server
     PROTOCOL_VERSIONS = %w[2025-06-18 2025-03-26 2024-11-05].freeze
     VERSION = "1.0.0".freeze
@@ -15,9 +16,15 @@ module Mcp
       correlação não é causa. Não é aconselhamento médico: para exames e sintomas, oriente procurar um profissional.
     TEXT
 
-    def initialize(account)
+    WRITE_INSTRUCTIONS = <<~TEXT.squish.freeze
+      O usuário também autorizou alterações: você pode criar, editar, mover e comentar tarefas, marcar hábitos manuais
+      e registrar peso. Só altere quando o usuário pedir ou concordar; diga o que fez depois. Não existe ferramenta de exclusão.
+    TEXT
+
+    def initialize(account, write: false, user: nil)
       @account = account
-      @tools = Tools.new(account)
+      @write = write
+      @tools = Tools.new(account, write: write, user: user)
     end
 
     # Recebe uma mensagem JSON-RPC (Hash) e devolve a resposta (Hash) ou nil
@@ -32,7 +39,7 @@ module Mcp
       case method
       when "initialize" then result(id, initialize_result(message["params"]))
       when "ping" then result(id, {})
-      when "tools/list" then result(id, { tools: Tools.definitions })
+      when "tools/list" then result(id, { tools: @tools.definitions })
       when "tools/call" then call_tool(id, message["params"])
       else error(id, -32_601, "Method not found: #{method}")
       end
@@ -46,13 +53,13 @@ module Mcp
         protocolVersion: PROTOCOL_VERSIONS.include?(requested) ? requested : PROTOCOL_VERSIONS.first,
         capabilities: { tools: { listChanged: false } },
         serverInfo: { name: "life", title: "Life", version: VERSION },
-        instructions: INSTRUCTIONS
+        instructions: @write ? "#{INSTRUCTIONS.sub('Todas as ferramentas são somente leitura. ', '')} #{WRITE_INSTRUCTIONS}" : INSTRUCTIONS
       }
     end
 
     def call_tool(id, params)
       name = params.is_a?(Hash) ? params["name"].to_s : ""
-      return error(id, -32_602, "Unknown tool: #{name}") unless Tools.known?(name)
+      return error(id, -32_602, "Unknown tool: #{name}") unless @tools.known?(name)
 
       arguments = params["arguments"].is_a?(Hash) ? params["arguments"] : {}
       data = @tools.call(name, arguments)

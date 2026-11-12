@@ -2,7 +2,8 @@
 #   POST /mcp + Authorization: Bearer <access token OAuth>   (caminho principal)
 #   POST /mcp + Authorization: Bearer <Account#mcp_token>    (token manual)
 #   POST /mcp/<Account#mcp_token>                            (token no endereço)
-# Tudo somente leitura. GET/DELETE respondem 405:
+# Leitura sempre; escrita só com OAuth e a permissão life:write dada pelo usuário
+# (o token manual é sempre somente leitura). GET/DELETE respondem 405:
 # o servidor não abre stream nem guarda sessão.
 class McpController < ActionController::API
   include Oauth::Cors
@@ -17,7 +18,7 @@ class McpController < ActionController::API
     return head(:payload_too_large) if request.content_length.to_i > MAX_BODY_BYTES
 
     payload = JSON.parse(request.raw_post)
-    server = Mcp::Server.new(@account)
+    server = Mcp::Server.new(@account, write: @grant&.write? || false, user: @grant&.user)
     if payload.is_a?(Array)
       responses = payload.filter_map { |message| server.handle(message) }
       responses.empty? ? head(:accepted) : render(json: responses)
@@ -41,13 +42,14 @@ class McpController < ActionController::API
   # OAuth — é o que faz o cliente abrir a tela de login.
   def authenticate!
     bearer = request.headers["Authorization"].to_s[/\ABearer\s+(.+)\z/i, 1]
-    @account = OauthGrant.account_for_access_token(bearer)
+    @grant = OauthGrant.for_access_token(bearer)
+    @account = @grant&.account
     legacy = params[:token].presence || bearer
     @account ||= Account.find_by(mcp_token: legacy) if legacy.present? && legacy.length >= 20
     return if @account
 
     metadata = "#{request.base_url}/.well-known/oauth-protected-resource"
-    response.set_header("WWW-Authenticate", %(Bearer resource_metadata="#{metadata}", scope="#{OauthGrant::SCOPE}"))
+    response.set_header("WWW-Authenticate", %(Bearer resource_metadata="#{metadata}", scope="#{OauthGrant::SCOPES.join(' ')}"))
     head :unauthorized
   end
 

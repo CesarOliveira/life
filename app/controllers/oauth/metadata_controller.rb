@@ -10,7 +10,7 @@ module Oauth
         resource: mcp_url,
         authorization_servers: [root_url.chomp("/")],
         bearer_methods_supported: ["header"],
-        scopes_supported: [OauthGrant::SCOPE],
+        scopes_supported: OauthGrant::SCOPES,
         resource_name: "Life"
       }
     end
@@ -26,7 +26,7 @@ module Oauth
         grant_types_supported: %w[authorization_code refresh_token],
         code_challenge_methods_supported: ["S256"],
         token_endpoint_auth_methods_supported: ["none"],
-        scopes_supported: [OauthGrant::SCOPE],
+        scopes_supported: OauthGrant::SCOPES,
         client_id_metadata_document_supported: true
       }
     end

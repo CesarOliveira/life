@@ -21,7 +21,7 @@ module Oauth
       render status: :created, json: {
         client_id: client.client_id, client_id_issued_at: client.created_at.to_i, client_name: client.name,
         redirect_uris: client.redirect_uris, grant_types: %w[authorization_code refresh_token],
-        response_types: ["code"], token_endpoint_auth_method: "none", scope: OauthGrant::SCOPE
+        response_types: ["code"], token_endpoint_auth_method: "none", scope: OauthGrant::SCOPES.join(" ")
       }.compact
     end
 

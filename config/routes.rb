@@ -85,6 +85,7 @@ Rails.application.routes.draw do
   get "oauth/authorize", to: "oauth/authorizations#new", as: :oauth_authorize
   post "oauth/authorize", to: "oauth/authorizations#create"
   delete "oauth/grants/:id", to: "oauth/authorizations#destroy", as: :oauth_grant
+  patch "oauth/grants/:id", to: "oauth/authorizations#update"
   post "oauth/register", to: "oauth/tokens#register", as: :oauth_register
   post "oauth/token", to: "oauth/tokens#create", as: :oauth_token
   post "oauth/revoke", to: "oauth/tokens#revoke", as: :oauth_revoke
