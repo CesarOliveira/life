@@ -29,6 +29,12 @@ module Mcp
         description: "Tempo de tela do iPhone: total por dia e ranking de apps no período (padrão: 30 dias). " \
                      "Com 'app', devolve a série diária só daquele app.",
         properties: PERIOD.merge(app: { type: "string", description: "Nome do app, como aparece no ranking (ex.: Instagram)." }) },
+      { name: "get_screen_time_by_hour", title: "Tempo de tela por horário",
+        description: "Em que horas do dia o iPhone é usado (padrão: últimos 14 dias, máximo 62): média de minutos por hora, " \
+                     "e por dia o total, o primeiro e o último uso e os minutos por hora. Inclui 'before_bed': para cada noite com " \
+                     "hora de dormir registrada, os minutos de tela nos 60 minutos antes de dormir e em quais apps, ao lado da " \
+                     "duração do sono — use para testar se tela antes de dormir se relaciona com o sono. Com 'app', restringe a um app.",
+        properties: PERIOD.merge(app: { type: "string", description: "Nome do app (ex.: Instagram)." }) },
       { name: "list_health_metrics", title: "Métricas de saúde disponíveis",
         description: "Lista as métricas de saúde que têm dados: chave, nome, unidade, seção, primeiro e último dia. " \
                      "Use para descobrir as chaves aceitas por get_health_metrics.",
@@ -316,6 +322,19 @@ module Mcp
         daily_total_minutes: daily.sort.to_h { |date, seconds| [date, minutes(seconds)] },
         apps: app_ranking(usages, 30),
         notes: "Fonte: uso de apps do iPhone sincronizado pelo Mac. Não inclui sites nem apps usados pelo CarPlay; o dia mais recente pode estar incompleto." }
+    end
+
+    def get_screen_time_by_hour(args)
+      from, to = period(args, 14, max_span: 62)
+      hours = ScreenTimeHours.new(@account, from: from, to: to, app: args["app"].to_s.strip.presence)
+      first = @account.app_usage_slots.minimum(:date)
+      { period: { from: from, to: to }, app: args["app"].to_s.strip.presence, days_with_data: hours.days_with_data,
+        hourly_data_available_since: first,
+        average_minutes_by_hour: hours.average_minutes_by_hour.to_h { |hour, minutes| [format("%02dh", hour), minutes] },
+        days: hours.days,
+        before_bed: hours.before_bed,
+        notes: "Resolução de 15 minutos, horário local. 'last_use_block' é o início do último bloco de 15 min com uso. " \
+               "'before_bed' só aparece em noites com hora de dormir (Apple Watch) e tempo de tela sincronizado." }.compact
     end
 
     def list_health_metrics(_args)

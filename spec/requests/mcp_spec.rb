@@ -96,6 +96,30 @@ RSpec.describe "MCP server", type: :request do
     expect(list["metrics"].map { |m| m["key"] }).to eq(%w[sleep_minutes sleep_bedtime steps])
   end
 
+  it "exposes screen time by hour and the screen use in the hour before bed" do
+    night = yesterday # noite atribuída ao dia em que acorda
+    create(:measurement, account: account, key: "sleep_bedtime", value: (23 * 60) + 30, category: "health", measured_on: night) # dormiu 23:30 da véspera
+    create(:measurement, account: account, key: "sleep_minutes", value: 400, category: "health", measured_on: night)
+    eve = night - 1
+    { 89 => 600, 90 => 900, 91 => 900, 92 => 900, 93 => 900, 94 => 300 }.each do |slot, seconds| # 22:15 … 23:30+
+      AppUsageSlot.create!(account: account, date: eve, slot: slot, bundle_id: "Instagram", name: "Instagram", seconds: seconds)
+    end
+    AppUsageSlot.create!(account: account, date: eve, slot: 36, bundle_id: "WhatsApp", name: "WhatsApp", seconds: 300) # 09:00
+
+    _, data = tool("get_screen_time_by_hour", { from: (eve - 1).iso8601, to: night.iso8601 })
+    expect(data["average_minutes_by_hour"]).to include("22h" => 40.0, "23h" => 35.0, "09h" => 5.0)
+    day = data["days"].first
+    expect(day).to include("first_use" => "09:00", "last_use_block" => "23:30", "total_minutes" => 80)
+
+    bed = data["before_bed"].first
+    # janela 22:30–23:30 = blocos 90, 91, 92, 93 inteiros = 60 min de Instagram
+    expect(bed).to include("night_of" => night.iso8601, "bedtime" => "23:30", "sleep_minutes" => 400, "screen_minutes_in_hour_before_bed" => 60)
+    expect(bed["apps"]).to eq([{ "app" => "Instagram", "minutes" => 60 }])
+
+    _, only = tool("get_screen_time_by_hour", { from: eve.iso8601, to: eve.iso8601, app: "whatsapp" })
+    expect(only["days"].first["total_minutes"]).to eq(5)
+  end
+
   it "reports bad arguments as a tool error the model can fix, and unknown tools as a protocol error" do
     result, text = tool("get_screen_time", { from: "ontem" })
     expect(result["isError"]).to be(true)

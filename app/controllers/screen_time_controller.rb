@@ -22,6 +22,7 @@ class ScreenTimeController < ApplicationController
     @last_data_on = current_account.app_usages.maximum(:date)
 
     @chart = ScreenTimeChart.new(by_date, from: @from, to: @to)
+    @hours = ScreenTimeHours.new(current_account, from: @from, to: @to)
     @avg_delta = avg_delta_vs_previous
 
     names = usages.where.not(name: nil).group(:bundle_id).maximum(:name)

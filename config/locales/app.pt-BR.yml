@@ -544,6 +544,15 @@ pt-BR:
     period_last_days: "Últimos %{days} dias"
     avg_label: "méd."
     most_used: "Mais usados"
+    by_hour: "Por hora do dia"
+    by_hour_avg:
+      one: "média de %{count} dia"
+      other: "média de %{count} dias"
+    by_hour_day: "minutos em cada hora"
+    by_hour_night: "22h às 5h"
+    minutes_short:
+      one: "%{count} min"
+      other: "%{count} min"
     per_day: "por dia"
     delta_hint: "Variação da média diária contra o período anterior de mesmo tamanho"
     days_with_data: "Dias com dados"

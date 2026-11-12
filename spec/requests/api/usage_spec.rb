@@ -224,4 +224,18 @@ RSpec.describe "API::Usage", type: :request do
       expect(account.app_usages.where("bundle_id LIKE ?", "%()")).to be_empty
     end
   end
+
+  it "stores 15-minute slots for the day and replaces them on resend" do
+    day = (Date.current - 1).iso8601
+    payload = lambda do |slots|
+      { device: "iphone", date: day, apps: [{ bundle_id: "Instagram", name: "Instagram", seconds: 1500 }], slots: slots }.to_json
+    end
+    post "/api/usage", params: payload.call([{ slot: 92, name: "Instagram", seconds: 840 }, { slot: 93, name: "Instagram", seconds: 660 },
+                                             { slot: 200, name: "Fora", seconds: 60 }, { slot: 10, name: "Zero", seconds: 0 }]), headers: headers
+    expect(JSON.parse(response.body)).to include("upserted" => 1, "slots" => 2)
+    expect(account.app_usage_slots.order(:slot).pluck(:slot, :seconds)).to eq([[92, 840], [93, 660]])
+
+    post "/api/usage", params: payload.call([{ slot: 92, name: "Instagram", seconds: 900 }]), headers: headers
+    expect(account.app_usage_slots.pluck(:slot, :seconds)).to eq([[92, 900]])
+  end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_12_000005) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_12_000006) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -28,6 +28,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_000005) do
     t.index ["join_code"], name: "index_accounts_on_join_code", unique: true
     t.index ["mcp_token"], name: "index_accounts_on_mcp_token", unique: true
     t.index ["owner_id"], name: "index_accounts_on_owner_id"
+  end
+
+  create_table "app_usage_slots", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.string "bundle_id", null: false
+    t.datetime "created_at", null: false
+    t.date "date", null: false
+    t.string "device", default: "iphone", null: false
+    t.string "name"
+    t.integer "seconds", default: 0, null: false
+    t.integer "slot", limit: 2, null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "date"], name: "index_app_usage_slots_on_account_id_and_date"
+    t.index ["account_id", "device", "date", "slot", "bundle_id"], name: "idx_app_usage_slots_unique", unique: true
+    t.index ["account_id"], name: "index_app_usage_slots_on_account_id"
   end
 
   create_table "app_usages", force: :cascade do |t|
@@ -386,6 +401,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_000005) do
   end
 
   add_foreign_key "accounts", "users", column: "owner_id"
+  add_foreign_key "app_usage_slots", "accounts"
   add_foreign_key "app_usages", "accounts"
   add_foreign_key "connectors", "accounts"
   add_foreign_key "exam_extractions", "accounts"

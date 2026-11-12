@@ -109,6 +109,32 @@ def segundos_por_app(evs, dia):
     return {b: s for b, s in secs.items() if b not in EXCLUIR and not b.startswith(EXCLUIR_PREFIXOS)}
 
 
+SLOT = 15 * 60  # blocos de 15 minutos (96 por dia)
+
+
+def segundos_por_bloco(evs, dia):
+    """{(bloco 0..95, bundle): segundos} do dia local: mesmo pareamento inicio->fim, repartido em blocos de 15 min."""
+    d0 = datetime.datetime(dia.year, dia.month, dia.day, tzinfo=TZ)
+    t0 = d0.timestamp() - COCOA
+    t1 = (d0 + datetime.timedelta(days=1)).timestamp() - COCOA
+    aberto = {}; blocos = {}
+    for t, b, inicio in evs:
+        if inicio:
+            aberto[b] = t; continue
+        if b not in aberto: continue
+        lo = max(aberto.pop(b), t0); hi = min(t, t1)
+        if hi <= lo or b in EXCLUIR or b.startswith(EXCLUIR_PREFIXOS): continue
+        while lo < hi:
+            # bloco pelo relogio local (em dia de troca de horario de verao o dia nao tem 96 blocos iguais)
+            local = datetime.datetime.fromtimestamp(lo + COCOA, TZ)
+            n = local.hour * 4 + local.minute // 15
+            fim_bloco = lo - ((local.minute % 15) * 60 + local.second + local.microsecond / 1e6) + SLOT
+            ate = min(hi, fim_bloco)
+            blocos[(n, b)] = blocos.get((n, b), 0.0) + (ate - lo)
+            lo = ate
+    return blocos
+
+
 def nome_legivel(bundle, nomes):
     if bundle in nomes: return nomes[bundle]
     partes = [x for x in bundle.split(".") if x]
@@ -138,20 +164,27 @@ def life_token():
     return r.stdout.strip() or None if r.returncode == 0 else None
 
 
-def enviar_life(token, dia, secs, nomes):
+def enviar_life(token, dia, secs, nomes, blocos=None):
     """POST /api/usage de um dia. A chave do app e o NOME (como o Atalho enviava), para o historico
     e os habitos do site continuarem batendo. O servidor faz upsert: reenviar o dia sobrescreve."""
     por_nome = {}
     for b, s in secs.items():
         n = nome_legivel(b, nomes); por_nome[n] = por_nome.get(n, 0.0) + s
     apps = [{"bundle_id": n, "name": n, "seconds": round(s)} for n, s in por_nome.items() if round(s) > 0]
-    body = json.dumps({"device": LIFE_DEVICE, "date": dia.isoformat(), "apps": apps}).encode()
+    payload = {"device": LIFE_DEVICE, "date": dia.isoformat(), "apps": apps}
+    if blocos is not None:   # uso em blocos de 15 min, com a mesma chave (nome) do total do dia
+        por_bloco = {}
+        for (n, b), s in blocos.items():
+            chave = (n, nome_legivel(b, nomes)); por_bloco[chave] = por_bloco.get(chave, 0.0) + s
+        payload["slots"] = [{"slot": n, "bundle_id": nome, "name": nome, "seconds": min(round(s), SLOT)}
+                            for (n, nome), s in sorted(por_bloco.items()) if round(s) > 0]
+    body = json.dumps(payload).encode()
     req = urllib.request.Request(LIFE_ENDPOINT, data=body, method="POST", headers={
         "Content-Type": "application/json", "Authorization": f"Bearer {token}", "User-Agent": "tempodetela-mac/1.0"})
     try:
         with urllib.request.urlopen(req, timeout=30) as resp:
             r = json.loads(resp.read().decode() or "{}")
-        log(f"Life {dia}: enviado, {r.get('upserted', '?')} apps gravados"); return True
+        log(f"Life {dia}: enviado, {r.get('upserted', '?')} apps e {r.get('slots', 0) or 0} blocos de 15 min gravados"); return True
     except urllib.error.HTTPError as e:
         log(f"ERRO Life {dia}: HTTP {e.code} {e.read().decode(errors='replace')[:200]}")
     except Exception as e:
@@ -246,7 +279,7 @@ def main():
     token = life_token()
     if not token:
         log(f"ERRO Life: token nao encontrado no Chaves (item '{LIFE_KEYCHAIN}'); CSV gravado, envio pulado"); return 4
-    ok = all([enviar_life(token, d, brutos[d], nomes) for d in dias_life])
+    ok = all([enviar_life(token, d, brutos[d], nomes, segundos_por_bloco(evs, d)) for d in dias_life])
     return 0 if ok else 4
 
 

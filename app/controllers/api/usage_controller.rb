@@ -39,9 +39,10 @@ module Api
       # upsert_all não aceita duplicatas na mesma chamada: mantém a última ocorrência.
       rows = rows.reverse.uniq { |r| [r[:device], r[:date], r[:bundle_id]] }.reverse
       alerts = persist_rows(rows)
+      slots = persist_slots(data["slots"], device, parse_date(default_date))
 
-      @ingestion_result = { upserted: rows.size, skipped: skipped, alerts: alerts.size }
-      render json: { ok: true, upserted: rows.size, skipped: skipped,
+      @ingestion_result = { upserted: rows.size, skipped: skipped, alerts: alerts.size, slots: slots }
+      render json: { ok: true, upserted: rows.size, skipped: skipped, slots: slots,
                      alerts: alerts, alert_text: alerts.join("\n").presence }.compact
     end
 
@@ -86,6 +87,32 @@ module Api
       AppUsage.upsert_all(rows, unique_by: :idx_app_usages_unique, record_timestamps: true)
       HabitRuleEvaluator.new(current_account).evaluate(dates)
       before ? alerts.messages(Date.current, previous: before) : []
+    end
+
+    # Uso em blocos de 15 min do dia do lote (opcional):
+    #   "slots": [ { "slot": 92, "name": "Instagram", "seconds": 840 }, ... ]
+    # Substitui os blocos daquele (device, dia): o envio é sempre o dia inteiro.
+    def persist_slots(raw, device, date)
+      return nil unless raw.is_a?(Array) && date && date_in_window?(date)
+
+      rows = raw.first(5000).filter_map do |entry|
+        next unless entry.is_a?(Hash)
+
+        name = entry["name"].to_s.gsub(/\p{Cf}/, "").strip.first(120).presence
+        bundle = entry["bundle_id"].to_s.strip.first(200).presence || name
+        slot = Integer(entry["slot"], exception: false)
+        seconds = entry["seconds"].to_f.round.clamp(0, AppUsageSlot::SLOT_MINUTES * 60)
+        next if bundle.blank? || slot.nil? || !slot.between?(0, AppUsageSlot::SLOTS_PER_DAY - 1) || seconds.zero?
+
+        { account_id: current_account.id, device: device, date: date, slot: slot, bundle_id: bundle, name: name, seconds: seconds }
+      end
+      rows = rows.reverse.uniq { |r| [r[:slot], r[:bundle_id]] }.reverse
+
+      AppUsageSlot.transaction do
+        current_account.app_usage_slots.where(device: device, date: date).delete_all
+        AppUsageSlot.insert_all(rows, record_timestamps: true) if rows.any?
+      end
+      rows.size
     end
 
     DURATION_TOKEN = /((?:\d[\d.,]*\s*(?:horas?|hr|h|min|m|seg|sec|s)\b[\s,]*)+)/i

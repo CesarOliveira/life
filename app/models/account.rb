@@ -31,6 +31,7 @@ class Account < ApplicationRecord
   has_many :habits, dependent: :destroy
   has_many :weight_entries, dependent: :destroy
   has_many :app_usages, dependent: :destroy
+  has_many :app_usage_slots, dependent: :destroy
   has_many :measurements, dependent: :destroy
   has_many :workouts, dependent: :destroy
   has_many :oauth_grants, dependent: :destroy

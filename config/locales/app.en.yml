@@ -544,6 +544,15 @@ en:
     period_last_days: "Last %{days} days"
     avg_label: "avg."
     most_used: "Most used"
+    by_hour: "By hour of day"
+    by_hour_avg:
+      one: "average of %{count} day"
+      other: "average of %{count} days"
+    by_hour_day: "minutes in each hour"
+    by_hour_night: "10 pm to 5 am"
+    minutes_short:
+      one: "%{count} min"
+      other: "%{count} min"
     per_day: "per day"
     delta_hint: "Change in daily average versus the previous period of the same length"
     days_with_data: "Days with data"

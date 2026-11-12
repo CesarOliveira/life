@@ -11,7 +11,7 @@ module Mcp
       Life é o diário pessoal de dados do usuário: tempo de tela do iPhone por app, saúde do iPhone e Apple Watch
       (sono, atividade, coração, treinos), tarefas em quadros kanban, hábitos, peso e exames de laboratório.
       Todas as ferramentas são somente leitura. Datas são dias locais (America/Sao_Paulo) no formato AAAA-MM-DD e
-      durações vêm em minutos. Comece por get_overview para ver o que existe e o período coberto; depois use as
+      durações vêm em minutos. O tempo de tela também existe por horário (get_screen_time_by_hour). Comece por get_overview para ver o que existe e o período coberto; depois use as
       ferramentas específicas. Ao cruzar dados, lembre que o dia mais recente pode estar incompleto e que
       correlação não é causa. Não é aconselhamento médico: para exames e sintomas, oriente procurar um profissional.
     TEXT
