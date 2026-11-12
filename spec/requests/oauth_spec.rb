@@ -170,6 +170,22 @@ RSpec.describe "OAuth for MCP", type: :request do
       expect(client).to have_attributes(kind: "cimd", name: "Claude", client_id: url)
     end
 
+    it "falls back to the next address when the first one is unreachable (IPv6 without a route)" do
+      allow(Resolv).to receive(:getaddresses).and_return(["2607:6bc0::10", "160.79.104.10"])
+      ok = Net::HTTPOK.new("1.1", "200", "OK")
+      allow(ok).to receive(:body).and_return({ client_id: url, client_name: "Claude", redirect_uris: ["https://claude.ai/api/mcp/auth_callback"] }.to_json)
+      tried = []
+      allow(Net::HTTP).to receive(:new) do
+        http = instance_double(Net::HTTP, :use_ssl= => nil, :open_timeout= => nil, :read_timeout= => nil)
+        allow(http).to receive(:ipaddr=) { |address| tried << address }
+        allow(http).to receive(:request_get) { tried.last.include?(":") ? raise(Errno::ENETUNREACH) : ok }
+        http
+      end
+
+      expect(described_class.call(url)).to have_attributes(name: "Claude")
+      expect(tried.first).to eq("160.79.104.10") # IPv4 primeiro
+    end
+
     it "refuses documents that claim another id and hosts that resolve to internal addresses" do
       expect(stub_fetch(described_class, { client_id: "https://outro.example/x", redirect_uris: ["https://a.example/cb"] })).to be_nil
       expect(Net::HTTP).not_to receive(:new)

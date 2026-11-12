@@ -55,9 +55,20 @@ module Oauth
       uri = URI.parse(@client_id)
       return nil unless uri.is_a?(URI::HTTPS) && uri.host.present? && uri.path.present? && uri.path != "/" && uri.userinfo.nil?
 
-      address = public_address(uri.host)
-      return nil if address.nil?
+      addresses = public_addresses(uri.host)
+      return nil if addresses.empty?
 
+      # Tenta cada IP validado (IPv4 primeiro: há redes de hospedagem sem rota IPv6).
+      addresses.each do |address|
+        document = request_document(uri, address)
+        return document if document
+      end
+      nil
+    rescue URI::InvalidURIError
+      nil
+    end
+
+    def request_document(uri, address)
       http = Net::HTTP.new(uri.host, uri.port)
       http.ipaddr = address # conecta no IP já validado (evita troca de DNS entre checar e conectar)
       http.use_ssl = true
@@ -69,19 +80,19 @@ module Oauth
       parsed = JSON.parse(response.body)
       parsed.is_a?(Hash) ? parsed : nil
     rescue StandardError => e
-      Rails.logger.warn("OAuth CIMD: falha ao ler #{@client_id}: #{e.class}")
+      Rails.logger.warn("OAuth CIMD: falha ao ler #{@client_id} via #{address}: #{e.class}")
       nil
     end
 
-    # Primeiro IP público do host, ou nil se algum endereço for interno.
-    def public_address(host)
+    # IPs públicos do host, IPv4 primeiro. Vazio se QUALQUER endereço for interno
+    # (um host que resolve para dentro da rede não é confiável, nem em parte).
+    def public_addresses(host)
       addresses = Resolv.getaddresses(host)
-      return nil if addresses.empty?
-      return nil if addresses.any? { |address| internal?(IPAddr.new(address)) }
+      return [] if addresses.empty? || addresses.any? { |address| internal?(IPAddr.new(address)) }
 
-      addresses.first
+      addresses.sort_by { |address| IPAddr.new(address).ipv4? ? 0 : 1 }.first(4)
     rescue IPAddr::InvalidAddressError, Resolv::ResolvError
-      nil
+      []
     end
 
     def internal?(ip)
