@@ -35,7 +35,7 @@ RSpec.describe "Tasks", type: :request do
 
   it "creates tasks numbered per account and comments on them" do
     post task_board_tasks_path(board), params: { task: { title: "Primeira", task_column_id: todo.id } }
-    post task_board_tasks_path(board), params: { task: { title: "Segunda", description: "ver https://example.com" } }
+    post task_board_tasks_path(board), params: { task: { title: "Segunda", description: "**Medidas:** ver https://example.com" } }
     expect(account.tasks.order(:number).pluck(:number, :title)).to eq([[1, "Primeira"], [2, "Segunda"]])
 
     task = account.tasks.find_by!(title: "Segunda")
@@ -43,6 +43,7 @@ RSpec.describe "Tasks", type: :request do
     get task_path(task)
     expect(response.body).to include("&lt;b&gt;orçamento&lt;/b&gt; ok") # texto do usuário escapado
     expect(response.body).to include(%(href="https://example.com"))
+    expect(response.body).to include("<strong>Medidas:</strong>")
   end
 
   it "moves a task by drag and drop, reordering and marking completion" do

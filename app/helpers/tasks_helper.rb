@@ -13,9 +13,11 @@ module TasksHelper
     (COLUMN_STYLES[column.color] || COLUMN_STYLES["slate"])[part]
   end
 
-  # Descrição/comentário: texto do usuário com quebras de linha e links, sem HTML.
+  # Descrição/comentário: texto do usuário com quebras de linha, links e
+  # **negrito**; qualquer HTML digitado é escapado antes.
   def task_text(text)
-    simple_format(auto_link_urls(h(text.to_s)), {}, sanitize: false)
+    escaped = h(text.to_s).gsub(/\*\*(.+?)\*\*/, '<strong>\1</strong>') # **negrito** (vem do Trello)
+    simple_format(auto_link_urls(escaped), {}, sanitize: false)
   end
 
   private
