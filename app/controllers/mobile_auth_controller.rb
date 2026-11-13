@@ -13,6 +13,9 @@ class MobileAuthController < ApplicationController
     user = account&.owner || account&.users&.first
     return redirect_to(new_user_session_path, alert: t("flash.omniauth.failure")) unless user
 
+    # Sessão persistente (cookie "lembrar de mim"): o WebView do app perde cookies
+    # de sessão quando o iOS encerra o processo, e o usuário não deve ver login.
+    user.remember_me = true
     sign_in(user)
     redirect_to root_path
   end

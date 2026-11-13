@@ -42,6 +42,7 @@ RSpec.describe "Mobile auth (Caminho B)", type: :request do
       account = Account.ensure_personal_for(user)
 
       get "/mobile/enter", params: { token: account.api_token }
+      expect(response.headers["Set-Cookie"].to_s).to include("remember_user_token") # sessão persistente no WebView
       expect(response).to redirect_to(root_path)
 
       get root_path # já autenticado: não volta pro login
