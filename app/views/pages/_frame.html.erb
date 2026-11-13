@@ -1,0 +1,33 @@
+<%# locals: title — moldura comum das páginas públicas. %>
+<div class="mx-auto max-w-2xl">
+  <div class="mb-6 flex items-center justify-between gap-3">
+    <%= link_to root_path, class: "flex items-center gap-2 font-semibold text-slate-900" do %>
+      <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500 text-sm text-white">✦</span>
+      <span><%= @legal[:product_name] %></span>
+    <% end %>
+    <div class="inline-flex items-center overflow-hidden rounded-lg border border-slate-200 text-xs">
+      <% I18n.available_locales.each do |loc| %>
+        <%= link_to locale_label(loc), locale_switch_path(loc),
+              class: "px-2.5 py-1 #{I18n.locale == loc ? 'bg-emerald-600 font-semibold text-white' : 'text-slate-500 hover:bg-slate-50'}" %>
+      <% end %>
+    </div>
+  </div>
+
+  <% if @legal[:status].to_s != "published" %>
+    <p class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800"><%= t("pages.draft") %></p>
+  <% end %>
+
+  <article class="space-y-5 rounded-2xl border border-slate-200 bg-white p-6 text-sm leading-relaxed text-slate-700 shadow-sm
+                  [&_h2]:mt-6 [&_h2]:text-base [&_h2]:font-semibold [&_h2]:text-slate-900 [&_ul]:list-disc [&_ul]:space-y-1 [&_ul]:pl-5 [&_a]:font-medium [&_a]:text-emerald-700 [&_a]:underline">
+    <h1 class="text-2xl font-bold text-slate-900"><%= title %></h1>
+    <p class="text-xs text-slate-400"><%= t("pages.effective", date: l(Date.iso8601(@legal[:effective_date].to_s), format: :long)) %></p>
+    <%= yield %>
+  </article>
+
+  <nav class="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs text-slate-500">
+    <%= link_to t("pages.privacy_title"), privacy_path, class: "hover:underline" %>
+    <%= link_to t("pages.terms_title"), terms_path, class: "hover:underline" %>
+    <%= link_to t("pages.support_title"), support_path, class: "hover:underline" %>
+    <%= link_to t("user_deletion.title"), delete_account_path, class: "hover:underline" %>
+  </nav>
+</div>

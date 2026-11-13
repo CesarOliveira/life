@@ -50,7 +50,6 @@ class TaskBoardsController < ApplicationController
   end
 
   def destroy
-    @board.tasks.destroy_all
     @board.destroy
     redirect_to task_boards_path, notice: t("flash.tasks.board_removed")
   end

@@ -35,6 +35,7 @@ class Account < ApplicationRecord
   has_many :measurements, dependent: :destroy
   has_many :workouts, dependent: :destroy
   has_many :oauth_grants, dependent: :destroy
+  has_many :ingestion_logs, dependent: :delete_all
   has_many :task_boards, dependent: :destroy
   has_many :tasks, dependent: :destroy
   has_many :goals, dependent: :destroy

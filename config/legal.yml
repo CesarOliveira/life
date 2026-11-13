@@ -1,0 +1,12 @@
+# Dados do responsável pelo Life, exibidos nas páginas públicas (privacidade,
+# termos, suporte). Enquanto `status` for "draft", as páginas mostram um aviso
+# de versão preliminar. Preencha e mude para "published" antes de enviar o app
+# para a App Store.
+shared:
+  status: draft                 # draft | published
+  product_name: "Life"
+  legal_name:                   # razão social, ex.: "Integrattor Tecnologia Ltda."
+  tax_id:                       # CNPJ, ex.: "00.000.000/0001-00"
+  address:                      # cidade/UF do responsável (opcional)
+  contact_email:                # canal de privacidade e suporte
+  effective_date: "2026-11-13"

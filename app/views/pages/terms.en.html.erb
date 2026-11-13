@@ -1,0 +1,37 @@
+<%= render layout: "pages/frame", locals: { title: t("pages.terms_title") } do %>
+  <p>These terms govern the use of <strong><%= @legal[:product_name] %></strong>, on the website and in the app. By creating an account you agree to them and to the <%= link_to "Privacy Policy", privacy_path %>.</p>
+
+  <h2>1. The service</h2>
+  <p>Life brings together data you choose to record or connect: iPhone screen time, health and activity, tasks, habits, goals, weight and lab exams. Its purpose is to help you keep track of your own routine.</p>
+
+  <h2>2. Not medical advice</h2>
+  <p>Life is not a medical device. Charts, summaries, exam reference ranges and analyses produced by AI assistants are informational and do not replace evaluation by a health professional. Do not make health decisions based only on what Life shows. In an emergency, seek care.</p>
+
+  <h2>3. Your account</h2>
+  <ul>
+    <li>You must be 18 or older.</li>
+    <li>You are responsible for keeping your password and access tokens secret, and for everything done with them.</li>
+    <li>The information you record must be yours, or you must have the right to use it.</li>
+  </ul>
+
+  <h2>4. Acceptable use</h2>
+  <p>You may not use the service for unlawful purposes, try to access other people's data, overload or circumvent the systems, or resell the service without authorization.</p>
+
+  <h2>5. AI assistants and integrations</h2>
+  <p>You decide whether to connect AI assistants and other integrations, and with what level of access. What those services do with the data after receiving it is the responsibility of their providers. Review what an assistant changes when you grant write permission.</p>
+
+  <h2>6. Availability and changes</h2>
+  <p>We work to keep the service available, but it is provided "as is", with no guarantee of uninterrupted operation. Features may change or be discontinued. If the service is shut down, we will give reasonable notice so you can delete or keep your data.</p>
+
+  <h2>7. Termination</h2>
+  <p>You can delete your account at any time, in the app or at <%= link_to "#{request.base_url}/delete-account", delete_account_path %>. We may suspend accounts that violate these terms.</p>
+
+  <h2>8. Liability</h2>
+  <p>To the extent permitted by law, we are not liable for indirect damages or for decisions made based on the data displayed. Nothing here limits rights the law grants to consumers.</p>
+
+  <h2>9. Governing law</h2>
+  <p>These terms are governed by the laws of Brazil. Disputes are resolved in the courts of the consumer's domicile.</p>
+
+  <h2>10. Contact</h2>
+  <%= render "pages/operator" %>
+<% end %>

@@ -63,4 +63,12 @@
       <% end %>
     </div>
   </div>
+
+  <%# Exclusão da conta do usuário (exigida pela App Store e pela LGPD) %>
+  <div class="mt-6 rounded-2xl border border-rose-200 bg-white p-6 shadow-sm">
+    <h2 class="mb-1 text-sm font-medium text-rose-700"><%= t("user_deletion.title") %></h2>
+    <p class="mb-3 text-xs text-slate-500"><%= t("user_deletion.settings_hint") %></p>
+    <%= link_to t("user_deletion.title"), delete_account_path,
+          class: "inline-block rounded-lg border border-rose-300 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-50" %>
+  </div>
 </div>

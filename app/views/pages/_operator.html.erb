@@ -1,0 +1,14 @@
+<%# Identificação do responsável e canal de contato, conforme config/legal.yml. %>
+<% name = @legal[:legal_name].presence %>
+<p>
+  <% if name %>
+    <%= t("pages.operator", product: @legal[:product_name], name: name) %><% if @legal[:tax_id].present? %>, <%= t("pages.tax_id", id: @legal[:tax_id]) %><% end %><% if @legal[:address].present? %>, <%= @legal[:address] %><% end %>.
+  <% else %>
+    <%= t("pages.operator_pending", product: @legal[:product_name]) %>
+  <% end %>
+  <% if @legal[:contact_email].present? %>
+    <%= t("pages.contact_html", email: mail_to(@legal[:contact_email])) %>
+  <% else %>
+    <%= t("pages.contact_pending") %>
+  <% end %>
+</p>

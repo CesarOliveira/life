@@ -499,6 +499,36 @@ pt-BR:
       bad_redirect: "O endereço de retorno informado não está cadastrado para este aplicativo."
       hint: "Tente conectar de novo a partir do assistente. Nada foi autorizado."
 
+  user_deletion:
+    title: "Excluir minha conta"
+    settings_hint: "Apaga o seu usuário e todos os seus dados do Life, de forma definitiva."
+    intro: "Você está prestes a excluir a conta %{email} do Life."
+    what_title: "O que será apagado"
+    what:
+      data: "Todos os seus dados: tempo de tela, saúde, treinos, tarefas, hábitos, metas, peso e exames."
+      access: "Seu usuário e o acesso pelo site e pelo app. Os tokens de envio deixam de funcionar."
+      assistants: "As autorizações dadas a assistentes de IA."
+    shared: "Você divide com outras pessoas: %{names}. Essas contas continuam existindo para elas; você apenas sai."
+    irreversible: "Esta ação não pode ser desfeita, e não há como recuperar os dados depois."
+    type_label: "Para confirmar, digite %{word}"
+    submit: "Excluir definitivamente"
+    wrong_confirmation: "Digite %{word} para confirmar a exclusão."
+    done: "Sua conta e os seus dados foram excluídos."
+    blocked:
+      platform_admin: "Este usuário administra a plataforma e não pode ser excluído por aqui. Remova antes o papel de administrador."
+
+  pages:
+    draft: "Versão preliminar: os dados do responsável ainda estão sendo preenchidos."
+    effective: "Em vigor desde %{date}"
+    privacy_title: "Política de Privacidade"
+    terms_title: "Termos de Uso"
+    support_title: "Suporte"
+    operator: "O %{product} é operado por %{name}"
+    tax_id: "CNPJ %{id}"
+    operator_pending: "O %{product} está em fase de pré-lançamento."
+    contact_html: "Contato: %{email}."
+    contact_pending: "O canal de contato será publicado aqui antes do lançamento."
+
   weights:
     title: "Peso"
     add: "Registrar peso"

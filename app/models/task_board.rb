@@ -27,8 +27,10 @@ class TaskBoard < ApplicationRecord
   ].freeze
 
   belongs_to :account
-  has_many :columns, -> { order(:position, :id) }, class_name: "TaskColumn", dependent: :destroy, inverse_of: :task_board
+  # A ordem importa na exclusão: as tarefas saem antes das colunas, porque uma
+  # coluna com tarefas recusa ser apagada.
   has_many :tasks, dependent: :destroy
+  has_many :columns, -> { order(:position, :id) }, class_name: "TaskColumn", dependent: :destroy, inverse_of: :task_board
 
   validates :name, presence: true, length: { maximum: 80 }
 

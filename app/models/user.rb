@@ -3,6 +3,7 @@
 # Table name: users
 #
 #  id                     :bigint           not null, primary key
+#  apple_uid              :string
 #  email                  :string           default(""), not null
 #  encrypted_password     :string           default(""), not null
 #  name                   :string           default(""), not null
@@ -16,6 +17,7 @@
 #
 # Indexes
 #
+#  index_users_on_apple_uid             (apple_uid) UNIQUE
 #  index_users_on_email                 (email) UNIQUE
 #  index_users_on_provider_and_uid      (provider,uid) UNIQUE
 #  index_users_on_reset_password_token  (reset_password_token) UNIQUE
@@ -85,6 +87,28 @@ class User < ApplicationRecord
       )
     end
     user
+  end
+
+  # Cria ou encontra o usuário do "Iniciar sessão com a Apple". `sub` é o
+  # identificador estável da Apple; o e-mail (às vezes um endereço de retransmissão
+  # privado) só serve para vincular a um cadastro existente quando vem verificado.
+  def self.from_apple(sub:, email:, email_verified:, name: nil)
+    return nil if sub.blank?
+
+    user = find_by(apple_uid: sub)
+    return user if user
+
+    email = email.to_s.strip.downcase
+    return nil if email.blank?
+
+    if (user = find_by(email: email))
+      return nil unless email_verified # sem verificação, não entra na conta de outra pessoa
+
+      user.update(apple_uid: sub)
+      user
+    else
+      create(apple_uid: sub, email: email, name: name.presence || email.split("@").first, password: Devise.friendly_token[0, 24])
+    end
   end
 
   # Contas em que o usuário tem vínculo ativo (aprovado).

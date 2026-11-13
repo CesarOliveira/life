@@ -1,0 +1,26 @@
+<%= render layout: "pages/frame", locals: { title: t("pages.support_title") } do %>
+  <p>Ajuda para usar o <strong><%= @legal[:product_name] %></strong> no site e no iPhone.</p>
+
+  <h2>Fale conosco</h2>
+  <%= render "pages/operator" %>
+
+  <h2>A saúde não aparece no Life</h2>
+  <ul>
+    <li>Abra o app e toque em Saúde &gt; Sincronizar agora.</li>
+    <li>Confira as permissões em Ajustes &gt; Saúde &gt; Acesso a Dados e Dispositivos &gt; Life. Cada tipo de dado precisa estar ligado.</li>
+    <li>Para sincronizar com o app fechado, mantenha ligada a Atualização em 2º Plano e não force o encerramento do app.</li>
+    <li>Com o iPhone bloqueado, o sistema não libera os dados de saúde. O envio acontece depois que você o desbloqueia.</li>
+  </ul>
+
+  <h2>O tempo de tela está atrasado</h2>
+  <p>O tempo de uso do iPhone chega ao Life por um Mac, e só depois que o dia termina. O dia anterior costuma aparecer entre o fim da manhã e o começo da tarde.</p>
+
+  <h2>Como conectar um assistente de IA</h2>
+  <p>No site, abra Configurar &gt; Assistentes de IA, copie o endereço do servidor e adicione-o como conector no seu assistente. Ele abre o Life para você entrar e autorizar. O acesso é somente leitura, a menos que você permita alterações, e pode ser revogado na mesma página.</p>
+
+  <h2>Como excluir minha conta</h2>
+  <p>No app, em Conta &gt; Excluir minha conta. No site, em <%= link_to "#{request.base_url}/delete-account", delete_account_path %>. A exclusão apaga o usuário e todos os dados, e não pode ser desfeita.</p>
+
+  <h2>Privacidade</h2>
+  <p>Veja a <%= link_to "Política de Privacidade", privacy_path %> e os <%= link_to "Termos de Uso", terms_path %>.</p>
+<% end %>

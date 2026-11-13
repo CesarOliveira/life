@@ -1,0 +1,61 @@
+<%= render layout: "pages/frame", locals: { title: t("pages.privacy_title") } do %>
+  <p>Esta política explica quais dados o <strong><%= @legal[:product_name] %></strong> trata, para quê, com quem são compartilhados e como você os controla. Ela vale para o site e para o aplicativo do iPhone.</p>
+
+  <h2>1. Quem é o responsável</h2>
+  <%= render "pages/operator" %>
+
+  <h2>2. Quais dados tratamos</h2>
+  <ul>
+    <li><strong>Cadastro:</strong> nome, e-mail e, se você entrar com Google ou com a Apple, o identificador da sua conta nesses serviços. Não recebemos a sua senha deles.</li>
+    <li><strong>Saúde e atividade (app Saúde do iPhone / HealthKit):</strong> sono, passos, energia, exercício, frequência cardíaca, variabilidade cardíaca, oxigenação, respiração, treinos, peso e medidas corporais, mobilidade, audição e nutrição. Só lemos os tipos que você autorizar no iPhone, e apenas para leitura: o Life não grava nada no app Saúde.</li>
+    <li><strong>Tempo de uso do iPhone:</strong> minutos por aplicativo e por horário, quando você configura o envio a partir do seu Mac.</li>
+    <li><strong>O que você registra:</strong> tarefas e comentários, hábitos, metas, peso e resultados de exames de laboratório, digitados ou extraídos de PDFs que você envia.</li>
+    <li><strong>Dados técnicos:</strong> endereço IP, data e hora dos acessos e dos envios, e cookies estritamente necessários para manter o seu login.</li>
+  </ul>
+
+  <h2>3. Para que usamos</h2>
+  <ul>
+    <li>Mostrar os seus dados a você, em gráficos, resumos e históricos.</li>
+    <li>Marcar automaticamente hábitos ligados a métricas, quando você cria esse tipo de hábito.</li>
+    <li>Manter o serviço funcionando e seguro, e atender pedidos de suporte.</li>
+  </ul>
+  <p>Não usamos os seus dados para publicidade, não criamos perfis para terceiros e não vendemos dados.</p>
+
+  <h2>4. Dados de saúde</h2>
+  <p>Os dados obtidos do HealthKit são usados somente para as funções de acompanhamento de saúde do próprio Life. Eles <strong>não</strong> são usados para publicidade ou marketing, <strong>não</strong> são vendidos e <strong>não</strong> são divulgados a terceiros sem a sua autorização expressa. Não armazenamos dados de saúde no iCloud. Você pode revogar o acesso a qualquer momento em Ajustes &gt; Saúde &gt; Acesso a Dados e Dispositivos no iPhone.</p>
+  <p>O Life não é um dispositivo médico e não oferece diagnóstico nem aconselhamento médico.</p>
+
+  <h2>5. Com quem compartilhamos</h2>
+  <ul>
+    <li><strong>Infraestrutura:</strong> hospedagem do site e do banco de dados (Railway) e serviço de nomes de domínio (Cloudflare). Eles tratam os dados em nosso nome, apenas para operar o serviço.</li>
+    <li><strong>Login:</strong> Google e Apple, somente para confirmar a sua identidade quando você escolhe entrar por eles.</li>
+    <li><strong>Leitura de exames em PDF:</strong> quando você envia um PDF de exame para importação, o arquivo é enviado à Anthropic, que processa o documento para extrair os resultados. Se você não usar a importação de PDF, nada é enviado.</li>
+    <li><strong>GitHub:</strong> se você conectar a sua conta, lemos apenas a contagem das suas contribuições.</li>
+    <li><strong>Assistentes de IA que você autorizar:</strong> você pode conectar um assistente (por exemplo Claude ou ChatGPT) ao Life. Ele só acessa os seus dados depois que você autoriza, pode ser somente leitura ou leitura e escrita, e você revoga o acesso quando quiser em Configurar. A partir daí, o tratamento pelo assistente segue a política do fornecedor dele.</li>
+  </ul>
+  <p>Fora desses casos, só divulgamos dados se a lei exigir.</p>
+
+  <h2>6. Onde os dados ficam</h2>
+  <p>Os dados ficam em servidores dos provedores acima, que podem estar fora do Brasil. Ao usar o Life, os seus dados podem ser transferidos para esses países, com as proteções contratuais desses provedores.</p>
+
+  <h2>7. Por quanto tempo guardamos</h2>
+  <p>Guardamos os seus dados enquanto a sua conta existir. Quando você exclui a conta, os dados são apagados imediatamente dos sistemas em uso. Cópias de segurança cifradas ou de acesso restrito podem conter os dados por até 12 meses, depois são eliminadas. Registros técnicos de acesso são mantidos pelo tempo necessário à segurança do serviço.</p>
+
+  <h2>8. Seus direitos e controles</h2>
+  <ul>
+    <li><strong>Excluir a conta e todos os dados:</strong> no app, em Conta &gt; Excluir minha conta, ou em <%= link_to "#{request.base_url}/delete-account", delete_account_path %>.</li>
+    <li><strong>Parar a coleta de saúde:</strong> revogue a permissão nos Ajustes do iPhone ou saia do app.</li>
+    <li><strong>Revogar assistentes e tokens:</strong> em Configurar, no site.</li>
+    <li><strong>Acessar, corrigir, receber uma cópia ou pedir informações</strong> sobre o tratamento, conforme a Lei Geral de Proteção de Dados (Lei 13.709/2018): pelo canal de contato acima.</li>
+  </ul>
+  <p>Você também pode apresentar reclamação à Autoridade Nacional de Proteção de Dados (ANPD).</p>
+
+  <h2>9. Segurança</h2>
+  <p>A comunicação é cifrada (HTTPS). Senhas e tokens de acesso de assistentes são guardados apenas como hashes. O acesso ao banco de dados é restrito. Nenhum sistema é totalmente imune a falhas; se houver um incidente que afete os seus dados, você será avisado conforme a lei.</p>
+
+  <h2>10. Crianças e adolescentes</h2>
+  <p>O Life é destinado a maiores de 18 anos. Não coletamos conscientemente dados de menores.</p>
+
+  <h2>11. Mudanças nesta política</h2>
+  <p>Podemos atualizar esta política. A data no topo indica a versão em vigor, e mudanças relevantes serão avisadas no site ou no app.</p>
+<% end %>

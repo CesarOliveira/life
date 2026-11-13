@@ -1,0 +1,37 @@
+<%= render layout: "pages/frame", locals: { title: t("pages.terms_title") } do %>
+  <p>Estes termos regulam o uso do <strong><%= @legal[:product_name] %></strong>, no site e no aplicativo. Ao criar uma conta, você concorda com eles e com a <%= link_to "Política de Privacidade", privacy_path %>.</p>
+
+  <h2>1. O serviço</h2>
+  <p>O Life reúne em um só lugar dados que você escolhe registrar ou conectar: tempo de uso do iPhone, saúde e atividade, tarefas, hábitos, metas, peso e exames. O objetivo é ajudar você a acompanhar a própria rotina.</p>
+
+  <h2>2. Não é aconselhamento médico</h2>
+  <p>O Life não é um dispositivo médico. Gráficos, resumos, faixas de referência de exames e análises feitas por assistentes de IA são informativos e não substituem a avaliação de um profissional de saúde. Não tome decisões de saúde com base apenas no que o Life mostra. Em caso de emergência, procure atendimento.</p>
+
+  <h2>3. Sua conta</h2>
+  <ul>
+    <li>Você precisa ter 18 anos ou mais.</li>
+    <li>Você é responsável por manter em segredo a sua senha e os seus tokens de acesso, e por tudo o que for feito com eles.</li>
+    <li>As informações que você registra devem ser suas ou você deve ter o direito de usá-las.</li>
+  </ul>
+
+  <h2>4. Uso permitido</h2>
+  <p>Não é permitido usar o serviço para fins ilegais, tentar acessar dados de outras pessoas, sobrecarregar ou burlar os sistemas, nem revender o serviço sem autorização.</p>
+
+  <h2>5. Assistentes de IA e integrações</h2>
+  <p>Você decide se conecta assistentes de IA e outras integrações, e com qual nível de acesso. O que esses serviços fazem com os dados depois de recebê-los é de responsabilidade dos respectivos fornecedores. Revise o que um assistente altera quando você conceder permissão de escrita.</p>
+
+  <h2>6. Disponibilidade e mudanças</h2>
+  <p>Trabalhamos para manter o serviço disponível, mas ele é fornecido "como está", sem garantia de funcionamento ininterrupto. Recursos podem ser alterados ou descontinuados. Se o serviço for encerrado, avisaremos com antecedência razoável para que você possa excluir ou guardar os seus dados.</p>
+
+  <h2>7. Encerramento</h2>
+  <p>Você pode excluir a sua conta a qualquer momento, pelo app ou em <%= link_to "#{request.base_url}/delete-account", delete_account_path %>. Podemos suspender contas que violem estes termos.</p>
+
+  <h2>8. Responsabilidade</h2>
+  <p>Na extensão permitida pela lei, não respondemos por danos indiretos nem por decisões tomadas com base nos dados exibidos. Nada aqui limita direitos que a lei garante ao consumidor.</p>
+
+  <h2>9. Lei aplicável</h2>
+  <p>Estes termos seguem as leis do Brasil. Fica eleito o foro do domicílio do consumidor para resolver controvérsias.</p>
+
+  <h2>10. Contato</h2>
+  <%= render "pages/operator" %>
+<% end %>

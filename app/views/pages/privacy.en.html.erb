@@ -1,0 +1,61 @@
+<%= render layout: "pages/frame", locals: { title: t("pages.privacy_title") } do %>
+  <p>This policy explains what data <strong><%= @legal[:product_name] %></strong> processes, why, who it is shared with and how you control it. It applies to the website and to the iPhone app.</p>
+
+  <h2>1. Who is responsible</h2>
+  <%= render "pages/operator" %>
+
+  <h2>2. What data we process</h2>
+  <ul>
+    <li><strong>Account:</strong> name, e-mail and, if you sign in with Google or Apple, your account identifier in those services. We never receive your password from them.</li>
+    <li><strong>Health and activity (iPhone Health app / HealthKit):</strong> sleep, steps, energy, exercise, heart rate, heart rate variability, blood oxygen, respiration, workouts, weight and body measurements, mobility, hearing and nutrition. We read only the types you authorize on your iPhone, and read-only: Life never writes to the Health app.</li>
+    <li><strong>iPhone screen time:</strong> minutes per app and per time of day, when you set up the upload from your Mac.</li>
+    <li><strong>What you record:</strong> tasks and comments, habits, goals, weight and lab exam results, typed in or extracted from PDFs you upload.</li>
+    <li><strong>Technical data:</strong> IP address, date and time of visits and uploads, and strictly necessary cookies that keep you signed in.</li>
+  </ul>
+
+  <h2>3. How we use it</h2>
+  <ul>
+    <li>To show your data back to you, in charts, summaries and history.</li>
+    <li>To automatically mark habits linked to metrics, when you create that kind of habit.</li>
+    <li>To keep the service running and secure, and to answer support requests.</li>
+  </ul>
+  <p>We do not use your data for advertising, we do not build profiles for third parties and we do not sell data.</p>
+
+  <h2>4. Health data</h2>
+  <p>Data obtained from HealthKit is used only for Life's own health tracking features. It is <strong>not</strong> used for advertising or marketing, <strong>not</strong> sold and <strong>not</strong> disclosed to third parties without your express authorization. We do not store health data in iCloud. You can revoke access at any time in Settings &gt; Health &gt; Data Access &amp; Devices on your iPhone.</p>
+  <p>Life is not a medical device and does not provide diagnosis or medical advice.</p>
+
+  <h2>5. Who we share it with</h2>
+  <ul>
+    <li><strong>Infrastructure:</strong> hosting of the website and database (Railway) and domain name service (Cloudflare). They process data on our behalf, only to operate the service.</li>
+    <li><strong>Sign-in:</strong> Google and Apple, only to confirm your identity when you choose to sign in with them.</li>
+    <li><strong>Reading exam PDFs:</strong> when you upload an exam PDF for import, the file is sent to Anthropic, which processes the document to extract the results. If you do not use PDF import, nothing is sent.</li>
+    <li><strong>GitHub:</strong> if you connect your account, we read only your contribution counts.</li>
+    <li><strong>AI assistants you authorize:</strong> you may connect an assistant (for example Claude or ChatGPT) to Life. It can access your data only after you authorize it, either read-only or read and write, and you can revoke access at any time in Setup. From then on, processing by the assistant follows its provider's policy.</li>
+  </ul>
+  <p>Outside these cases, we disclose data only when required by law.</p>
+
+  <h2>6. Where data is stored</h2>
+  <p>Data is stored on servers of the providers above, which may be outside Brazil. By using Life, your data may be transferred to those countries, under those providers' contractual safeguards.</p>
+
+  <h2>7. How long we keep it</h2>
+  <p>We keep your data while your account exists. When you delete your account, the data is erased immediately from live systems. Encrypted or access-restricted backups may contain it for up to 12 months, after which they are destroyed. Technical access logs are kept as long as needed for the security of the service.</p>
+
+  <h2>8. Your rights and controls</h2>
+  <ul>
+    <li><strong>Delete your account and all data:</strong> in the app, under Account &gt; Delete my account, or at <%= link_to "#{request.base_url}/delete-account", delete_account_path %>.</li>
+    <li><strong>Stop health collection:</strong> revoke the permission in iPhone Settings or sign out of the app.</li>
+    <li><strong>Revoke assistants and tokens:</strong> in Setup, on the website.</li>
+    <li><strong>Access, correct, receive a copy or ask about</strong> the processing, under the Brazilian General Data Protection Law (LGPD, Law 13.709/2018): through the contact channel above.</li>
+  </ul>
+  <p>You may also lodge a complaint with the Brazilian data protection authority (ANPD).</p>
+
+  <h2>9. Security</h2>
+  <p>Communication is encrypted (HTTPS). Passwords and assistant access tokens are stored only as hashes. Database access is restricted. No system is completely immune to failure; if an incident affects your data, you will be notified as required by law.</p>
+
+  <h2>10. Children</h2>
+  <p>Life is intended for people aged 18 or older. We do not knowingly collect data from minors.</p>
+
+  <h2>11. Changes to this policy</h2>
+  <p>We may update this policy. The date at the top shows the version in force, and relevant changes will be announced on the website or in the app.</p>
+<% end %>

@@ -499,6 +499,36 @@ en:
       bad_redirect: "The return address is not registered for this app."
       hint: "Try connecting again from the assistant. Nothing was authorized."
 
+  user_deletion:
+    title: "Delete my account"
+    settings_hint: "Permanently deletes your user and all your Life data."
+    intro: "You are about to delete the Life account %{email}."
+    what_title: "What will be deleted"
+    what:
+      data: "All your data: screen time, health, workouts, tasks, habits, goals, weight and lab exams."
+      access: "Your user and your access on the website and in the app. Upload tokens stop working."
+      assistants: "Authorizations granted to AI assistants."
+    shared: "You share these with other people: %{names}. Those accounts keep existing for them; you just leave."
+    irreversible: "This cannot be undone, and the data cannot be recovered afterwards."
+    type_label: "To confirm, type %{word}"
+    submit: "Delete permanently"
+    wrong_confirmation: "Type %{word} to confirm the deletion."
+    done: "Your account and your data were deleted."
+    blocked:
+      platform_admin: "This user administers the platform and cannot be deleted here. Remove the administrator role first."
+
+  pages:
+    draft: "Preliminary version: the details of the responsible party are still being filled in."
+    effective: "In force since %{date}"
+    privacy_title: "Privacy Policy"
+    terms_title: "Terms of Use"
+    support_title: "Support"
+    operator: "%{product} is operated by %{name}"
+    tax_id: "Brazilian tax ID (CNPJ) %{id}"
+    operator_pending: "%{product} is in pre-launch."
+    contact_html: "Contact: %{email}."
+    contact_pending: "The contact channel will be published here before launch."
+
   weights:
     title: "Weight"
     add: "Log weight"

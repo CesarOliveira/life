@@ -68,5 +68,10 @@
         <%= link_to t("auth.sign_up"), new_registration_path(resource_name), class: "text-emerald-600 hover:underline" %>
       </div>
     </div>
+    <p class="mt-4 text-center text-xs text-slate-400">
+      <%= link_to t("pages.privacy_title"), privacy_path, class: "hover:underline" %> ·
+      <%= link_to t("pages.terms_title"), terms_path, class: "hover:underline" %> ·
+      <%= link_to t("pages.support_title"), support_path, class: "hover:underline" %>
+    </p>
   </div>
 </div>

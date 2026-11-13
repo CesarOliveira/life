@@ -50,6 +50,18 @@ Rails.application.routes.draw do
   post "exam_groups/:id/favorite", to: "exam_group_favorites#toggle", as: :toggle_exam_group_favorite
   resources :goals, only: [:index, :create, :destroy]
 
+  # Páginas públicas exigidas para publicar o app (em português e em inglês na URL).
+  get "privacidade", to: "pages#privacy", as: :privacy
+  get "privacy", to: "pages#privacy"
+  get "termos", to: "pages#terms", as: :terms
+  get "terms", to: "pages#terms"
+  get "suporte", to: "pages#support", as: :support
+  get "support", to: "pages#support"
+
+  # Exclusão da própria conta (URL pública e estável: é a informada à App Store).
+  get "delete-account", to: "user_deletions#new", as: :delete_account
+  delete "delete-account", to: "user_deletions#destroy"
+
   # Tarefas (kanban): quadros personalizáveis, colunas, tarefas e comentários.
   resources :task_boards, path: "tasks" do
     resources :task_columns, path: "columns", only: [:create, :update, :destroy]
@@ -103,6 +115,16 @@ Rails.application.routes.draw do
     post "metrics", to: "metrics#create"
     post "workouts", to: "workouts#create"
     post "tasks", to: "tasks#create"
+
+    # Telas nativas do app (login sem navegador, resumo, hábitos, tarefa rápida, exclusão).
+    namespace :mobile do
+      post "session", to: "sessions#create"
+      post "session/apple", to: "sessions#apple"
+      get "summary", to: "summaries#show"
+      post "habits/:id/toggle", to: "habits#toggle"
+      post "tasks", to: "tasks#create"
+      delete "account", to: "accounts#destroy"
+    end
     post "health_raw", to: "health_raw#create"
     get "exams", to: "exams#index"
   end
