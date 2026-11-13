@@ -5,3 +5,7 @@ indent_size = 2
 [[bash]]
 indent_style = space
 indent_size = 2
+
+# Cópia do script zsh do Mac (shfmt não entende zsh)
+[tools/life_backup/**]
+ignore = true
