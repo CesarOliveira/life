@@ -84,6 +84,8 @@ Rails.application.configure do
     ENV.fetch("URL_HOST", nil),
     "life.integrattor.com.br",
     "life.cesaroliveira.online",
+    "integrattor.com.br",       # site institucional (CorporateController)
+    "www.integrattor.com.br",
     /.*\.railway\.app/,
     /.*\.up\.railway\.app/
   ].compact.uniq

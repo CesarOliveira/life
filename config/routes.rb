@@ -1,4 +1,15 @@
 Rails.application.routes.draw do
+  # Site institucional da Integrattor: no domínio dela só existe esta página.
+  # Fica antes de tudo para nenhuma rota do Life responder nesse host.
+  constraints(host: "integrattor.com.br") do
+    get "/", to: "corporate#show", as: :corporate_home
+    match "*path", to: "corporate#redirect_home", via: :all, format: false
+  end
+  constraints(host: "www.integrattor.com.br") do
+    match "/", to: "corporate#redirect_home", via: :all
+    match "*path", to: "corporate#redirect_home", via: :all, format: false
+  end
+
   ActiveAdmin.routes(self)
   devise_for :users, controllers: { omniauth_callbacks: "users/omniauth_callbacks" }
 

@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Integrattor — holding</title>
+<meta name="description" content="A Integrattor é a holding que controla Vem Pra Tela, ImovelBase, Espaço Esmeralda e Life: mídia indoor, imóveis, eventos e tecnologia.">
+<meta property="og:title" content="Integrattor">
+<meta property="og:description" content="Holding de Vem Pra Tela, ImovelBase, Espaço Esmeralda e Life.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://integrattor.com.br/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f172a'/%3E%3Cpath d='M20 18h24v6h-9v16h9v6H20v-6h9V24h-9z' fill='%2338bdf8'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #ffffff; --bg-soft: #f6f8fb; --text: #0f172a; --muted: #475569; --line: #e2e8f0;
+    --brand: #0ea5e9; --brand-ink: #0369a1; --card: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0b1120; --bg-soft: #0f172a; --text: #e2e8f0; --muted: #94a3b8; --line: #1e293b; --brand: #38bdf8; --brand-ink: #7dd3fc; --card: #111a2e; }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--text); background: var(--bg); }
+  a { color: var(--brand-ink); }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+  header { border-bottom: 1px solid var(--line); }
+  header .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; letter-spacing: -0.01em; color: var(--text); text-decoration: none; }
+  .mark { width: 30px; height: 30px; border-radius: 8px; background: var(--text); display: grid; place-items: center; }
+  .mark svg { width: 18px; height: 18px; }
+  nav a { color: var(--muted); text-decoration: none; margin-left: 20px; font-size: 15px; }
+  nav a:hover { color: var(--text); }
+  .hero { padding: 88px 0 72px; background: radial-gradient(1200px 400px at 20% -10%, color-mix(in srgb, var(--brand) 14%, transparent), transparent); }
+  .eyebrow { font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brand-ink); }
+  h1 { font-size: clamp(32px, 5vw, 52px); line-height: 1.1; letter-spacing: -0.02em; margin: 12px 0 18px; max-width: 760px; }
+  .lead { font-size: 19px; color: var(--muted); max-width: 640px; margin: 0; }
+  section { padding: 64px 0; }
+  .soft { background: var(--bg-soft); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  h2 { font-size: 28px; letter-spacing: -0.01em; margin: 0 0 8px; }
+  .sub { color: var(--muted); margin: 0 0 28px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 20px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 26px; display: flex; flex-direction: column; }
+  .card .tag { align-self: flex-start; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: color-mix(in srgb, var(--brand) 14%, transparent); color: var(--brand-ink); }
+  .card h3 { font-size: 22px; margin: 14px 0 6px; }
+  .card p { color: var(--muted); margin: 0 0 18px; flex: 1; }
+  .card .go { font-weight: 600; text-decoration: none; }
+  .card .go:hover { text-decoration: underline; }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 28px; }
+  .cols h4 { margin: 0 0 6px; font-size: 16px; }
+  .cols p { margin: 0; color: var(--muted); }
+  .contact { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+  .btn { display: inline-block; background: var(--text); color: var(--bg); padding: 12px 20px; border-radius: 10px; font-weight: 600; text-decoration: none; }
+  footer { padding: 28px 0 40px; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: space-between; }
+  @media (max-width: 560px) { nav { display: none; } .hero { padding: 56px 0 48px; } section { padding: 48px 0; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <a class="logo" href="/">
+      <span class="mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12v3h-4.5v10H18v3H6v-3h4.5V7H6z" fill="#38bdf8"/></svg></span>
+      Integrattor
+    </a>
+    <nav aria-label="Seções">
+      <a href="#empresas">Empresas</a>
+      <a href="#sobre">Sobre</a>
+      <a href="#contato">Contato</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <div class="wrap">
+      <div class="eyebrow">Holding</div>
+      <h1>Uma holding, negócios diferentes.</h1>
+      <p class="lead">A Integrattor controla e opera empresas em mídia, imóveis, eventos e tecnologia. Cada uma com a sua marca e o seu público, todas com a mesma gestão por trás.</p>
+    </div>
+  </div>
+
+  <section id="empresas">
+    <div class="wrap">
+      <h2>Nossas empresas</h2>
+      <p class="sub">Negócios controlados e operados pela Integrattor.</p>
+      <div class="grid">
+        <article class="card">
+          <span class="tag">Mídia indoor</span>
+          <h3>Vem Pra Tela</h3>
+          <p>Rede de mídia indoor em Taquaritinga (SP) e região. Anúncios em TVs de supermercados, açougues e academias, na frente de quem compra perto, a partir de R$ 100 por mês.</p>
+          <a class="go" href="https://vempratela.com.br" rel="noopener">vempratela.com.br →</a>
+        </article>
+        <article class="card">
+          <span class="tag">Imóveis</span>
+          <h3>ImovelBase</h3>
+          <p>Portal de imóveis no estado de São Paulo: terrenos, casas e apartamentos à venda e para alugar, além de imóveis em leilão. Mapa por bairro, filtros e histórico de preços.</p>
+          <a class="go" href="https://imovelbase.com.br" rel="noopener">imovelbase.com.br →</a>
+        </article>
+        <article class="card">
+          <span class="tag">Eventos</span>
+          <h3>Espaço Esmeralda</h3>
+          <p>Salão de festas e eventos em Taquaritinga (SP), para casamentos, festas de 15 anos, aniversários e confraternizações, com estrutura completa para até 140 convidados.</p>
+          <a class="go" href="https://espacoesmeralda.com.br" rel="noopener">espacoesmeralda.com.br →</a>
+        </article>
+        <article class="card">
+          <span class="tag">App para iPhone e web</span>
+          <h3>Life</h3>
+          <p>Um lugar só para acompanhar a própria rotina: tempo de tela, sono e atividade do iPhone e do Apple Watch, tarefas, hábitos e exames, com a opção de conectar um assistente de IA para cruzar os dados.</p>
+          <a class="go" href="https://life.integrattor.com.br" rel="noopener">life.integrattor.com.br →</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="sobre" class="soft">
+    <div class="wrap">
+      <h2>Sobre a Integrattor</h2>
+      <p class="sub">A Integrattor é a empresa controladora dos negócios acima. Ela concentra a gestão, a tecnologia e a operação, e cada empresa mantém a sua marca e o seu atendimento.</p>
+      <div class="cols">
+        <div><h4>Gestão compartilhada</h4><p>Administração, finanças e jurídico centralizados, para que cada negócio foque no seu cliente.</p></div>
+        <div><h4>Tecnologia própria</h4><p>Sites, sistemas e apps desenvolvidos e mantidos pela própria Integrattor.</p></div>
+        <div><h4>Dados com cuidado</h4><p>Coletamos só o necessário, explicamos como usamos e damos controle a quem usa nossos serviços.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contato">
+    <div class="wrap">
+      <h2>Contato</h2>
+      <p class="sub">Parcerias, imprensa ou assuntos institucionais. Para atendimento de cada empresa, use o canal no site dela.</p>
+      <div class="contact">
+        <a class="btn" href="mailto:contato@integrattor.com.br">contato@integrattor.com.br</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© <span id="y">2026</span> Integrattor. Todos os direitos reservados.</span>
+    <span>Este site não usa cookies nem coleta dados.</span>
+  </div>
+</footer>
+<script>document.getElementById("y").textContent = new Date().getFullYear();</script>
+</body>
+</html>
