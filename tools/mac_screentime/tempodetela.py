@@ -34,6 +34,7 @@ LIFE_ENDPOINT = "https://life.cesaroliveira.online/api/usage"
 LIFE_KEYCHAIN = "tempodetela-life"
 LIFE_DEVICE = "iphone"                      # mesmo rotulo que o Atalho usava
 LIFE_DESDE = datetime.date(2026, 10, 15)    # primeiro dia completo do historico do Mac; o Atalho nao cobriu esse periodo
+ESTADO = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".estado.json")  # ultimo dia completo ja enviado
 COCOA = 978307200  # segundos entre 1970 e 2001
 
 
@@ -158,6 +159,19 @@ def minutos_por_app(secs, nomes):
     return [(n, m) for n, m in linhas if m >= 1]
 
 
+def ultimo_dia_enviado():
+    try:
+        with open(ESTADO, encoding="utf-8") as fh:
+            return datetime.date.fromisoformat(json.load(fh)["ultimo_dia_enviado"])
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+
+
+def registrar_dia_enviado(dia):
+    with open(ESTADO, "w", encoding="utf-8") as fh:
+        json.dump({"ultimo_dia_enviado": dia.isoformat(), "registrado_em": datetime.datetime.now(TZ).isoformat(timespec="seconds")}, fh)
+
+
 def life_token():
     try:
         r = subprocess.run(["/usr/bin/security", "find-generic-password", "-s", LIFE_KEYCHAIN, "-w"],
@@ -217,11 +231,18 @@ def main():
     ap.add_argument("--dias", type=int, default=1, help="quantos dias exportar, terminando em D (padrao 1)")
     ap.add_argument("--csv", action="store_true", help="grava tambem o apps.csv no Google Drive (desligado por padrao)")
     ap.add_argument("--saida", help="grava o apps.csv nesta pasta (teste); implica --csv e nao envia ao Life")
+    ap.add_argument("--forcar", action="store_true", help="roda mesmo que o dia de ontem ja tenha sido enviado hoje")
     ap.add_argument("--device", default=DEVICE_ID)
     ap.add_argument("--sem-life", action="store_true", help="nao envia ao site Life (so CSV)")
     a = ap.parse_args()
     fim = (datetime.date.fromisoformat(a.dia) if a.dia
            else datetime.datetime.now(TZ).date() - datetime.timedelta(days=1))
+
+    # Execucao agendada (sem dia explicito): se ontem ja foi enviado completo, as demais do dia nao tem o que fazer.
+    agendada = not (a.dia or a.saida or a.csv or a.sem_life or a.forcar)
+    ja = ultimo_dia_enviado()
+    if agendada and ja and ja >= fim:
+        log(f"{fim} ja foi enviado completo ao Life; nada a fazer nesta execucao"); return 0
 
     # O CSV e opcional: o Life guarda tudo. So exige o Google Drive quando --csv e pedido.
     destino = None
@@ -288,6 +309,10 @@ def main():
     if not token:
         log(f"ERRO Life: token nao encontrado no Chaves (item '{LIFE_KEYCHAIN}'); envio pulado"); return 4
     ok = all([enviar_life(token, d, brutos[d], nomes, segundos_por_bloco(evs, d)) for d in dias_life])
+    if ok and not a.dia:
+        registrar_dia_enviado(max(dias_life))   # so apos envio bem-sucedido de dias completos
+        if pendentes:
+            log(f"Life: ainda falta {', '.join(str(d) for d in pendentes)}; as proximas execucoes de hoje tentam de novo")
     return 0 if ok else 4
 
 
