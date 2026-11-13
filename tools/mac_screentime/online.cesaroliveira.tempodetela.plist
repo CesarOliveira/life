@@ -34,6 +34,18 @@
 			<key>Minute</key>
 			<integer>0</integer>
 		</dict>
+		<dict>
+			<key>Hour</key>
+			<integer>14</integer>
+			<key>Minute</key>
+			<integer>0</integer>
+		</dict>
+		<dict>
+			<key>Hour</key>
+			<integer>18</integer>
+			<key>Minute</key>
+			<integer>0</integer>
+		</dict>
 	</array>
 </dict>
 </plist>
