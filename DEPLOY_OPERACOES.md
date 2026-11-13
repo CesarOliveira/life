@@ -364,3 +364,33 @@ Cadastrados no OAuth client (projeto `civil-clarity-88019`):
 > redirect URIs em `.localhost`. Por isso o Traefik (`traefik/dynamic.yml`) atende
 > **os dois** hosts; o fluxo do Google roda em `http://localhost`. O tempo-real
 > segue funcionando porque o cable conecta em `/cable` relativo à origem.
+
+---
+
+## 9. Backup e restauração do banco
+
+O Postgres do Railway não tem endereço público. O backup é **puxado** por HTTPS:
+
+- `GET /ops/backup` devolve um `pg_dump --format=custom` do banco inteiro.
+- Protegido por `BACKUP_TOKEN` (variável do serviço `web`), enviado em
+  `Authorization: Bearer`. Sem a variável a rota responde 404. Limite: 6 por hora.
+- O dump contém **todas as contas** (dados de saúde, hashes de senha, tokens).
+  Trate o `BACKUP_TOKEN` como a senha do banco e guarde os dumps em local privado.
+
+### Cópia diária no Mac
+`~/Scripts/life-backup/life_backup.sh`, agendado pelo LaunchAgent
+`online.cesaroliveira.life-backup` (03:30). Lê o token do Chaves (item
+`life-backup-token`), grava em `~/Backups/life/life-AAAA-MM-DD.dump` e mantém os
+14 mais recentes mais o primeiro de cada mês. Log em `~/Library/Logs/life-backup.log`.
+
+### Conferir um dump (sem restaurar)
+```bash
+docker run --rm -v ~/Backups/life:/b postgres:17 pg_restore --list /b/life-AAAA-MM-DD.dump | head
+```
+
+### Restaurar num banco vazio
+```bash
+pg_restore --no-owner --no-privileges --clean --if-exists -d "$DATABASE_URL" life-AAAA-MM-DD.dump
+```
+Em produção, rode de dentro da rede do Railway (one-off, ver §2) ou habilite o
+TCP proxy do Postgres só durante a restauração. Teste antes num banco local.
