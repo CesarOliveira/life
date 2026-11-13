@@ -77,12 +77,16 @@ Rails.application.configure do
   # Only use :id for inspections in production.
   config.active_record.attributes_for_inspect = [ :id ]
 
-  # Allow Railway domains and custom domain. Update URL_HOST env var after deploy.
+  # Domínios aceitos. O principal é life.integrattor.com.br; o antigo
+  # (life.cesaroliveira.online) continua respondendo para apps instalados,
+  # scripts e conectores de IA já configurados com ele.
   config.hosts = [
     ENV.fetch("URL_HOST", nil),
+    "life.integrattor.com.br",
+    "life.cesaroliveira.online",
     /.*\.railway\.app/,
     /.*\.up\.railway\.app/
-  ].compact
+  ].compact.uniq
 
   config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 
