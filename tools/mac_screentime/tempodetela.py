@@ -30,7 +30,7 @@ EXCLUIR = {"com.apple.ScreenshotServicesService", "com.apple.control-center", "c
            "com.apple.CarPlaySplashScreen", "com.apple.PosterBoard"}
 # --- envio para o site Life (alem do CSV). O token fica no Chaves do macOS, nunca neste arquivo:
 #     security add-generic-password -U -s tempodetela-life -a life -w
-LIFE_ENDPOINT = "https://life.cesaroliveira.online/api/usage"
+LIFE_ENDPOINT = "https://life.integrattor.com.br/api/usage"
 LIFE_KEYCHAIN = "tempodetela-life"
 LIFE_DEVICE = "iphone"                      # mesmo rotulo que o Atalho usava
 LIFE_DESDE = datetime.date(2026, 10, 15)    # primeiro dia completo do historico do Mac; o Atalho nao cobriu esse periodo

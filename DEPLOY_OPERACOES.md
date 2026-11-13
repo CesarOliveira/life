@@ -378,7 +378,7 @@ O Postgres do Railway não tem endereço público. O backup é **puxado** por HT
   Trate o `BACKUP_TOKEN` como a senha do banco e guarde os dumps em local privado.
 
 ### Cópia diária no Mac
-`~/Scripts/life-backup/life_backup.sh`, agendado pelo LaunchAgent
+`~/Scripts/life-backup/life_backup.sh` (cópia em `tools/life_backup/`), agendado pelo LaunchAgent
 `online.cesaroliveira.life-backup` (03:30). Lê o token do Chaves (item
 `life-backup-token`), grava em `~/Backups/life/life-AAAA-MM-DD.dump` e mantém os
 14 mais recentes mais o primeiro de cada mês. Log em `~/Library/Logs/life-backup.log`.
@@ -394,3 +394,20 @@ pg_restore --no-owner --no-privileges --clean --if-exists -d "$DATABASE_URL" lif
 ```
 Em produção, rode de dentro da rede do Railway (one-off, ver §2) ou habilite o
 TCP proxy do Postgres só durante a restauração. Teste antes num banco local.
+
+---
+
+## 10. Domínios
+
+- **Principal:** `life.integrattor.com.br` (zona `integrattor.com.br` na Cloudflare,
+  CNAME DNS-only para o alvo do Railway + TXT `_railway-verify.life`).
+- **Antigo:** `life.cesaroliveira.online` continua ativo, servindo o mesmo app, para
+  apps instalados, scripts e conectores de IA criados antes da troca.
+- Os dois estão em `config.hosts` (`config/environments/production.rb`). Remover o
+  antigo só depois de migrar os clientes; um redirecionamento de páginas HTML pode
+  ser feito antes, mas **nunca** de `/api`, `/mcp`, `/oauth`, `/.well-known`,
+  `/mobile` e `/ops` (POST não sobrevive a redirect e o WebView do app usa sessão
+  por domínio).
+- Login com Google no domínio novo exige o redirect
+  `https://life.integrattor.com.br/users/auth/google_oauth2/callback` no cliente
+  OAuth do Google Cloud.
