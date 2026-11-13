@@ -378,7 +378,7 @@ O Postgres do Railway não tem endereço público. O backup é **puxado** por HT
   Trate o `BACKUP_TOKEN` como a senha do banco e guarde os dumps em local privado.
 
 ### Cópia diária no Mac
-`~/Scripts/life-backup/life_backup.sh` (cópia em `tools/life_backup/`), agendado pelo LaunchAgent
+`~/Scripts/life-backup/life_backup.sh` (cópia em `tools/life_backup/life_backup.zsh`), agendado pelo LaunchAgent
 `online.cesaroliveira.life-backup` (03:30). Lê o token do Chaves (item
 `life-backup-token`), grava em `~/Backups/life/life-AAAA-MM-DD.dump` e mantém os
 14 mais recentes mais o primeiro de cada mês. Log em `~/Library/Logs/life-backup.log`.

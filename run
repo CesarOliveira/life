@@ -91,6 +91,7 @@ lint:shell() {
     ! -path "./storage/*" \
     ! -path "./tmp/*" \
     ! -path "./vendor/*" \
+    ! -name "*.zsh" \
     -exec grep --quiet '^#!.*sh' {} \; -exec "${cmd[@]}" {} +
 }
 
