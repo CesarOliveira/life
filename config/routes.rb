@@ -15,6 +15,9 @@ Rails.application.routes.draw do
     root to: "devise/sessions#new"
   end
 
+  # Backup do banco (pg_dump), protegido por BACKUP_TOKEN. Ver DEPLOY_OPERACOES.md.
+  get "/ops/backup", to: "ops/backups#show"
+
   get "/up", to: "up#index", as: :up
   get "/up/databases", to: "up#databases", as: :up_databases
 
