@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
-"""Exporta o Tempo de Uso do iPhone (sincronizado para este Mac) para CSVs no Google Drive.
+"""Envia o Tempo de Uso do iPhone (sincronizado para este Mac) para o site Life.
 
 Fonte: ~/Library/Biome/streams/restricted/App.InFocus/remote/<dispositivo>/ (arquivos SEGB v2).
 Os arquivos sao COPIADOS para /tmp antes de serem lidos; nada e escrito na pasta do Biome.
+
+Destino: o site Life (POST /api/usage), com o total por app e blocos de 15 min. O CSV no Drive e opcional (--csv).
 
 Uso:
   tempodetela.py                  # ontem (America/Sao_Paulo)
   tempodetela.py 2026-11-09       # um dia especifico
   tempodetela.py --dias 3         # reexporta os 3 ultimos dias terminando em D (cobre atraso de sincronizacao)
-  tempodetela.py --saida /tmp/x   # grava em outra pasta (teste)
+  tempodetela.py --csv            # grava tambem o apps.csv no Google Drive
+  tempodetela.py --saida /tmp/x   # grava o CSV em outra pasta e nao envia (teste)
 
-Saida: um unico arquivo acumulado apps.csv (data,app,minutos); os dias exportados substituem as proprias linhas.
+CSV (quando pedido): arquivo acumulado apps.csv (data,app,minutos); os dias exportados substituem as proprias linhas.
 """
 import argparse, csv, datetime, glob, json, os, shutil, struct, subprocess, sys, tempfile, urllib.error, urllib.request, zoneinfo
 
@@ -212,21 +215,25 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("dia", nargs="?", help="AAAA-MM-DD (padrao: ontem)")
     ap.add_argument("--dias", type=int, default=1, help="quantos dias exportar, terminando em D (padrao 1)")
-    ap.add_argument("--saida", help="pasta de destino alternativa")
+    ap.add_argument("--csv", action="store_true", help="grava tambem o apps.csv no Google Drive (desligado por padrao)")
+    ap.add_argument("--saida", help="grava o apps.csv nesta pasta (teste); implica --csv e nao envia ao Life")
     ap.add_argument("--device", default=DEVICE_ID)
     ap.add_argument("--sem-life", action="store_true", help="nao envia ao site Life (so CSV)")
     a = ap.parse_args()
     fim = (datetime.date.fromisoformat(a.dia) if a.dia
            else datetime.datetime.now(TZ).date() - datetime.timedelta(days=1))
 
+    # O CSV e opcional: o Life guarda tudo. So exige o Google Drive quando --csv e pedido.
+    destino = None
     if a.saida:
         destino = a.saida
-    else:
+    elif a.csv:
         drives = sorted(glob.glob(DRIVE_GLOB))
         if not drives:
             log("ERRO: Google Drive para desktop nao encontrado em ~/Library/CloudStorage/GoogleDrive-*/Meu Drive"); return 3
         destino = os.path.join(drives[0], PASTA_DESTINO)
-    os.makedirs(destino, exist_ok=True)
+    if destino:
+        os.makedirs(destino, exist_ok=True)
 
     origem = os.path.join(STREAM, a.device)
     tmp = tempfile.mkdtemp(prefix="tempodetela-", dir="/tmp")
@@ -262,8 +269,9 @@ def main():
         aviso = "" if ultimo.date() > dia else "  [AVISO: dia ainda incompleto na sincronizacao]"
         top = ", ".join(f"{n} {m}" for n, m in linhas[:5])
         log(f"{dia}: total {sum(m for _, m in linhas)} min, {len(linhas)} apps ({top}){aviso}")
-    caminho, n = gravar(novos, destino)
-    log(f"gravado em {caminho} ({n} dias no arquivo)")
+    if destino:
+        caminho, n = gravar(novos, destino)
+        log(f"gravado em {caminho} ({n} dias no arquivo)")
 
     # Envio ao Life: so o destino real (nao em --saida de teste) e so dias a partir de LIFE_DESDE.
     if a.sem_life or a.saida:
@@ -278,7 +286,7 @@ def main():
         log("Life: nenhum dia completo a enviar"); return 0
     token = life_token()
     if not token:
-        log(f"ERRO Life: token nao encontrado no Chaves (item '{LIFE_KEYCHAIN}'); CSV gravado, envio pulado"); return 4
+        log(f"ERRO Life: token nao encontrado no Chaves (item '{LIFE_KEYCHAIN}'); envio pulado"); return 4
     ok = all([enviar_life(token, d, brutos[d], nomes, segundos_por_bloco(evs, d)) for d in dias_life])
     return 0 if ok else 4
 

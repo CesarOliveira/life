@@ -18,7 +18,7 @@
 	<array>
 		<dict>
 			<key>Hour</key>
-			<integer>6</integer>
+			<integer>10</integer>
 			<key>Minute</key>
 			<integer>15</integer>
 		</dict>
@@ -26,25 +26,13 @@
 			<key>Hour</key>
 			<integer>10</integer>
 			<key>Minute</key>
-			<integer>15</integer>
+			<integer>30</integer>
 		</dict>
 		<dict>
 			<key>Hour</key>
-			<integer>14</integer>
+			<integer>11</integer>
 			<key>Minute</key>
-			<integer>15</integer>
-		</dict>
-		<dict>
-			<key>Hour</key>
-			<integer>18</integer>
-			<key>Minute</key>
-			<integer>15</integer>
-		</dict>
-		<dict>
-			<key>Hour</key>
-			<integer>22</integer>
-			<key>Minute</key>
-			<integer>15</integer>
+			<integer>0</integer>
 		</dict>
 	</array>
 </dict>
