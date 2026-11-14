@@ -54,4 +54,15 @@ RSpec.describe "Mobile auth (Caminho B)", type: :request do
       expect(response).to redirect_to(new_user_session_path)
     end
   end
+
+  it "hides the 'install as app' banner inside the native app's web view" do
+    user = create(:user)
+    account = create(:account, owner: user)
+    create(:membership, user: user, account: account, role: "owner", status: "active")
+    sign_in user
+    get habits_path
+    expect(response.body).to include("data-pwa-install-target")
+    get habits_path, headers: { "User-Agent" => "Mozilla/5.0 (iPhone) Mobile/15E148 LifeApp/0.4.1" }
+    expect(response.body).not_to include("data-pwa-install-target")
+  end
 end

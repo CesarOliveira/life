@@ -51,10 +51,12 @@
                 </summary>
                 <div class="absolute right-0 z-10 mt-2 min-w-[220px] rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
                   <%= link_to t("nav.account_settings"), edit_account_path(current_account), class: "block px-3 py-1.5 text-sm hover:bg-slate-50" %>
-                  <button type="button" data-pwa-install-target="menuItem" data-action="pwa-install#promptInstall"
-                          class="block w-full px-3 py-1.5 text-left text-sm hover:bg-slate-50">
-                    <%= t("pwa.menu_item") %>
-                  </button>
+                  <% unless inside_native_app? %>
+                    <button type="button" data-pwa-install-target="menuItem" data-action="pwa-install#promptInstall"
+                            class="block w-full px-3 py-1.5 text-left text-sm hover:bg-slate-50">
+                      <%= t("pwa.menu_item") %>
+                    </button>
+                  <% end %>
                 </div>
               </details>
             <% end %>
@@ -77,6 +79,7 @@
       <% end %>
       <%= yield %>
     </main>
-    <%= render "shared/pwa_install" %>
+    <%# O convite para instalar o site como app não aparece dentro do app nativo. %>
+    <%= render "shared/pwa_install" unless inside_native_app? %>
   </body>
 </html>
