@@ -12,7 +12,8 @@ RSpec.describe "Public pages", type: :request do
     get privacy_path
     body = response.body
     expect(body).to include("HealthKit", "publicidade", "iCloud", "Anthropic", "/delete-account")
-    expect(body).to include(I18n.t("pages.draft")) # config/legal.yml ainda em rascunho
+    expect(body).not_to include(I18n.t("pages.draft")) # config/legal.yml publicado
+    expect(body).to include("23.001.652/0001-46", "cesar@integrattor.com.br")
 
     get privacy_path(locale: "en")
     expect(response.body).to include("Privacy Policy", "advertising", "not</strong> sold")

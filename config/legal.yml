@@ -3,10 +3,10 @@
 # de versão preliminar. Preencha e mude para "published" antes de enviar o app
 # para a App Store.
 shared:
-  status: draft                 # draft | published
+  status: published             # draft | published
   product_name: "Life"
-  legal_name:                   # razão social, ex.: "Integrattor Tecnologia Ltda."
-  tax_id:                       # CNPJ, ex.: "00.000.000/0001-00"
-  address:                      # cidade/UF do responsável (opcional)
-  contact_email:                # canal de privacidade e suporte
-  effective_date: "2026-11-13"
+  legal_name: "Cesar Aparecido de Oliveira Desenvolvimento de Software (Integrattor)"  # razão social
+  tax_id: "23.001.652/0001-46"  # CNPJ
+  address: "Taquaritinga/SP"     # cidade/UF do responsável (opcional)
+  contact_email: "cesar@integrattor.com.br"  # canal de privacidade e suporte
+  effective_date: "2026-11-15"
