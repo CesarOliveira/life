@@ -49,7 +49,10 @@
 
     <h3 class="mt-5 text-sm font-semibold text-slate-800"><%= t("setup.mac.token_title") %></h3>
     <p class="mt-1 text-sm text-slate-600"><%= t("setup.mac.token_help") %></p>
-    <pre class="mt-2 overflow-x-auto rounded-lg bg-slate-900 px-3 py-2 text-xs text-slate-100"><code>security add-generic-password -U -s tempodetela-life -a life -w</code></pre>
+    <div class="mt-3 flex flex-wrap items-center gap-3">
+      <%= link_to t("setup.mac.download"), mac_download_path, class: "rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700" %>
+      <%= link_to t("setup.mac.more"), mac_app_path, class: "text-sm font-medium text-emerald-700 hover:underline" %>
+    </div>
 
     <h3 class="mt-5 text-sm font-semibold text-slate-800"><%= t("setup.mac.limits_title") %></h3>
     <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-600">

@@ -523,6 +523,7 @@ en:
     privacy_title: "Privacy Policy"
     terms_title: "Terms of Use"
     support_title: "Support"
+    mac_title: "Life for Mac"
     operator: "%{product} is operated by %{name}"
     tax_id: "Brazilian tax ID (CNPJ) %{id}"
     operator_pending: "%{product} is in pre-launch."
@@ -664,7 +665,7 @@ en:
       disable_confirm: "Everything using this token loses access immediately. Continue?"
     mac:
       section: "Collection from the Mac"
-      hint: "There is nothing to install on the iPhone. The script runs by itself on the Mac every day and resends the last few days, so a day that arrived incomplete is fixed later."
+      hint: "There is nothing to install on the iPhone. The Life for Mac app sits in the menu bar and sends the iPhone screen time that macOS receives through iCloud, after each day ends."
       status_title: "Status"
       last_received: "Last upload received: %{time}"
       never_received: "No upload received yet."
@@ -673,15 +674,17 @@ en:
       requirements:
         share: "On the iPhone: Settings → Screen Time → Share Across Devices."
         icloud: "iPhone and Mac on the same Apple account."
-        mac_on: "The Mac powered on at upload time (06:15). If it is off, missed days are recovered on the next run, up to about a month."
-      token_title: "Token on the Mac"
-      token_help: "The script reads the token from the macOS Keychain. To save or replace it, run this in the Mac's Terminal and paste the token when asked:"
+        mac_on: "The Mac turned on now and then. Days left behind are sent the next time the Mac is used, up to about a month."
+      token_title: "Life for Mac"
+      token_help: "Download the app, drag it to Applications, sign in to your account and turn on Life in System Settings › Privacy & Security › Full Disk Access."
+      download: "Download for Mac"
+      more: "How it works"
       limits_title: "What is not collected"
       limits:
         web: "Website usage (e.g. pages opened in Safari)."
         carplay: "Apps used through CarPlay."
         delay: "The current day: data arrives hours late, so screen habits are evaluated once the day is closed."
-      guide: "Script and instructions: tools/mac_screentime folder in the repository."
+      guide: "Alternative without the app: the script in the repository's tools/mac_screentime folder."
 
   auth:
     tagline: "Your progress, every day."

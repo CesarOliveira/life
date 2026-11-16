@@ -1,0 +1,8 @@
+# Life para Mac (repositório integrattor/life_mac): versão publicada em public/downloads.
+# Para publicar uma versão nova: copie o DMG notarizado para public/downloads e atualize aqui.
+shared:
+  version: "1.0.0"
+  file: "Life-1.0.0.dmg"
+  sha256: "ed25d3219dbb6a69ea22065594ab9814f724148cc9ef72057d7d3c49c944459c"
+  size_bytes: 1794072
+  min_macos: "13"

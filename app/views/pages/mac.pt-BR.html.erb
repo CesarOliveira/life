@@ -1,0 +1,46 @@
+<%= render layout: "pages/frame", locals: { title: t("pages.mac_title") } do %>
+  <p>O <strong>Life para Mac</strong> envia ao Life o tempo de tela do seu iPhone. O iPhone não deixa outros apps lerem esse dado, mas o macOS recebe uma cópia pelo iCloud. O Life para Mac lê essa cópia e manda o total por app e por horário de cada dia para a sua conta.</p>
+
+  <div class="not-prose flex flex-col items-start gap-2 rounded-xl bg-emerald-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <p class="font-semibold text-slate-900">Life para Mac <%= @mac_app[:version] %></p>
+      <p class="text-xs text-slate-500">macOS <%= @mac_app[:min_macos] %> ou mais novo · Apple silicon e Intel · <%= number_to_human_size(@mac_app[:size_bytes]) %></p>
+    </div>
+    <%= link_to "Baixar para Mac", mac_download_path, class: "!no-underline rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold !text-white hover:bg-emerald-700" %>
+  </div>
+
+  <h2>Antes de começar</h2>
+  <ul>
+    <li>No iPhone: Ajustes › Tempo de Uso › ligue <strong>Compartilhar Entre Dispositivos</strong>.</li>
+    <li>iPhone e Mac na mesma Conta Apple (iCloud).</li>
+  </ul>
+
+  <h2>Instalação</h2>
+  <ol class="list-decimal space-y-1 pl-5">
+    <li>Abra o arquivo baixado e arraste o <strong>Life</strong> para a pasta Aplicativos.</li>
+    <li>Abra o Life. Ele fica na barra de menus, perto do relógio.</li>
+    <li>Entre na sua conta do Life com Google ou com e-mail e senha.</li>
+    <li>Em Ajustes do Sistema › Privacidade e Segurança › <strong>Acesso Total ao Disco</strong>, ligue o Life. O macOS guarda o tempo de tela numa pasta protegida e só libera a leitura com essa permissão.</li>
+    <li>Pronto. O Life abre com o Mac e envia os dias completos algumas vezes por dia. Na primeira vez, envia até 30 dias para trás.</li>
+  </ol>
+
+  <h2>O que o app lê e envia</h2>
+  <ul>
+    <li>Lê apenas o registro de uso de apps do iPhone que o macOS recebeu pelo iCloud. Não lê arquivos, mensagens, fotos nem o que você faz no Mac, e não altera nada no sistema.</li>
+    <li>Envia para a sua conta o tempo de cada app por dia e em blocos de 15 minutos. Nada vai para terceiros.</li>
+    <li>O acesso fica guardado no Chaves do macOS. Para parar, use "Sair da conta" no app ou apague o Life.</li>
+  </ul>
+
+  <h2>Limitações</h2>
+  <ul>
+    <li>O dado do iPhone chega ao Mac em lotes, com horas de atraso. Por isso o Life só envia um dia depois que ele termina.</li>
+    <li>Uso de sites e apps usados pelo CarPlay não entram.</li>
+    <li>O app lê um formato interno do macOS. Se uma atualização do sistema mudar esse formato, o app avisa e uma versão nova corrige.</li>
+  </ul>
+
+  <h2>Verificação do arquivo</h2>
+  <p>O app é assinado com Developer ID e notarizado pela Apple. SHA-256 do arquivo:</p>
+  <p><code class="break-all rounded bg-slate-100 px-1.5 py-0.5 text-xs"><%= @mac_app[:sha256] %></code></p>
+
+  <p>Dúvidas? Veja o <%= link_to "Suporte", support_path %> e a <%= link_to "Política de Privacidade", privacy_path %>.</p>
+<% end %>

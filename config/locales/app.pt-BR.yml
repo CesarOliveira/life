@@ -523,6 +523,7 @@ pt-BR:
     privacy_title: "Política de Privacidade"
     terms_title: "Termos de Uso"
     support_title: "Suporte"
+    mac_title: "Life para Mac"
     operator: "O %{product} é operado por %{name}"
     tax_id: "CNPJ %{id}"
     operator_pending: "O %{product} está em fase de pré-lançamento."
@@ -664,7 +665,7 @@ pt-BR:
       disable_confirm: "Tudo o que usa este token perde o acesso na hora. Continuar?"
     mac:
       section: "Coleta pelo Mac"
-      hint: "Não há nada para instalar no iPhone. O script roda sozinho no Mac todos os dias e reenvia os últimos dias, então um dia que chegou incompleto é corrigido depois."
+      hint: "Não há nada para instalar no iPhone. O app Life para Mac fica na barra de menus e envia o tempo de tela do iPhone, que o macOS recebe pelo iCloud, depois que cada dia termina."
       status_title: "Situação"
       last_received: "Último envio recebido: %{time}"
       never_received: "Nenhum envio recebido ainda."
@@ -673,15 +674,17 @@ pt-BR:
       requirements:
         share: "No iPhone: Ajustes → Tempo de Uso → Compartilhar Entre Dispositivos."
         icloud: "iPhone e Mac na mesma conta Apple."
-        mac_on: "O Mac ligado no horário do envio (06:15). Se ficar desligado, os dias perdidos são recuperados na execução seguinte, até cerca de um mês."
-      token_title: "Token no Mac"
-      token_help: "O script lê o token do Chaves do macOS. Para gravar ou trocar, rode no Terminal do Mac e cole o token quando pedir:"
+        mac_on: "O Mac ligado de vez em quando. Os dias que ficarem para trás são enviados na próxima vez que o Mac for usado, até cerca de um mês."
+      token_title: "Life para Mac"
+      token_help: "Baixe o app, arraste para Aplicativos, entre na sua conta e ligue o Life em Ajustes do Sistema › Privacidade e Segurança › Acesso Total ao Disco."
+      download: "Baixar para Mac"
+      more: "Como funciona"
       limits_title: "O que não é coletado"
       limits:
         web: "Uso de sites (ex.: páginas abertas no Safari)."
         carplay: "Apps usados pelo CarPlay."
         delay: "O dia corrente: o dado chega com horas de atraso, então os hábitos de tela são avaliados com o dia fechado."
-      guide: "Script e instruções: pasta tools/mac_screentime do repositório."
+      guide: "Alternativa sem app: o script da pasta tools/mac_screentime do repositório."
 
   auth:
     tagline: "Seu progresso, todo dia."

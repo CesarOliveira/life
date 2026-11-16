@@ -57,6 +57,8 @@ Rails.application.routes.draw do
   get "terms", to: "pages#terms"
   get "suporte", to: "pages#support", as: :support
   get "support", to: "pages#support"
+  get "mac", to: "pages#mac", as: :mac_app
+  get "mac/download", to: "pages#mac_download", as: :mac_download
 
   # Exclusão da própria conta (URL pública e estável: é a informada à App Store).
   get "delete-account", to: "user_deletions#new", as: :delete_account

@@ -1,0 +1,46 @@
+<%= render layout: "pages/frame", locals: { title: t("pages.mac_title") } do %>
+  <p><strong>Life for Mac</strong> sends your iPhone screen time to Life. The iPhone does not let other apps read this data, but macOS receives a copy through iCloud. Life for Mac reads that copy and sends each day's total per app and per hour to your account.</p>
+
+  <div class="not-prose flex flex-col items-start gap-2 rounded-xl bg-emerald-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <p class="font-semibold text-slate-900">Life for Mac <%= @mac_app[:version] %></p>
+      <p class="text-xs text-slate-500">macOS <%= @mac_app[:min_macos] %> or later · Apple silicon and Intel · <%= number_to_human_size(@mac_app[:size_bytes]) %></p>
+    </div>
+    <%= link_to "Download for Mac", mac_download_path, class: "!no-underline rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold !text-white hover:bg-emerald-700" %>
+  </div>
+
+  <h2>Before you start</h2>
+  <ul>
+    <li>On the iPhone: Settings › Screen Time › turn on <strong>Share Across Devices</strong>.</li>
+    <li>iPhone and Mac signed in to the same Apple Account (iCloud).</li>
+  </ul>
+
+  <h2>Installation</h2>
+  <ol class="list-decimal space-y-1 pl-5">
+    <li>Open the downloaded file and drag <strong>Life</strong> to the Applications folder.</li>
+    <li>Open Life. It lives in the menu bar, next to the clock.</li>
+    <li>Sign in to your Life account with Google or with email and password.</li>
+    <li>In System Settings › Privacy &amp; Security › <strong>Full Disk Access</strong>, turn on Life. macOS keeps screen time in a protected folder and only allows reading it with this permission.</li>
+    <li>Done. Life opens with your Mac and sends completed days a few times a day. The first time, it sends up to 30 days back.</li>
+  </ol>
+
+  <h2>What the app reads and sends</h2>
+  <ul>
+    <li>It only reads the iPhone app usage record that macOS received through iCloud. It does not read files, messages, photos or what you do on the Mac, and it changes nothing on the system.</li>
+    <li>It sends to your account the time spent in each app per day and in 15-minute blocks. Nothing goes to third parties.</li>
+    <li>Access is stored in the macOS Keychain. To stop, use "Sign out" in the app or delete Life.</li>
+  </ul>
+
+  <h2>Limitations</h2>
+  <ul>
+    <li>iPhone data reaches the Mac in batches, hours late. That is why Life only sends a day after it ends.</li>
+    <li>Website usage and apps used through CarPlay are not included.</li>
+    <li>The app reads an internal macOS format. If a system update changes it, the app warns you and a new version fixes it.</li>
+  </ul>
+
+  <h2>File verification</h2>
+  <p>The app is signed with Developer ID and notarized by Apple. SHA-256 of the file:</p>
+  <p><code class="break-all rounded bg-slate-100 px-1.5 py-0.5 text-xs"><%= @mac_app[:sha256] %></code></p>
+
+  <p>Questions? See <%= link_to "Support", support_path %> and the <%= link_to "Privacy Policy", privacy_path %>.</p>
+<% end %>

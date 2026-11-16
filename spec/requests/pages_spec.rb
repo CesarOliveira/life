@@ -29,4 +29,16 @@ RSpec.describe "Public pages", type: :request do
     expect(response.body).to include("Empresa Exemplo Ltda.", "00.000.000/0001-00", "mailto:contato@example.com")
     expect(response.body).not_to include(I18n.t("pages.draft"))
   end
+
+  it "serves the Life for Mac page and redirects the stable download link to the current DMG" do
+    mac = Rails.application.config_for(:mac_app)
+    get mac_app_path
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Life para Mac", "Acesso Total ao Disco", mac[:sha256], mac_download_path)
+
+    get mac_download_path
+    expect(response).to redirect_to("/downloads/#{mac[:file]}")
+    expect(Rails.public_path.join("downloads", mac[:file])).to exist
+    expect(Digest::SHA256.file(Rails.public_path.join("downloads", mac[:file])).hexdigest).to eq(mac[:sha256])
+  end
 end

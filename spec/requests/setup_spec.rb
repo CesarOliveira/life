@@ -17,7 +17,7 @@ RSpec.describe "Setup", type: :request do
     expect(response.body).not_to include("abcd1234567890efgh") # token mascarado
     expect(response.body).to include(I18n.t("setup.mac.section"))
     expect(response.body).to include(I18n.t("setup.mac.never_received"))
-    expect(response.body).to include("tempodetela-life")
+    expect(response.body).to include(mac_download_path, mac_app_path) # app Life para Mac em vez do script
     expect(response.body).not_to include(".shortcut")
   end
 
