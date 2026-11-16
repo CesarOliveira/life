@@ -53,6 +53,13 @@ RSpec.describe "Public pages", type: :request do
     expect(response.body).to include("Create a free account", "will never be charged for")
   end
 
+  it "states the pricing commitment in the terms" do
+    get terms_path
+    expect(response.body).to include("6. Preço", "nunca serão cobrados", "não passará a ser pago")
+    get terms_path(locale: "en")
+    expect(response.body).to include("6. Pricing", "will never be charged for")
+  end
+
   it "keeps signed-in users on the dashboard at the root" do
     user = create(:user)
     account = create(:account, owner: user)
