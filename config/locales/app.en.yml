@@ -623,14 +623,14 @@ en:
 
   setup:
     title: "Set up Screen time"
-    intro: "Health (steps, sleep, HR) comes automatically from the app. iPhone Screen time arrives through the Mac: the iPhone syncs usage to the Mac over iCloud, and a script on the Mac sends it here every morning."
+    intro: "Health (steps, sleep, HR) comes automatically from the iPhone app. iPhone Screen Time can arrive in two ways: through the Life for Mac app or through a Shortcut on the iPhone itself. Pick one."
     token_label: "Your personal token"
     copy: "Copy token"
     copied: "Copied!"
     keep_secret: "The token is like a password: anyone who has it can send data to your account."
     regenerate: "Generate new token"
-    regenerate_confirm: "Generating a new token invalidates the current one. Uploads from the Mac stop working until you update the token in the macOS Keychain. Continue?"
-    regenerate_hint: "Use this if the token leaked. Then update the token on the Mac with the command below."
+    regenerate_confirm: "Generating a new token invalidates the current one. Life for Mac will ask you to sign in again, and the iPhone Shortcut stops sending until you paste the new token into it. Continue?"
+    regenerate_hint: "Use it if the token leaked. Then sign in again in Life for Mac or paste the new token into the Shortcut."
     mcp:
       section: "AI assistants (MCP)"
       hint: "Connect Claude, ChatGPT or another MCP-compatible assistant so it can read and cross-reference your data: screen time, health, workouts, tasks, habits and lab exams. Access is read-only unless you allow changes."
@@ -663,9 +663,36 @@ en:
       rotate_confirm: "The current token stops working. Continue?"
       disable: "Turn off token"
       disable_confirm: "Everything using this token loses access immediately. Continue?"
+    options:
+      recommended: "Recommended"
+      only_one: "Use only one of the two options. App names come slightly different in each, and with both on the same usage may be counted twice."
+      mac:
+        title: "Life for Mac"
+        auto: "Automatic: it sits in the menu bar and sends by itself, nothing to remember."
+        hourly: "Complete: time per app and per hour of the day, with up to 30 days of history the first time."
+        needs: "Requires a Mac with macOS 13 or later, on the same Apple Account as the iPhone."
+        shot_alt: "Life for Mac menu in the menu bar"
+        screens: "See the Life for Mac screens"
+        captions:
+          enter: "1. Sign in"
+          permission: "2. Grant Full Disk Access"
+          ready: "3. Done: automatic upload"
+      shortcut:
+        title: "iPhone Shortcut (no Mac)"
+        no_mac: "Works with the iPhone alone, on iOS 26 or later."
+        daily: "Sends each app's total for the previous day, once a day, through a Shortcuts automation. No per-hour detail."
+        websites: "Includes websites and CarPlay apps, which the Mac does not see."
+        download: "Download the Shortcut"
+        download_today: "\"Today\" Shortcut (alerts)"
+        today_hint: "Optional: the \"Today\" Shortcut sends the current day and alerts you when a screen habit goes over its limit. Use it in an automation that runs when you close the apps you want to watch."
+        steps:
+          download: "On the iPhone, open this page in Safari and tap Download the Shortcut."
+          token: "When adding it, the Shortcut asks for your token: tap Copy token at the top of this page and paste it."
+          automation: "In the Shortcuts app, under Automation, create a personal \"Time of Day\" automation every morning (e.g. 8:00), set to \"Run Immediately\", that runs the \"Life Tempo de Tela\" shortcut."
+          run: "Run the shortcut once by hand and allow access to Screen Time and the internet when the iPhone asks."
     mac:
-      section: "Collection from the Mac"
-      hint: "There is nothing to install on the iPhone. The Life for Mac app sits in the menu bar and sends the iPhone screen time that macOS receives through iCloud, after each day ends."
+      section: "iPhone Screen Time"
+      hint: "The iPhone does not let apps read Screen Time. There are two ways out: the Mac, which receives a copy through iCloud, or an iOS 26 Shortcut that reads the daily summary."
       status_title: "Status"
       last_received: "Last upload received: %{time}"
       never_received: "No upload received yet."
@@ -674,17 +701,14 @@ en:
       requirements:
         share: "On the iPhone: Settings → Screen Time → Share Across Devices."
         icloud: "iPhone and Mac on the same Apple account."
-        mac_on: "The Mac turned on now and then. Days left behind are sent the next time the Mac is used, up to about a month."
-      token_title: "Life for Mac"
-      token_help: "Download the app, drag it to Applications, sign in to your account and turn on Life in System Settings › Privacy & Security › Full Disk Access."
+        mac_on: "For Life for Mac: the Mac turned on now and then. Days left behind are sent the next time the Mac is used, up to about a month."
       download: "Download for Mac"
       more: "How it works"
       limits_title: "What is not collected"
       limits:
-        web: "Website usage (e.g. pages opened in Safari)."
-        carplay: "Apps used through CarPlay."
+        web: "With Life for Mac: website usage (e.g. pages opened in Safari)."
+        carplay: "With Life for Mac: apps used through CarPlay."
         delay: "The current day: data arrives hours late, so screen habits are evaluated once the day is closed."
-      guide: "Alternative without the app: the script in the repository's tools/mac_screentime folder."
 
   auth:
     tagline: "Your progress, every day."

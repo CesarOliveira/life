@@ -9,6 +9,13 @@
     <%= link_to "Download for Mac", mac_download_path, class: "!no-underline rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold !text-white hover:bg-emerald-700" %>
   </div>
 
+  <div class="not-prose grid gap-3 sm:grid-cols-2">
+    <figure><%= image_tag "/images/mac/mac-menu.png", alt: "Life for Mac menu", class: "w-full", loading: "lazy" %><figcaption class="mt-1 text-center text-xs text-slate-500">Life in the menu bar</figcaption></figure>
+    <figure><%= image_tag "/images/mac/mac-pronto.png", alt: "Life for Mac set up", class: "w-full", loading: "lazy" %><figcaption class="mt-1 text-center text-xs text-slate-500">Set up: automatic upload</figcaption></figure>
+    <figure><%= image_tag "/images/mac/mac-entrar.png", alt: "Sign in", class: "w-full", loading: "lazy" %><figcaption class="mt-1 text-center text-xs text-slate-500">Sign in</figcaption></figure>
+    <figure><%= image_tag "/images/mac/mac-permissao.png", alt: "Full Disk Access", class: "w-full", loading: "lazy" %><figcaption class="mt-1 text-center text-xs text-slate-500">Grant Full Disk Access</figcaption></figure>
+  </div>
+
   <h2>Before you start</h2>
   <ul>
     <li>On the iPhone: Settings › Screen Time › turn on <strong>Share Across Devices</strong>.</li>
@@ -37,6 +44,9 @@
     <li>Website usage and apps used through CarPlay are not included.</li>
     <li>The app reads an internal macOS format. If a system update changes it, the app warns you and a new version fixes it.</li>
   </ul>
+
+  <h2>No Mac?</h2>
+  <p>On iOS 26 or later you can send it through the Shortcuts app on the iPhone itself: it sends each app's total for the previous day, once a day, websites included. Sign in to Life and open <strong>Setup › Screen time</strong> to download the Shortcut and follow the steps.</p>
 
   <h2>File verification</h2>
   <p>The app is signed with Developer ID and notarized by Apple. SHA-256 of the file:</p>

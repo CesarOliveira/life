@@ -59,6 +59,10 @@ Rails.application.routes.draw do
   get "support", to: "pages#support"
   get "mac", to: "pages#mac", as: :mac_app
   get "mac/download", to: "pages#mac_download", as: :mac_download
+  # Alternativa sem Mac: Atalho do iPhone (iOS 26) com a ação de tempo de uso de apps,
+  # assinado e público (token placeholder, colado na importação). Envia para /api/usage_raw.
+  get "atalhos/tempo-de-tela", to: "shortcuts#health", as: :health_shortcut
+  get "atalhos/tempo-de-tela-hoje", to: "shortcuts#today", as: :today_shortcut
 
   # Exclusão da própria conta (URL pública e estável: é a informada à App Store).
   get "delete-account", to: "user_deletions#new", as: :delete_account

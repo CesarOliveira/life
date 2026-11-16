@@ -623,14 +623,14 @@ pt-BR:
 
   setup:
     title: "Configurar Tempo de tela"
-    intro: "A Saúde (passos, sono, FC) vem automaticamente pelo app. O Tempo de tela do iPhone chega pelo Mac: o iPhone sincroniza o uso com o Mac pelo iCloud, e um script no Mac envia para cá toda manhã."
+    intro: "A Saúde (passos, sono, FC) vem automaticamente pelo app do iPhone. O Tempo de tela do iPhone pode chegar de dois jeitos: pelo app Life para Mac ou por um Atalho no próprio iPhone. Escolha um."
     token_label: "Seu token pessoal"
     copy: "Copiar token"
     copied: "Copiado!"
     keep_secret: "O token é como uma senha: quem tiver ele pode enviar dados para a sua conta."
     regenerate: "Gerar novo token"
-    regenerate_confirm: "Gerar um novo token invalida o atual. O envio pelo Mac para de funcionar até você atualizar o token no Chaves do macOS. Continuar?"
-    regenerate_hint: "Use se o token vazou. Depois, atualize o token no Mac com o comando abaixo."
+    regenerate_confirm: "Gerar um novo token invalida o atual. O Life para Mac pede para entrar de novo, e o Atalho do iPhone para de enviar até você colar o token novo nele. Continuar?"
+    regenerate_hint: "Use se o token vazou. Depois, entre de novo no Life para Mac ou cole o token novo no Atalho."
     mcp:
       section: "Assistentes de IA (MCP)"
       hint: "Conecte o Claude, o ChatGPT ou outro assistente compatível com MCP para ele ler e cruzar seus dados: tempo de tela, saúde, treinos, tarefas, hábitos e exames. O acesso é somente leitura, a menos que você permita alterações."
@@ -663,9 +663,36 @@ pt-BR:
       rotate_confirm: "O token atual para de funcionar. Continuar?"
       disable: "Desligar token"
       disable_confirm: "Tudo o que usa este token perde o acesso na hora. Continuar?"
+    options:
+      recommended: "Recomendado"
+      only_one: "Use só uma das duas opções. Os nomes dos apps vêm um pouco diferentes em cada uma, e com as duas ligadas o mesmo uso pode ser contado duas vezes."
+      mac:
+        title: "Life para Mac"
+        auto: "Automático: fica na barra de menus e envia sozinho, sem você lembrar."
+        hourly: "Completo: tempo por app e por horário do dia, com até 30 dias de histórico na primeira vez."
+        needs: "Precisa de um Mac com macOS 13 ou mais novo, na mesma Conta Apple do iPhone."
+        shot_alt: "Menu do Life para Mac na barra de menus"
+        screens: "Ver as telas do Life para Mac"
+        captions:
+          enter: "1. Entrar na conta"
+          permission: "2. Dar Acesso Total ao Disco"
+          ready: "3. Pronto: envio automático"
+      shortcut:
+        title: "Atalho no iPhone (sem Mac)"
+        no_mac: "Funciona só com o iPhone, com iOS 26 ou mais novo."
+        daily: "Envia o total de cada app do dia anterior, uma vez por dia, por uma automação do app Atalhos. Sem o detalhe por horário."
+        websites: "Inclui sites e apps usados pelo CarPlay, que o Mac não vê."
+        download: "Baixar o Atalho"
+        download_today: "Atalho \"Hoje\" (alertas)"
+        today_hint: "Opcional: o Atalho \"Hoje\" envia o dia em andamento e avisa quando um hábito de tela passa do limite. Use numa automação ao fechar os apps que você quer vigiar."
+        steps:
+          download: "No iPhone, abra esta página no Safari e toque em Baixar o Atalho."
+          token: "Ao adicionar, o Atalho pede o seu token: toque em Copiar token, no topo desta página, e cole."
+          automation: "No app Atalhos, em Automação, crie uma automação pessoal \"Horário do dia\", todo dia de manhã (ex.: 8:00), com \"Executar imediatamente\", que roda o atalho \"Life Tempo de Tela\"."
+          run: "Rode o atalho uma vez à mão e permita o acesso ao Tempo de Uso e à internet quando o iPhone perguntar."
     mac:
-      section: "Coleta pelo Mac"
-      hint: "Não há nada para instalar no iPhone. O app Life para Mac fica na barra de menus e envia o tempo de tela do iPhone, que o macOS recebe pelo iCloud, depois que cada dia termina."
+      section: "Tempo de tela do iPhone"
+      hint: "O iPhone não deixa apps lerem o tempo de tela. Há duas saídas: o Mac, que recebe uma cópia pelo iCloud, ou um Atalho do iOS 26 que lê o resumo do dia."
       status_title: "Situação"
       last_received: "Último envio recebido: %{time}"
       never_received: "Nenhum envio recebido ainda."
@@ -674,17 +701,14 @@ pt-BR:
       requirements:
         share: "No iPhone: Ajustes → Tempo de Uso → Compartilhar Entre Dispositivos."
         icloud: "iPhone e Mac na mesma conta Apple."
-        mac_on: "O Mac ligado de vez em quando. Os dias que ficarem para trás são enviados na próxima vez que o Mac for usado, até cerca de um mês."
-      token_title: "Life para Mac"
-      token_help: "Baixe o app, arraste para Aplicativos, entre na sua conta e ligue o Life em Ajustes do Sistema › Privacidade e Segurança › Acesso Total ao Disco."
+        mac_on: "Para o Life para Mac: o Mac ligado de vez em quando. Os dias que ficarem para trás são enviados na próxima vez que o Mac for usado, até cerca de um mês."
       download: "Baixar para Mac"
       more: "Como funciona"
       limits_title: "O que não é coletado"
       limits:
-        web: "Uso de sites (ex.: páginas abertas no Safari)."
-        carplay: "Apps usados pelo CarPlay."
+        web: "No Life para Mac: uso de sites (ex.: páginas abertas no Safari)."
+        carplay: "No Life para Mac: apps usados pelo CarPlay."
         delay: "O dia corrente: o dado chega com horas de atraso, então os hábitos de tela são avaliados com o dia fechado."
-      guide: "Alternativa sem app: o script da pasta tools/mac_screentime do repositório."
 
   auth:
     tagline: "Seu progresso, todo dia."

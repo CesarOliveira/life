@@ -9,6 +9,13 @@
     <%= link_to "Baixar para Mac", mac_download_path, class: "!no-underline rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold !text-white hover:bg-emerald-700" %>
   </div>
 
+  <div class="not-prose grid gap-3 sm:grid-cols-2">
+    <figure><%= image_tag "/images/mac/mac-menu.png", alt: "Menu do Life para Mac", class: "w-full", loading: "lazy" %><figcaption class="mt-1 text-center text-xs text-slate-500">O Life na barra de menus</figcaption></figure>
+    <figure><%= image_tag "/images/mac/mac-pronto.png", alt: "Life para Mac configurado", class: "w-full", loading: "lazy" %><figcaption class="mt-1 text-center text-xs text-slate-500">Configurado: envio automático</figcaption></figure>
+    <figure><%= image_tag "/images/mac/mac-entrar.png", alt: "Entrar na conta", class: "w-full", loading: "lazy" %><figcaption class="mt-1 text-center text-xs text-slate-500">Entrar na conta</figcaption></figure>
+    <figure><%= image_tag "/images/mac/mac-permissao.png", alt: "Acesso Total ao Disco", class: "w-full", loading: "lazy" %><figcaption class="mt-1 text-center text-xs text-slate-500">Dar Acesso Total ao Disco</figcaption></figure>
+  </div>
+
   <h2>Antes de começar</h2>
   <ul>
     <li>No iPhone: Ajustes › Tempo de Uso › ligue <strong>Compartilhar Entre Dispositivos</strong>.</li>
@@ -37,6 +44,9 @@
     <li>Uso de sites e apps usados pelo CarPlay não entram.</li>
     <li>O app lê um formato interno do macOS. Se uma atualização do sistema mudar esse formato, o app avisa e uma versão nova corrige.</li>
   </ul>
+
+  <h2>Não tem Mac?</h2>
+  <p>Com iOS 26 ou mais novo, dá para enviar pelo app Atalhos do próprio iPhone: ele envia o total de cada app do dia anterior, uma vez por dia, incluindo sites. Entre no Life e abra <strong>Configurar › Tempo de tela</strong> para baixar o Atalho e ver o passo a passo.</p>
 
   <h2>Verificação do arquivo</h2>
   <p>O app é assinado com Developer ID e notarizado pela Apple. SHA-256 do arquivo:</p>
