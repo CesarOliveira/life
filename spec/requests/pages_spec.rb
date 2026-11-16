@@ -41,4 +41,24 @@ RSpec.describe "Public pages", type: :request do
     expect(Rails.public_path.join("downloads", mac[:file])).to exist
     expect(Digest::SHA256.file(Rails.public_path.join("downloads", mac[:file])).hexdigest).to eq(mac[:sha256])
   end
+
+  it "shows the landing page at the root for visitors, with the free pricing promise" do
+    get root_path
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Criar conta grátis", "tudo o que existe hoje nunca vai ser cobrado",
+                                      "Vantagens e limitações", new_user_registration_path, mac_app_path)
+    expect(response.body).to include("em breve na App Store") # até a Apple aprovar
+
+    get root_path(locale: "en")
+    expect(response.body).to include("Create a free account", "will never be charged for")
+  end
+
+  it "keeps signed-in users on the dashboard at the root" do
+    user = create(:user)
+    account = create(:account, owner: user)
+    create(:membership, user: user, account: account, role: "owner", status: "active")
+    sign_in user
+    get root_path
+    expect(response.body).not_to include("Criar conta grátis")
+  end
 end

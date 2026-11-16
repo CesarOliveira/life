@@ -8,6 +8,12 @@ class PagesController < ApplicationController
 
   before_action { @legal = Rails.application.config_for(:legal) }
 
+  # Apresentação pública (raiz do site para quem não está logado).
+  def home
+    @mac_app = Rails.application.config_for(:mac_app)
+    @store = Rails.application.config_for(:store_links)
+  end
+
   def privacy; end
 
   def terms; end

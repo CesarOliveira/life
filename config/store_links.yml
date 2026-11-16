@@ -1,0 +1,4 @@
+# Links das lojas exibidos na página inicial. Vazio = "Em breve".
+# Preencha ios_app_store_url quando a Apple aprovar o app (ID Apple 6835065045).
+shared:
+  ios_app_store_url: ""

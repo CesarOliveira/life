@@ -11,9 +11,8 @@ Rails.application.routes.draw do
     root to: "dashboard#index", as: :authenticated_root
   end
 
-  devise_scope :user do
-    root to: "devise/sessions#new"
-  end
+  # Visitante sem login: página de apresentação do Life (o login fica em /users/sign_in).
+  root to: "pages#home"
 
   # Backup do banco (pg_dump), protegido por BACKUP_TOKEN. Ver DEPLOY_OPERACOES.md.
   get "/ops/backup", to: "ops/backups#show"
