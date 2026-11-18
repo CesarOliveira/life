@@ -1,4 +1,4 @@
 # Links das lojas exibidos na página inicial. Vazio = "Em breve".
-# Preencha ios_app_store_url quando a Apple aprovar o app (ID Apple 6835065045).
+# App do iPhone aprovado e na App Store desde 18/11/2026 (ID Apple 6835065045).
 shared:
-  ios_app_store_url: ""
+  ios_app_store_url: "https://apps.apple.com/br/app/life-rotina-sa%C3%BAde-e-tela/id6835065045"

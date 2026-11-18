@@ -47,7 +47,7 @@ RSpec.describe "Public pages", type: :request do
     expect(response).to have_http_status(:ok)
     expect(response.body).to include("Criar conta grátis", "tudo o que existe hoje nunca vai ser cobrado",
                                       "Vantagens e limitações", new_user_registration_path, mac_app_path)
-    expect(response.body).to include("em breve na App Store") # até a Apple aprovar
+    expect(response.body).to include("Baixar na App Store", Rails.application.config_for(:store_links)[:ios_app_store_url])
 
     get root_path(locale: "en")
     expect(response.body).to include("Create a free account", "will never be charged for")
