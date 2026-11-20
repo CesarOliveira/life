@@ -12,6 +12,7 @@
 #  frequency         :string           default("weekly_days"), not null
 #  metric_key        :string
 #  name              :string           not null
+#  place_ids         :bigint           default([]), not null, is an Array
 #  position          :integer          default(0), not null
 #  threshold_value   :decimal(12, 3)
 #  weekdays          :integer          default([0, 1, 2, 3, 4, 5, 6]), not null, is an Array

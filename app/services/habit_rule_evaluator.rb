@@ -84,6 +84,11 @@ class HabitRuleEvaluator
 
       scope = meta[:apps] ? day.where(bundle_id: Array(habit.app_bundle_ids)) : day
       scope.sum(:seconds) / 3600.0 # apps escolhidos sem uso = 0 (cumpre o máximo)
+    when :place
+      # Sem nenhuma visita registrada no dia (o iPhone não enviou): não mexe.
+      return nil unless @account.visits.overlapping(date.in_time_zone.beginning_of_day, date.in_time_zone.end_of_day).exists?
+
+      Places::Stats.minutes_on(@account, Array(habit.place_ids), date)
     when :measurement
       measurement = @account.measurements.find_by(key: meta[:measurement_key], measured_on: date)
       return nil unless measurement

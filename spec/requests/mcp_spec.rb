@@ -46,7 +46,7 @@ RSpec.describe "MCP server", type: :request do
     expect(response.body).to be_empty
 
     tools = rpc("tools/list")["result"]["tools"]
-    expect(tools.map { |t| t["name"] }).to include("get_overview", "get_screen_time", "get_health_metrics", "get_tasks", "get_exams")
+    expect(tools.map { |t| t["name"] }).to include("get_overview", "get_screen_time", "get_health_metrics", "get_tasks", "get_exams", "get_places", "get_place_visits")
     expect(tools).to all(include("inputSchema", "description"))
     expect(tools.map { |t| t.dig("annotations", "readOnlyHint") }).to all(be(true))
 

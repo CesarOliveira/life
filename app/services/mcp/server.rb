@@ -9,7 +9,8 @@ module Mcp
 
     INSTRUCTIONS = <<~TEXT.squish.freeze
       Life é o diário pessoal de dados do usuário: tempo de tela do iPhone por app, saúde do iPhone e Apple Watch
-      (sono, atividade, coração, treinos), tarefas em quadros kanban, hábitos, peso e exames de laboratório.
+      (sono, atividade, coração, treinos), tarefas em quadros kanban, hábitos, peso, exames de laboratório e lugares
+      (onde a pessoa esteve e quanto tempo ficou em cada lugar nomeado, como Casa ou Academia).
       Todas as ferramentas são somente leitura. Datas são dias locais (America/Sao_Paulo) no formato AAAA-MM-DD e
       durações vêm em minutos. O tempo de tela também existe por horário (get_screen_time_by_hour). Comece por get_overview para ver o que existe e o período coberto; depois use as
       ferramentas específicas. Ao cruzar dados, lembre que o dia mais recente pode estar incompleto e que

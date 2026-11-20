@@ -21,6 +21,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#10b981">
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= yield :head %>
     <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
   </head>
   <body data-controller="pwa-install" class="min-h-screen bg-slate-50 text-slate-800 antialiased">
@@ -40,6 +41,7 @@
               <%= nav_link t("nav.insights"), insights_path %>
               <%= nav_link t("nav.health"), measurements_path %>
               <%= nav_link t("nav.screen_time"), screen_time_path %>
+              <%= nav_link t("nav.places"), places_path %>
               <%= nav_link t("nav.setup"), setup_path %>
             <% end %>
           </div>

@@ -48,3 +48,9 @@ application.register("scroll-end", ScrollEndController)
 
 import KanbanController from "./kanban_controller"
 application.register("kanban", KanbanController)
+
+import PlacesMapController from "./places_map_controller"
+application.register("places-map", PlacesMapController)
+
+import PlacesImportController from "./places_import_controller"
+application.register("places-import", PlacesImportController)

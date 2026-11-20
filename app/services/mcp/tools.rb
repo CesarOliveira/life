@@ -64,7 +64,15 @@ module Mcp
       { name: "get_exams", title: "Exames de laboratório",
         description: "Resultados de exames no período (padrão: 5 anos): nome, valor, unidade, faixa de referência do laudo e " \
                      "se está fora da faixa. As faixas vêm do próprio laudo, não do Life.",
-        properties: PERIOD.merge(only_out_of_range: { type: "boolean", description: "Só resultados fora da faixa de referência." }) }
+        properties: PERIOD.merge(only_out_of_range: { type: "boolean", description: "Só resultados fora da faixa de referência." }) },
+      { name: "get_places", title: "Lugares",
+        description: "Lugares que a pessoa nomeou (ex.: Casa, Academia, Casa da mãe) e o tempo passado em cada um no período " \
+                     "(padrão: 30 dias): horas, visitas e dias com visita. Também o tempo em lugares ainda sem nome. Sem coordenadas.",
+        properties: PERIOD },
+      { name: "get_place_visits", title: "Visitas a lugares",
+        description: "Linha do tempo de lugares no período (padrão: 7 dias, máximo 62): cada visita com dia, chegada, saída, " \
+                     "minutos e o nome do lugar ('sem nome' quando não nomeado). Útil para cruzar com sono, treinos e tempo de tela.",
+        properties: PERIOD }
     ].freeze
 
     TASK_REF = { number: { type: "integer", description: "Número da tarefa (o #N mostrado em get_tasks)." } }.freeze
@@ -300,9 +308,35 @@ module Mcp
           events: events.order(:occurred_at).map { |e| { time: e.occurred_at.strftime("%H:%M"), task: e.task.title, kind: e.kind, from: e.from_column, to: e.to_column }.compact },
           completed: @account.tasks.where(completed_at: date.all_day).pluck(:title)
         },
+        places: Places::Timeline.new(@account, date).totals.map { |name, sec| { place: name, minutes: (sec / 60.0).round } },
         habits_done: HabitCheck.joins(:habit).where(habits: { account_id: @account.id }, date: date).pluck("habits.name"),
         weight_kg: @account.weight_entries.find_by(date: date)&.weight_kg&.to_f
       }
+    end
+
+    def get_places(args)
+      from, to = period(args, 30)
+      rows = Places::Stats.new(@account, from: from, to: to).rows
+      unnamed = @account.visits.unassigned.overlapping(from.in_time_zone.beginning_of_day, (to + 1).in_time_zone.beginning_of_day)
+                        .sum { |v| v.seconds_within(from.in_time_zone.beginning_of_day, (to + 1).in_time_zone.beginning_of_day) }
+      { period: { from: from, to: to },
+        places: rows.map { |r| { name: r.place.name, hours: (r.seconds / 3600.0).round(1), visits: r.visits, days_with_visit: r.days.size } },
+        unnamed_places_hours: (unnamed / 3600.0).round(1),
+        note: "Tempo calculado pelas visitas (chegada/saída) vindas do iPhone ou da Linha do Tempo do Google; trajetos não entram." }
+    end
+
+    def get_place_visits(args)
+      from, to = period(args, 7)
+      raise InvalidArguments, "Período máximo: 62 dias." if (to - from).to_i > 62
+
+      start = from.in_time_zone.beginning_of_day
+      finish = (to + 1).in_time_zone.beginning_of_day
+      visits = @account.visits.includes(:place).overlapping(start, finish).chronological
+      { period: { from: from, to: to },
+        visits: visits.map do |v|
+          { day: v.arrived_at.to_date, arrived: v.arrived_at.strftime("%Y-%m-%d %H:%M"), departed: v.departed_at&.strftime("%Y-%m-%d %H:%M"),
+            minutes: (v.seconds_within(start, finish) / 60.0).round, place: v.place&.name || "sem nome" }
+        end }
     end
 
     def get_screen_time(args)
@@ -557,7 +591,8 @@ module Mcp
         workouts: range.call(@account.workouts, :date),
         tasks: range.call(@account.tasks, :created_at),
         weight: range.call(@account.weight_entries, :date),
-        exams: range.call(@account.exam_results, :measured_on) }.compact
+        exams: range.call(@account.exam_results, :measured_on),
+        places: range.call(@account.visits, :date) }.compact
     end
 
     def screen_time_summary(from, to)

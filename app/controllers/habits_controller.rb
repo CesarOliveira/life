@@ -59,6 +59,7 @@ class HabitsController < ApplicationController
     names = current_account.app_usages.where.not(name: nil).group(:bundle_id).maximum(:name)
     @apps = current_account.app_usages.distinct.pluck(:bundle_id).sort
                            .map { |bundle_id| { bundle_id: bundle_id, name: names[bundle_id].presence || bundle_id } }
+    @places = current_account.places.ordered.select(:id, :name)
   end
 
   # Backfill da janela recente quando o hábito é automático (preenche o histórico
@@ -74,7 +75,7 @@ class HabitsController < ApplicationController
     permitted = params.require(:habit)
                       .permit(:name, :description, :color, :active, :position, :habit_category_id,
                               :frequency, :weekly_target, :auto, :metric_key, :comparator, :threshold_value,
-                              weekdays: [], app_bundle_ids: [])
+                              weekdays: [], app_bundle_ids: [], place_ids: [])
     permitted[:habit_category_id] = current_account.habit_categories.find_by(id: permitted[:habit_category_id])&.id ||
                                     current_account.habit_categories.ordered.first&.id
     permitted[:auto] = ActiveModel::Type::Boolean.new.cast(permitted[:auto]) ? true : false
@@ -91,6 +92,7 @@ class HabitsController < ApplicationController
       permitted[:comparator] = nil
       permitted[:threshold_value] = nil
       permitted[:app_bundle_ids] = []
+      permitted[:place_ids] = []
     end
     permitted
   end
@@ -104,6 +106,8 @@ class HabitsController < ApplicationController
       time = params.dig(:habit, :threshold_time).to_s
       permitted[:threshold_value] = time =~ /\A(\d{1,2}):(\d{2})\z/ ? (::Regexp.last_match(1).to_i * 60) + ::Regexp.last_match(2).to_i : permitted[:threshold_value]
     end
+
+    permitted[:place_ids] = meta[:places] ? Array(permitted[:place_ids]).reject(&:blank?).map(&:to_i).uniq & current_account.places.ids : []
 
     permitted[:app_bundle_ids] =
       if meta[:apps]

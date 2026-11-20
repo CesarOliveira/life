@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_13_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_20_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -179,6 +179,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_000001) do
     t.bigint "habit_category_id", null: false
     t.string "metric_key"
     t.string "name", null: false
+    t.bigint "place_ids", default: [], null: false, array: true
     t.integer "position", default: 0, null: false
     t.decimal "threshold_value", precision: 12, scale: 3
     t.datetime "updated_at", null: false
@@ -270,6 +271,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_000001) do
     t.index ["oauth_client_id"], name: "index_oauth_grants_on_oauth_client_id"
     t.index ["refresh_token_digest"], name: "index_oauth_grants_on_refresh_token_digest", unique: true
     t.index ["user_id"], name: "index_oauth_grants_on_user_id"
+  end
+
+  create_table "places", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.text "address"
+    t.datetime "created_at", null: false
+    t.text "latitude", null: false
+    t.text "longitude", null: false
+    t.string "name", null: false
+    t.integer "radius_m", default: 120, null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_places_on_account_id"
   end
 
   create_table "roles", force: :cascade do |t|
@@ -372,6 +385,28 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_000001) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  create_table "visits", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.integer "accuracy_m"
+    t.text "address"
+    t.datetime "arrived_at", null: false
+    t.datetime "created_at", null: false
+    t.date "date", null: false
+    t.datetime "departed_at"
+    t.string "external_id", null: false
+    t.string "hint"
+    t.text "latitude", null: false
+    t.text "longitude", null: false
+    t.bigint "place_id"
+    t.string "source", default: "iphone", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "arrived_at"], name: "index_visits_on_account_id_and_arrived_at"
+    t.index ["account_id", "date"], name: "index_visits_on_account_id_and_date"
+    t.index ["account_id", "external_id"], name: "index_visits_on_account_id_and_external_id", unique: true
+    t.index ["account_id"], name: "index_visits_on_account_id"
+    t.index ["place_id"], name: "index_visits_on_place_id"
+  end
+
   create_table "weight_entries", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.datetime "created_at", null: false
@@ -422,6 +457,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_000001) do
   add_foreign_key "oauth_grants", "accounts"
   add_foreign_key "oauth_grants", "oauth_clients"
   add_foreign_key "oauth_grants", "users"
+  add_foreign_key "places", "accounts"
   add_foreign_key "task_boards", "accounts"
   add_foreign_key "task_columns", "task_boards"
   add_foreign_key "task_comments", "tasks"
@@ -432,6 +468,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_000001) do
   add_foreign_key "tasks", "task_boards"
   add_foreign_key "tasks", "task_columns"
   add_foreign_key "tasks", "users", column: "creator_id"
+  add_foreign_key "visits", "accounts"
+  add_foreign_key "visits", "places", on_delete: :nullify
   add_foreign_key "weight_entries", "accounts"
   add_foreign_key "workouts", "accounts"
 end

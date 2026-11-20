@@ -8,11 +8,12 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = [
     "frequency", "weeklyDays", "weeklyCount", "auto", "autoFields", "cadenceFields",
-    "metric", "appPicker", "numberThreshold", "timeThreshold"
+    "metric", "appPicker", "placePicker", "numberThreshold", "timeThreshold"
   ]
   static values = {
     timeMetrics: { type: Array, default: ["sleep_bedtime"] },
-    appMetrics: { type: Array, default: ["social_apps"] }
+    appMetrics: { type: Array, default: ["social_apps"] },
+    placeMetrics: { type: Array, default: ["place_minutes"] }
   }
 
   connect() {
@@ -42,5 +43,6 @@ export default class extends Controller {
     if (this.hasTimeThresholdTarget) this.timeThresholdTarget.classList.toggle("hidden", !isTime)
     if (this.hasNumberThresholdTarget) this.numberThresholdTarget.classList.toggle("hidden", isTime)
     if (this.hasAppPickerTarget) this.appPickerTarget.classList.toggle("hidden", !isApps)
+    if (this.hasPlacePickerTarget) this.placePickerTarget.classList.toggle("hidden", !this.placeMetricsValue.includes(metric))
   }
 }

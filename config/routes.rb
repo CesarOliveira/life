@@ -76,6 +76,15 @@ Rails.application.routes.draw do
     patch :move, on: :member
     resources :task_comments, path: "comments", only: [:create, :destroy]
   end
+  # Linha do tempo de lugares (visitas do iPhone ou importadas do Google) e "Meus lugares".
+  get "lugares", to: "places#index", as: :places
+  get "lugares/meus", to: "places#manage", as: :manage_places
+  post "lugares", to: "places#create"
+  post "lugares/importar", to: "places#import", as: :import_places
+  delete "lugares/historico/dia", to: "places#destroy_day", as: :places_day
+  delete "lugares/historico/tudo", to: "places#destroy_history", as: :places_history
+  patch "lugares/:id", to: "places#update", as: :place
+  delete "lugares/:id", to: "places#destroy"
   get "configurar", to: "setup#index", as: :setup
 
   # Conectores (integrações que puxam dados sozinhas)
@@ -117,6 +126,7 @@ Rails.application.routes.draw do
   namespace :api do
     post "usage", to: "usage#create"
     post "usage_raw", to: "usage#create_raw"
+    post "visits", to: "visits#create" # lugares: visitas do iPhone (CLVisit)
     post "metrics", to: "metrics#create"
     post "workouts", to: "workouts#create"
     post "tasks", to: "tasks#create"

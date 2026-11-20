@@ -12,6 +12,7 @@
 #  frequency         :string           default("weekly_days"), not null
 #  metric_key        :string
 #  name              :string           not null
+#  place_ids         :bigint           default([]), not null, is an Array
 #  position          :integer          default(0), not null
 #  threshold_value   :decimal(12, 3)
 #  weekdays          :integer          default([0, 1, 2, 3, 4, 5, 6]), not null, is an Array
@@ -68,7 +69,9 @@ class Habit < ApplicationRecord
     "mindful_minutes"   => { source: :measurement, measurement_key: "mindful_minutes", unit: "min" },
     "daylight_minutes"  => { source: :measurement, measurement_key: "daylight_minutes", unit: "min" },
     "hrv"               => { source: :measurement, measurement_key: "hrv", unit: "ms" },
-    "water_ml"          => { source: :measurement, measurement_key: "water_ml", unit: "ml" }
+    "water_ml"          => { source: :measurement, measurement_key: "water_ml", unit: "ml" },
+    # Lugares (visitas do iPhone ou do Google): minutos no dia nos lugares escolhidos.
+    "place_minutes"     => { source: :place, unit: "min", places: true }
   }.freeze
 
   belongs_to :account
@@ -87,6 +90,7 @@ class Habit < ApplicationRecord
   validates :comparator, inclusion: { in: COMPARATORS }, if: :auto?
   validates :threshold_value, presence: true, numericality: true, if: :auto?
   validate :apps_selected_for_app_metric, if: :auto?
+  validate :places_selected_for_place_metric, if: :auto?
 
   scope :active, -> { where(active: true) }
   scope :ordered, -> { order(:position, :created_at) }
@@ -150,6 +154,12 @@ class Habit < ApplicationRecord
     elsif days.any? { |d| !WEEKDAYS.include?(d.to_i) }
       errors.add(:weekdays, :invalid_day)
     end
+  end
+
+  def places_selected_for_place_metric
+    return unless auto_metric[:places]
+
+    errors.add(:place_ids, :blank) if Array(place_ids).reject(&:blank?).empty?
   end
 
   def apps_selected_for_app_metric

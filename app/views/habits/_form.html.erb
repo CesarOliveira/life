@@ -89,6 +89,23 @@
       <% end %>
     </div>
 
+    <div data-habit-form-target="placePicker" class="hidden">
+      <span class="mb-1 block text-sm font-medium text-slate-700"><%= t("habits.places_label") %></span>
+      <% if @places.present? %>
+        <%= hidden_field_tag "habit[place_ids][]", "" %>
+        <div class="flex flex-wrap gap-2">
+          <% @places.each do |place| %>
+            <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50">
+              <%= check_box_tag "habit[place_ids][]", place.id, Array(@habit.place_ids).include?(place.id), class: "accent-emerald-600" %>
+              <%= place.name %>
+            </label>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="text-xs text-slate-500"><%= t("habits.no_places_yet_html", link: link_to(t("nav.places"), manage_places_path, class: "font-medium text-emerald-700 hover:underline")) %></p>
+      <% end %>
+    </div>
+
     <p class="text-xs text-slate-500"><%= t("habits.auto_metric_hint") %></p>
   </div>
 
