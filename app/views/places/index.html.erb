@@ -32,9 +32,18 @@
     </div>
   <% end %>
 
-  <div class="grid gap-4 lg:grid-cols-5">
-    <div class="h-80 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:col-span-3 lg:h-auto lg:min-h-[28rem]">
-      <div class="h-full w-full" data-controller="places-map" data-places-map-points-value="<%= points.to_json %>"></div>
+  <div class="grid gap-4 lg:grid-cols-5" data-controller="places-map" data-places-map-points-value="<%= points.to_json %>">
+    <div data-places-map-target="frame" class="relative h-[26rem] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:col-span-3 lg:h-auto lg:min-h-[28rem]">
+      <div data-places-map-target="canvas" class="h-full w-full"></div>
+      <div class="absolute right-2 top-2 z-[1000] flex gap-2">
+        <% if points.any? %>
+          <button type="button" data-action="places-map#fit" class="rounded-lg bg-white/95 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow hover:bg-white"><%= t("places.map_fit") %></button>
+        <% end %>
+        <button type="button" data-action="places-map#toggleFullscreen" class="rounded-lg bg-white/95 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow hover:bg-white">
+          <span data-places-map-target="fullscreenLabel" data-open="<%= t("places.map_fullscreen") %>" data-close="<%= t("places.map_close") %>"><%= t("places.map_fullscreen") %></span>
+        </button>
+      </div>
+      <p data-places-map-target="hint" class="pointer-events-none absolute bottom-6 left-1/2 z-[1000] hidden -translate-x-1/2 whitespace-nowrap rounded-full bg-slate-900/70 px-3 py-1 text-xs text-white md:block"><%= t("places.map_hint") %></p>
     </div>
 
     <div class="space-y-4 lg:col-span-2">
@@ -52,7 +61,7 @@
               <li class="flex gap-3">
                 <span class="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white <%= v.place ? 'bg-emerald-600' : 'bg-amber-500' %>"><%= i + 1 %></span>
                 <div class="min-w-0 flex-1">
-                  <div class="flex items-baseline justify-between gap-2">
+                  <div class="flex cursor-pointer items-baseline justify-between gap-2 hover:text-emerald-700" data-action="click->places-map#focus" data-places-map-index-param="<%= i %>" title="<%= t("places.show_on_map") %>">
                     <p class="truncate text-sm font-medium text-slate-900"><%= e.name %></p>
                     <p class="shrink-0 text-sm font-semibold text-slate-700"><%= humanize_duration(e.seconds) %></p>
                   </div>

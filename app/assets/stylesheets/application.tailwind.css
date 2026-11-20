@@ -1,1 +1,10 @@
 @import "tailwindcss" source("/app");
+
+/* Mapa de Lugares em tela cheia (places_map_controller#toggleFullscreen). */
+.places-map-full {
+  position: fixed !important;
+  inset: 0;
+  z-index: 60;
+  height: 100dvh !important;
+  border-radius: 0 !important;
+}
